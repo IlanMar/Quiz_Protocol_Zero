@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Загадка о Седьмом Элементе</title>
+    <style>
+      :root {
+        --bg: #f6f8fb;
+        --accent: #2a9d8f;
+        --center-width: 560px;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: var(--bg);
+        color: #111;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .wrapper {
+        width: 100%;
+        max-width: var(--center-width);
+        padding: 24px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 18px;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+      }
+      h1 {
+        margin: 0 0 18px;
+        font-size: 22px;
+        line-height: 1.2;
+        font-weight: 600;
+      }
+      .input-row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      input[type="text"] {
+        padding: 10px 12px;
+        font-size: 16px;
+        border: 1px solid #cfd8e3;
+        border-radius: 6px;
+        width: 300px;
+        box-sizing: border-box;
+      }
+      button {
+        padding: 10px 16px;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      #result {
+        position: fixed;
+        left: 50%;
+        bottom: 28px;
+        transform: translateX(-50%);
+        font-weight: 700;
+        font-size: 40px;
+        padding: 8px 18px;
+        border-radius: 8px;
+        min-width: 220px;
+        text-align: center;
+      }
+      .correct {
+        color: #0b7a3f;
+        background: rgba(11, 122, 63, 0.06);
+        border: 1px solid rgba(11, 122, 63, 0.12);
+      }
+      .incorrect {
+        color: #b32121;
+        background: rgba(179, 33, 33, 0.04);
+        border: 1px solid rgba(179, 33, 33, 0.09);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <img
+        src="file:///C:/Users/ilanm/source/repos/Quiz_Protocol_Zero/Gemini_Generated_Image_k9ozjhk9ozjhk9oz.png"
+        alt="Зимний пейзаж с снеговиком"
+      />
+      <h1>🧠 Загадка о Седьмом Элементе</h1>
+
+      <form id="quizForm" onsubmit="return false" aria-label="Форма для ответа">
+        <div class="input-row">
+          <input
+            type="text"
+            id="answer"
+            placeholder="Введите ответ"
+            autocomplete="off"
+            aria-label="Ответ"
+          />
+          <button id="submitBtn" type="button">Ввод</button>
+        </div>
+      </form>
+    </div>
+
+    <div
+      id="result"
+      role="status"
+      aria-live="polite"
+      style="display: none"
+    ></div>
+
+    <script>
+      (function () {
+        const accepted = ["опыт", "мудрость", "знание"];
+        const input = document.getElementById("answer");
+        const btn = document.getElementById("submitBtn");
+        const result = document.getElementById("result");
+
+        function show(text, isCorrect) {
+          result.textContent = text;
+          result.className = isCorrect ? "correct" : "incorrect";
+          result.style.display = "block";
+        }
+
+        function check() {
+          const val = (input.value || "").trim().toLowerCase();
+          if (!val) {
+            show("не верно", false);
+            return;
+          }
+          if (accepted.includes(val)) {
+            show("Правильно!", true);
+          } else {
+            show("не верно", false);
+          }
+        }
+
+        btn.addEventListener("click", check);
+        input.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            check();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

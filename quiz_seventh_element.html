@@ -41,6 +41,7 @@
         font-size: 22px;
         line-height: 1.2;
         font-weight: 600;
+        white-space: pre-line;
       }
       .input-row {
         display: flex;
@@ -97,7 +98,7 @@
   <body>
     <div class="wrapper">
       <img
-        src="file:///C:/Users/ilanm/source/repos/Quiz_Protocol_Zero/Gemini_Generated_Image_k9ozjhk9ozjhk9oz.png"
+        src="Gemini_Generated_Image_k9ozjhk9ozjhk9oz.png"
         alt="Зимний пейзаж с снеговиком"
       />
       <h1>🧠 Загадка о Седьмом Элементе</h1>
@@ -125,15 +126,40 @@
 
     <script>
       (function () {
-        const accepted = ["опыт", "мудрость", "знание"];
+        const riddles = [
+          {
+            text: "🧠 Загадка о Седьмом Элементе\n\nЯ не могу быть создан, но я постоянно формируюсь. Я не могу быть сохранен, но я накапливаюсь. Я не имею веса, но могу раздавить империю. Я невидим, но оставляю самые глубокие следы. Моё отсутствие является причиной моего существования.",
+            accepted: ["опыт", "мудрость", "знание"],
+          },
+          {
+            text: "Я всегда впереди, но никогда не приду. Я тот, кто дает обещания, но никогда не будет принадлежать тебе. Меня ищут, но стоит меня найти, как я тут же исчезаю. Я измеряем, но не имею массы. Я бесконечен, но каждый мой момент длится лишь мгновение.",
+            accepted: ["будущее"],
+          },
+        ];
+
+        let current = 0;
         const input = document.getElementById("answer");
         const btn = document.getElementById("submitBtn");
         const result = document.getElementById("result");
+        const header = document.querySelector("h1");
+        let hideTimeout = null;
+
+        function updateHeader() {
+          header.textContent = riddles[current].text;
+        }
 
         function show(text, isCorrect) {
           result.textContent = text;
           result.className = isCorrect ? "correct" : "incorrect";
           result.style.display = "block";
+        }
+
+        function hideResult() {
+          if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+          }
+          result.style.display = "none";
         }
 
         function check() {
@@ -142,12 +168,30 @@
             show("не верно", false);
             return;
           }
+
+          const accepted = riddles[current].accepted;
           if (accepted.includes(val)) {
             show("Правильно!", true);
+
+            // Перейти к следующей загадке (если есть)
+            if (current < riddles.length - 1) {
+              current += 1;
+              updateHeader();
+              input.value = "";
+            }
+
+            // Скрыть надпись через 7 секунд
+            if (hideTimeout) clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+              hideResult();
+            }, 7000);
           } else {
             show("не верно", false);
           }
         }
+
+        // Инициализация
+        updateHeader();
 
         btn.addEventListener("click", check);
         input.addEventListener("keydown", function (e) {

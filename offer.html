@@ -1,0 +1,225 @@
+// ...existing code...
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Оффер — Blue Screen Inc.</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+        background: #f6f8fb;
+        color: #111;
+        margin: 0;
+        padding: 24px;
+      }
+      .container {
+        max-width: 900px;
+        margin: 24px auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        padding: 28px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+      .logo {
+        width: 64px;
+        height: 64px;
+        display: inline-block;
+        border-radius: 8px;
+        overflow: hidden;
+        flex: 0 0 64px;
+      }
+      .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+      .meta {
+        color: #666;
+        font-size: 13px;
+        margin-top: 6px;
+      }
+      .offer {
+        white-space: pre-wrap;
+        line-height: 1.45;
+        margin-top: 18px;
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      }
+      .signature {
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .sig-line {
+        border-top: 1px dashed #bbb;
+        width: 220px;
+        padding-top: 8px;
+        color: #666;
+        font-size: 13px;
+        text-align: center;
+      }
+      form {
+        margin-top: 26px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      label {
+        font-size: 14px;
+        color: #333;
+      }
+      input[type="text"] {
+        padding: 8px 10px;
+        font-size: 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        min-width: 220px;
+      }
+      button {
+        padding: 9px 14px;
+        font-size: 14px;
+        border-radius: 6px;
+        border: 0;
+        background: #0f62fe;
+        color: #fff;
+        cursor: pointer;
+      }
+      #result {
+        margin-left: 8px;
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .ok {
+        color: #147a14;
+      }
+      .err {
+        color: #c62828;
+      }
+      .note {
+        margin-top: 12px;
+        color: #666;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="logo">
+          <img src="logo.jpg" alt="Blue Screen Inc. logo" />
+        </div>
+        <div>
+          <h1>Blue Screen Inc. — ОФФЕР О ПЕРЕВОДЕ В ШТАТ</h1>
+          <div class="meta">
+            Документ: оффер — копия 1/1. Уничтожить после прочтения... или
+            съесть.
+          </div>
+        </div>
+      </header>
+
+      <div class="offer">
+        ДОКУМЕНТ: ОФФЕР О ПЕРЕВОДЕ В ШТАТ (Копия 1/1. Уничтожить после
+        прочтения... или съесть) Кому: Существу, занимающему стул у кулера
+        (Стажеру) От: Департамента Счастья и Человеческих Ресурсов (HR) Тема:
+        Добро пожаловать в Семью™ (Выхода нет) Дорогой [ИМЯ СТАЖЕРА]!
+        Поздравляем! Мы заметили, что за последние 3 месяца вы поседели всего на
+        15%, а ваш глаз дергается в ритме нашего корпоративного гимна. Это
+        выдающийся результат! Мы провели оценку вашей эффективности (по шкале от
+        «Где мой кофе?» до «Кто уронил прод?») и приняли решение. Компания «Blue
+        Screen Inc.» с радостью (и легким злорадством) предлагает вам позицию:
+        Младший Ведущий Специалист по Критическим Ошибкам и Кофейной Логистике
+        (Junior Senior Scapegoat & Coffee Ninja) Ваши новые обязанности: Работа
+        с ИИ: Быть моральной поддержкой для «Януса». Если он решит захватить
+        мир, вы должны первым сказать: «Отличная идея, босс!».
+        Кибербезопасность: Принимать на себя вину за все утечки данных, которые
+        совершил Топ-менеджмент. Стрессоустойчивость: Умение плакать абсолютно
+        бесшумно, не отрываясь от монитора. Секретность: Забыть всё, что вы
+        видели, слышали или случайно записали в свой маленький блокнотик (да-да,
+        мы знаем про него). Наш социальный пакет «Мечта Джуна»: Зарплата:
+        Конкурентная! Мы платим бесценным Опытом и Корпоративным духом. (Первые
+        5 лет индексация не предусмотрена). График: Свободный! Вы свободны
+        работать в любое время суток, если это время — «всегда». Питание:
+        Безлимитный доступ к запаху пиццы из кабинета Генерального Директора.
+        Опционы: Вы получите 0.0001% акций компании сразу после того, как мы
+        колонизируем Марс (или перейдем в 2026 год, что наступит раньше). Особые
+        условия (Мелкий шрифт): Подписывая этот документ, вы соглашаетесь с тем,
+        что мы — Семья. А из Семьи, как известно, не уходят. Также вы обязуетесь
+        отдать свой голос (и душу, если потребуется) Главе HR в любых спорах.
+        Добро пожаловать на борт Титани... то есть, нашего Айсбрейкера
+        инноваций! (Подпись Стажера) (Кровью подписывать необязательно, но
+        желательно) Глава HR (Твой лучший друг и ночной кошмар)
+      </div>
+
+      <div class="signature">
+        <div class="sig-line">(Подпись Стажера)</div>
+        <div class="sig-line">Глава HR</div>
+      </div>
+
+      <form
+        id="signForm"
+        onsubmit="return false;"
+        aria-label="Проверка подписи"
+      >
+        <label for="bossCode">Код генерального директора:</label>
+        <input
+          id="bossCode"
+          type="text"
+          autocomplete="off"
+          aria-label="Код генерального директора"
+        />
+        <button id="signBtn" type="button">Подписать</button>
+        <div id="result" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <script>
+      (function () {
+        const CORRECT = "BIGBOSS";
+        const input = document.getElementById("bossCode");
+        const btn = document.getElementById("signBtn");
+        const result = document.getElementById("result");
+
+        function show(text, ok) {
+          result.textContent = text;
+          result.className = ok ? "ok" : "err";
+        }
+
+        function validate() {
+          const val = (input.value || "").trim();
+          if (!val) {
+            show("Введите код", false);
+            return;
+          }
+          if (val.toUpperCase() === CORRECT) {
+            show("Одобрено", true);
+          } else {
+            show("неверная подпись!", false);
+          }
+        }
+
+        btn.addEventListener("click", validate);
+        input.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            validate();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
+// ...existing code...

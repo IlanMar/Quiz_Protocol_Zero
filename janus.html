@@ -5,25 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JANUS TERMINAL // BLUE SCREEN INC.</title>
     <style>
+      :root {
+        --pad: 20px;
+        --accent: #00ff41;
+        --bg: #050505;
+        --console-bg: #0f0f0f;
+        --muted: #555;
+      }
+
+      /* Support iOS safe area and ensure pseudo-element is relative to viewport */
+      html,
       body {
-        background-color: #050505;
-        color: #00ff41;
+        height: 100%;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--accent);
         font-family: "Courier New", Courier, monospace;
         margin: 0;
-        padding: 20px;
+        /* use safe area insets for devices with notch */
+        padding: calc(var(--pad) + env(safe-area-inset-top))
+          env(safe-area-inset-right)
+          calc(var(--pad) + env(safe-area-inset-bottom))
+          env(safe-area-inset-left);
         display: flex;
         flex-direction: column;
         align-items: center;
         min-height: 100vh;
         box-sizing: border-box;
         text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+        position: relative; /* make ::before absolute relative to body */
+        -webkit-font-smoothing: antialiased;
       }
 
-      /* Scanline effect */
+      /* Scanline effect — use fixed so it covers viewport correctly on scroll/resize */
       body::before {
         content: " ";
         display: block;
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         bottom: 0;
@@ -44,14 +64,16 @@
       }
 
       #app-container {
-        width: 100%;
+        width: calc(100% - 40px);
         max-width: 800px;
         z-index: 10;
         position: relative;
+        margin: 0 auto;
       }
 
+      /* responsive header size */
       .header-time {
-        font-size: 2em;
+        font-size: clamp(1.1rem, 4vw, 2em);
         font-weight: bold;
         text-align: center;
         margin-bottom: 10px;
@@ -61,7 +83,7 @@
 
       .error-msg {
         color: #ff3333;
-        font-size: 1.5em;
+        font-size: clamp(1rem, 3.5vw, 1.5em);
         font-weight: bold;
         text-align: center;
         margin-bottom: 20px;
@@ -82,9 +104,9 @@
       }
 
       .console-box {
-        background-color: #0f0f0f;
-        border: 2px solid #00ff41;
-        padding: 20px;
+        background-color: var(--console-bg);
+        border: 2px solid var(--accent);
+        padding: clamp(12px, 3vw, 20px);
         margin-bottom: 20px;
         box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
       }
@@ -97,13 +119,15 @@
 
       input[type="text"] {
         background-color: #000;
-        border: 1px solid #00ff41;
-        color: #00ff41;
+        border: 1px solid var(--accent);
+        color: var(--accent);
         font-family: "Courier New", Courier, monospace;
-        font-size: 1.2em;
+        font-size: clamp(1rem, 3.5vw, 1.2em);
         padding: 10px;
         outline: none;
         text-transform: uppercase;
+        width: 100%;
+        box-sizing: border-box;
       }
 
       .buttons {
@@ -114,18 +138,20 @@
       button {
         flex: 1;
         background-color: #003300;
-        color: #00ff41;
-        border: 1px solid #00ff41;
+        color: var(--accent);
+        border: 1px solid var(--accent);
         padding: 15px;
         font-family: "Courier New", Courier, monospace;
         font-size: 1em;
         cursor: pointer;
         transition: all 0.2s;
         font-weight: bold;
+        min-height: 48px; /* touch target */
+        border-radius: 6px;
       }
 
       button:hover {
-        background-color: #00ff41;
+        background-color: var(--accent);
         color: #000;
       }
 
@@ -144,17 +170,19 @@
         min-height: 20px;
         white-space: pre-wrap;
         color: #ccffcc;
+        word-break: break-word;
+        overflow-wrap: anywhere;
       }
 
       .status-window {
-        border: 1px solid #555;
+        border: 1px solid var(--muted);
         padding: 10px;
-        min-height: 150px;
+        min-height: 120px;
         background-color: #0a0a0a;
       }
 
       .status-header {
-        border-bottom: 1px dashed #555;
+        border-bottom: 1px dashed var(--muted);
         margin-bottom: 10px;
         color: #aaa;
       }
@@ -162,7 +190,7 @@
       .log-entry {
         margin-bottom: 5px;
         padding-left: 10px;
-        border-left: 2px solid #00ff41;
+        border-left: 2px solid var(--accent);
       }
 
       /* Ending Screens */
@@ -178,16 +206,22 @@
         align-items: center;
         z-index: 100;
         flex-direction: column;
+        padding: calc(20px + env(safe-area-inset-top))
+          env(safe-area-inset-right) calc(20px + env(safe-area-inset-bottom))
+          env(safe-area-inset-left);
+        box-sizing: border-box;
       }
 
       .year-display {
-        font-size: 8em;
+        font-size: clamp(3rem, 12vw, 8em);
         font-weight: bold;
+        text-align: center;
+        line-height: 1;
       }
 
       .year-2026 {
-        color: #00ff41;
-        text-shadow: 0 0 20px #00ff41;
+        color: var(--accent);
+        text-shadow: 0 0 20px var(--accent);
       }
       .year-2025 {
         color: #ffff00;
@@ -200,6 +234,49 @@
 
       .hidden {
         display: none;
+      }
+
+      /* MOBILE / SMALL SCREENS */
+      @media (max-width: 600px) {
+        #app-container {
+          width: calc(100% - 24px);
+        }
+        .buttons {
+          flex-direction: column;
+        }
+        button {
+          padding: 14px;
+          font-size: 1rem;
+        }
+        .console-box {
+          padding: 12px;
+        }
+        .status-window {
+          min-height: 100px;
+        }
+        .header-time {
+          padding-bottom: 8px;
+        }
+        .error-msg {
+          margin-bottom: 12px;
+        }
+      }
+
+      /* VERY SMALL SCREENS */
+      @media (max-width: 380px) {
+        body {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+        .header-time {
+          font-size: clamp(1rem, 6vw, 1.4rem);
+        }
+        .error-msg {
+          font-size: 1rem;
+        }
+        button {
+          min-height: 44px;
+        }
       }
     </style>
   </head>

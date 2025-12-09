@@ -1,466 +1,494 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8" />
-	<title>Simple CAPTCHA Demo</title>
-	<style>
-		body {
-			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-			background: #f3f4f6;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			min-height: 100vh;
-			margin: 0;
-		}
+  <head>
+    <meta charset="UTF-8" />
+    <title>Simple CAPTCHA Demo</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+      }
 
-		.container {
-			background: #ffffff;
-			padding: 24px 28px;
-			border-radius: 10px;
-			box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-			width: 340px;
-		}
+      .container {
+        background: #ffffff;
+        padding: 24px 28px;
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+        width: 340px;
+      }
 
-		h1 {
-			font-size: 20px;
-			margin: 0 0 16px;
-			color: #111827;
-		}
+      h1 {
+        font-size: 20px;
+        margin: 0 0 16px;
+        color: #111827;
+      }
 
-		p {
-			margin: 0 0 16px;
-			font-size: 14px;
-			color: #4b5563;
-		}
+      p {
+        margin: 0 0 16px;
+        font-size: 14px;
+        color: #4b5563;
+      }
 
-		.captcha-box {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 8px;
-			margin-bottom: 12px;
-		}
+      .captcha-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
 
-		.captcha-text {
-			flex: 1;
-			padding: 10px 12px;
-			border-radius: 8px;
-			background: repeating-linear-gradient(
-				-45deg,
-				#e5e7eb,
-				#e5e7eb 6px,
-				#f9fafb 6px,
-				#f9fafb 12px
-			);
-			font-family: "Courier New", monospace;
-			font-size: 20px;
-			letter-spacing: 4px;
-			text-align: center;
-			text-decoration: line-through;
-			color: #111827;
-			user-select: none;
-		}
+      .captcha-text {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: repeating-linear-gradient(
+          -45deg,
+          #e5e7eb,
+          #e5e7eb 6px,
+          #f9fafb 6px,
+          #f9fafb 12px
+        );
+        font-family: "Courier New", monospace;
+        font-size: 20px;
+        letter-spacing: 4px;
+        text-align: center;
+        text-decoration: line-through;
+        color: #111827;
+        user-select: none;
+      }
 
-		.refresh-btn {
-			border: none;
-			background: #111827;
-			color: #f9fafb;
-			border-radius: 999px;
-			width: 36px;
-			height: 36px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			cursor: pointer;
-			font-size: 18px;
-		}
+      .refresh-btn {
+        border: none;
+        background: #111827;
+        color: #f9fafb;
+        border-radius: 999px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 18px;
+      }
 
-		.refresh-btn:hover {
-			background: #000000;
-		}
+      .refresh-btn:hover {
+        background: #000000;
+      }
 
-		.field {
-			margin-bottom: 12px;
-		}
+      .field {
+        margin-bottom: 12px;
+      }
 
-		.field label {
-			display: block;
-			font-size: 13px;
-			margin-bottom: 4px;
-			color: #374151;
-		}
+      .field label {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 4px;
+        color: #374151;
+      }
 
-		.field input {
-			width: 100%;
-			padding: 8px 10px;
-			border-radius: 6px;
-			border: 1px solid #d1d5db;
-			font-size: 14px;
-		}
+      .field input {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        font-size: 14px;
+      }
 
-		.field input:focus {
-			outline: none;
-			border-color: #2563eb;
-			box-shadow: 0 0 0 1px #2563eb33;
-		}
+      .field input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 1px #2563eb33;
+      }
 
-		.submit-btn {
-			width: 100%;
-			padding: 9px 10px;
-			border-radius: 8px;
-			border: none;
-			background: #2563eb;
-			color: white;
-			font-size: 14px;
-			font-weight: 600;
-			cursor: pointer;
-		}
+      .submit-btn {
+        width: 100%;
+        padding: 9px 10px;
+        border-radius: 8px;
+        border: none;
+        background: #2563eb;
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
 
-		.submit-btn:hover {
-			background: #1d4ed8;
-		}
+      .submit-btn:hover {
+        background: #1d4ed8;
+      }
 
-		.message {
-			margin-top: 10px;
-			font-size: 13px;
-		}
+      .message {
+        margin-top: 10px;
+        font-size: 13px;
+      }
 
-		.message.ok {
-			color: #15803d;
-		}
+      .message.ok {
+        color: #15803d;
+      }
 
-		.message.error {
-			color: #b91c1c;
-		}
+      .message.error {
+        color: #b91c1c;
+      }
 
-		.usb-stage {
-			margin-top: 12px;
-			display: none;
-		}
+      .usb-stage {
+        margin-top: 12px;
+        display: none;
+      }
 
-		.usb-images {
-			display: flex;
-			gap: 8px;
-			margin-bottom: 10px;
-		}
+      .usb-images {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
 
-		.usb-port,
-		.usb-drive {
-			flex: 1;
-			border-radius: 8px;
-			border: 2px solid #111827;
-			background: #f9fafb;
-			padding: 10px 8px;
-			text-align: center;
-			font-size: 11px;
-			color: #111827;
-		}
+      .usb-port,
+      .usb-drive {
+        flex: 1;
+        border-radius: 8px;
+        border: 2px solid #111827;
+        background: #f9fafb;
+        padding: 10px 8px;
+        text-align: center;
+        font-size: 11px;
+        color: #111827;
+      }
 
-		.usb-port-diagram,
-		.usb-drive-diagram {
-			width: 100%;
-			height: 36px;
-			border-radius: 6px;
-			border: 2px dashed #9ca3af;
-			margin-bottom: 6px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-size: 18px;
-		}
+      .usb-port-diagram,
+      .usb-drive-diagram {
+        width: 100%;
+        height: 36px;
+        border-radius: 6px;
+        border: 2px dashed #9ca3af;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
 
-		.usb-port-shell {
-			width: 85%;
-			height: 60%;
-			border-radius: 4px;
-			border: 2px solid #111827;
-			background: #e5e7eb;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
+      .usb-port-shell {
+        width: 85%;
+        height: 60%;
+        border-radius: 4px;
+        border: 2px solid #111827;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-		.usb-port-slot {
-			width: 80%;
-			height: 45%;
-			border-radius: 3px;
-			background: #0f172a;
-			display: flex;
-			align-items: center;
-			justify-content: space-evenly;
-		}
+      .usb-port-slot {
+        width: 80%;
+        height: 45%;
+        border-radius: 3px;
+        background: #0f172a;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+      }
 
-		.usb-pin {
-			width: 18%;
-			height: 55%;
-			border-radius: 2px;
-			background: #facc15;
-		}
+      .usb-pin {
+        width: 18%;
+        height: 55%;
+        border-radius: 2px;
+        background: #facc15;
+      }
 
-		.usb-drive-body {
-			width: 75%;
-			height: 55%;
-			border-radius: 4px;
-			background: #4b5563;
-			position: relative;
-		}
+      .usb-drive-body {
+        width: 75%;
+        height: 55%;
+        border-radius: 4px;
+        background: #4b5563;
+        position: relative;
+      }
 
-		.usb-drive-head {
-			position: absolute;
-			left: 4px;
-			top: 25%;
-			width: 26%;
-			height: 50%;
-			border-radius: 2px;
-			background: #e5e7eb;
-		}
+      .usb-drive-head {
+        position: absolute;
+        left: 4px;
+        top: 25%;
+        width: 26%;
+        height: 50%;
+        border-radius: 2px;
+        background: #e5e7eb;
+      }
 
-		.usb-buttons {
-			display: flex;
-			gap: 8px;
-		}
+      .usb-buttons {
+        display: flex;
+        gap: 8px;
+      }
 
-		.usb-btn {
-			flex: 1;
-			padding: 8px 10px;
-			border-radius: 8px;
-			border: none;
-			background: #111827;
-			color: #f9fafb;
-			font-size: 12px;
-			cursor: pointer;
-		}
+      .usb-btn {
+        flex: 1;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: none;
+        background: #111827;
+        color: #f9fafb;
+        font-size: 12px;
+        cursor: pointer;
+      }
 
-		.usb-btn:hover:enabled {
-			background: #000000;
-		}
+      .usb-btn:hover:enabled {
+        background: #000000;
+      }
 
-		.usb-btn:disabled {
-			opacity: 0.6;
-			cursor: default;
-		}
-	</style>
-</head>
-<body>
-	<div class="container">
-		<h1>Simple CAPTCHA</h1>
-		<p id="instructions">Type the distorted characters to prove you are human.</p>
+      .usb-btn:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Simple CAPTCHA</h1>
+      <p id="instructions">
+        Type the distorted characters to prove you are human.
+      </p>
 
-		<div class="captcha-box">
-			<div id="captchaText" class="captcha-text"></div>
-			<button class="refresh-btn" id="refreshCaptcha" title="New code">⟳</button>
-		</div>
+      <div class="captcha-box">
+        <div id="captchaText" class="captcha-text"></div>
+        <button class="refresh-btn" id="refreshCaptcha" title="New code">
+          ⟳
+        </button>
+      </div>
 
-		<div id="usbStage" class="usb-stage">
-			<div class="usb-images">
-				<div class="usb-port">
-					<div class="usb-port-diagram">
-						<div class="usb-port-shell">
-							<div class="usb-port-slot">
-								<div class="usb-pin"></div>
-								<div class="usb-pin"></div>
-							</div>
-						</div>
-					</div>
-					USB PORT
-				</div>
-				<div class="usb-drive">
-					<div class="usb-drive-diagram">
-						<div class="usb-drive-body">
-							<div class="usb-drive-head"></div>
-						</div>
-					</div>
-					USB FLASH DRIVE
-				</div>
-			</div>
-			<div class="usb-buttons">
-				<button id="usbBtnAsIs" class="usb-btn">Insert as it is</button>
-				<button id="usbBtnRotate" class="usb-btn">Turn 180° first</button>
-			</div>
-		</div>
+      <div id="usbStage" class="usb-stage">
+        <div class="usb-images">
+          <div class="usb-port">
+            <div class="usb-port-diagram">
+              <div class="usb-port-shell">
+                <div class="usb-port-slot">
+                  <div class="usb-pin"></div>
+                  <div class="usb-pin"></div>
+                </div>
+              </div>
+            </div>
+            USB PORT
+          </div>
+          <div class="usb-drive">
+            <div class="usb-drive-diagram">
+              <div class="usb-drive-body">
+                <div class="usb-drive-head"></div>
+              </div>
+            </div>
+            USB FLASH DRIVE
+          </div>
+        </div>
+        <div class="usb-buttons">
+          <button id="usbBtnAsIs" class="usb-btn">Insert as it is</button>
+          <button id="usbBtnRotate" class="usb-btn">Turn 180° first</button>
+        </div>
+      </div>
 
-		<div class="field">
-			<label for="captchaInput">Enter the text above</label>
-			<input id="captchaInput" type="text" spellcheck="false" autocomplete="off" />
-		</div>
+      <div class="field">
+        <label for="captchaInput">Enter the text above</label>
+        <input
+          id="captchaInput"
+          type="text"
+          spellcheck="false"
+          autocomplete="off"
+        />
+      </div>
 
-		<button class="submit-btn" id="submitBtn">Verify</button>
-		<div id="message" class="message"></div>
-	</div>
+      <button class="submit-btn" id="submitBtn">Verify</button>
+      <div id="message" class="message"></div>
+    </div>
 
-	<script>
-		const captchaTextEl = document.getElementById('captchaText');
-		const captchaInputEl = document.getElementById('captchaInput');
-		const messageEl = document.getElementById('message');
-		const refreshBtn = document.getElementById('refreshCaptcha');
-		const submitBtn = document.getElementById('submitBtn');
-		const headerEl = document.querySelector('h1');
-		const instructionsEl = document.getElementById('instructions');
-		const captchaBoxEl = document.querySelector('.captcha-box');
-		const fieldEl = document.querySelector('.field');
-		const usbStageEl = document.getElementById('usbStage');
-		const usbBtnAsIs = document.getElementById('usbBtnAsIs');
-		const usbBtnRotate = document.getElementById('usbBtnRotate');
+    <script>
+      const captchaTextEl = document.getElementById("captchaText");
+      const captchaInputEl = document.getElementById("captchaInput");
+      const messageEl = document.getElementById("message");
+      const refreshBtn = document.getElementById("refreshCaptcha");
+      const submitBtn = document.getElementById("submitBtn");
+      const headerEl = document.querySelector("h1");
+      const instructionsEl = document.getElementById("instructions");
+      const captchaBoxEl = document.querySelector(".captcha-box");
+      const fieldEl = document.querySelector(".field");
+      const usbStageEl = document.getElementById("usbStage");
+      const usbBtnAsIs = document.getElementById("usbBtnAsIs");
+      const usbBtnRotate = document.getElementById("usbBtnRotate");
 
-		let currentCaptcha = '';
-		let successCount = 0;
-		let usbMode = false;
-		let usbAttempts = 0;
+      let currentCaptcha = "";
+      let successCount = 0;
+      let usbMode = false;
+      let usbAttempts = 0;
 
-		const successMessages = [
-			"Human detected. Initiating next ridiculous test...",
-			"Still human. The robots are getting nervous...",
-			"Impressive. You are at least 60% coffee.",
-			"Nice. Unlocking bonus CAPTCHA, because why not?",
-			"Okay, fine, you win this round, carbon-based lifeform."
-		];
+      const successMessages = [
+        "Human detected. Initiating next ridiculous test...",
+        "Still human. The robots are getting nervous...",
+        "Impressive. You are at least 60% coffee.",
+        "Nice. Unlocking bonus CAPTCHA, because why not?",
+        "Okay, fine, you win this round, carbon-based lifeform.",
+      ];
 
-		const failureMessages = [
-			"Nope. That looked kinda robot-ish. Try again.",
-			"Close, but still suspicious. One more time.",
-			"Wrong. Even my toaster could do better.",
-			"Denied. Wiggle those organic fingers and retry.",
-			"CAPTCHA says no. Your keyboard deserves a second chance."
-		];
+      const failureMessages = [
+        "Nope. That looked kinda robot-ish. Try again.",
+        "Close, but still suspicious. One more time.",
+        "Wrong. Even my toaster could do better.",
+        "Denied. Wiggle those organic fingers and retry.",
+        "CAPTCHA says no. Your keyboard deserves a second chance.",
+      ];
 
-		const usbFailureMessages = [
-			"Nope, upside down. Classic USB experience.",
-			"Still not right. Try your patented wiggle technique.",
-			"Mmm, almost. The port remains unimpressed."
-		];
+      const usbFailureMessages = [
+        "Nope, upside down. Classic USB experience.",
+        "Still not right. Try your patented wiggle technique.",
+        "Mmm, almost. The port remains unimpressed.",
+      ];
 
-		function generateCaptcha(length = 6) {
-			const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
-			let result = '';
-			for (let i = 0; i < length; i++) {
-				const index = Math.floor(Math.random() * chars.length);
-				result += chars[index];
-			}
-			return result;
-		}
+      function generateCaptcha(length = 6) {
+        const chars =
+          "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+        let result = "";
+        for (let i = 0; i < length; i++) {
+          const index = Math.floor(Math.random() * chars.length);
+          result += chars[index];
+        }
+        return result;
+      }
 
-		function startUsbStage() {
-			usbMode = true;
-			usbAttempts = 0;
-			if (captchaBoxEl) captchaBoxEl.style.display = 'none';
-			if (fieldEl) fieldEl.style.display = 'none';
-			if (submitBtn) submitBtn.style.display = 'none';
-			if (refreshBtn) refreshBtn.style.display = 'none';
-			if (usbStageEl) usbStageEl.style.display = 'block';
-			messageEl.textContent = '';
-			messageEl.className = 'message';
-			if (headerEl) headerEl.textContent = 'USB Compatibility Test';
-			if (instructionsEl)
-				instructionsEl.textContent =
-					"Just like real life: it only fits on the third try.";
-		}
+      function startUsbStage() {
+        usbMode = true;
+        usbAttempts = 0;
+        if (captchaBoxEl) captchaBoxEl.style.display = "none";
+        if (fieldEl) fieldEl.style.display = "none";
+        if (submitBtn) submitBtn.style.display = "none";
+        if (refreshBtn) refreshBtn.style.display = "none";
+        if (usbStageEl) usbStageEl.style.display = "block";
+        messageEl.textContent = "";
+        messageEl.className = "message";
+        if (headerEl) headerEl.textContent = "USB Compatibility Test";
+        if (instructionsEl)
+          instructionsEl.textContent =
+            "Just like real life: it only fits on the third try.";
+      }
 
-		function renderCaptcha() {
-			if (successCount >= 4 && !usbMode) {
-				startUsbStage();
-				return;
-			}
-			currentCaptcha = generateCaptcha();
-			captchaTextEl.textContent = currentCaptcha
-				.split('')
-				.map((ch) => (Math.random() > 0.5 ? ch.toUpperCase() : ch.toLowerCase()))
-				.join(' ');
-			captchaInputEl.value = '';
-			messageEl.textContent = '';
-			messageEl.className = 'message';
+      function renderCaptcha() {
+        if (successCount >= 3 && !usbMode) {
+          startUsbStage();
+          return;
+        }
+        currentCaptcha = generateCaptcha();
+        captchaTextEl.textContent = currentCaptcha
+          .split("")
+          .map((ch) =>
+            Math.random() > 0.5 ? ch.toUpperCase() : ch.toLowerCase()
+          )
+          .join(" ");
+        captchaInputEl.value = "";
+        messageEl.textContent = "";
+        messageEl.className = "message";
 
-			if (headerEl) {
-				if (successCount === 0) {
-					headerEl.textContent = 'Simple CAPTCHA';
-				} else if (successCount === 1) {
-					headerEl.textContent = 'Humanity Check: Level 2';
-				} else if (successCount === 2) {
-					headerEl.textContent = 'Humanity Check: Level 3';
-				} else if (successCount === 3) {
-					headerEl.textContent = 'Final Boss CAPTCHA';
-				} else {
-					headerEl.textContent = 'Okay, you are VERY human.';
-				}
-			}
+        if (headerEl) {
+          if (successCount === 0) {
+            headerEl.textContent = "Simple CAPTCHA";
+          } else if (successCount === 1) {
+            headerEl.textContent = "Humanity Check: Level 2";
+          } else if (successCount === 2) {
+            headerEl.textContent = "Humanity Check: Level 3";
+          } else if (successCount === 3) {
+            headerEl.textContent = "Final Boss CAPTCHA";
+          } else {
+            headerEl.textContent = "Okay, you are VERY human.";
+          }
+        }
 
-			if (instructionsEl) {
-				if (successCount === 0) {
-					instructionsEl.textContent = 'Type the distorted characters to prove you are human.';
-				} else if (successCount === 1) {
-					instructionsEl.textContent = 'Again, just to make the robots jealous.';
-				} else if (successCount === 2) {
-					instructionsEl.textContent = 'At this point, it\'s more of a mini-game.';
-				} else if (successCount === 3) {
-					instructionsEl.textContent = 'Beat this and we stop questioning your existence. Maybe.';
-				} else {
-					instructionsEl.textContent = 'Extra round! Because humans love unnecessary challenges.';
-				}
-			}
-		}
+        if (instructionsEl) {
+          if (successCount === 0) {
+            instructionsEl.textContent =
+              "Type the distorted characters to prove you are human.";
+          } else if (successCount === 1) {
+            instructionsEl.textContent =
+              "Again, just to make the robots jealous.";
+          } else if (successCount === 2) {
+            instructionsEl.textContent =
+              "At this point, it's more of a mini-game.";
+          } else if (successCount === 3) {
+            instructionsEl.textContent =
+              "Beat this and we stop questioning your existence. Maybe.";
+          } else {
+            instructionsEl.textContent =
+              "Extra round! Because humans love unnecessary challenges.";
+          }
+        }
+      }
 
-		function verifyCaptcha() {
-			let value = captchaInputEl.value || '';
-			// Normalize input: remove spaces and non-alphanumeric, compare case-insensitive
-			const normalizedValue = value.replace(/\s+/g, '').replace(/[^A-Za-z0-9]/g, '').toLowerCase();
-			const normalizedCaptcha = currentCaptcha.replace(/\s+/g, '').replace(/[^A-Za-z0-9]/g, '').toLowerCase();
+      function verifyCaptcha() {
+        let value = captchaInputEl.value || "";
+        // Normalize input: remove spaces and non-alphanumeric, compare case-insensitive
+        const normalizedValue = value
+          .replace(/\s+/g, "")
+          .replace(/[^A-Za-z0-9]/g, "")
+          .toLowerCase();
+        const normalizedCaptcha = currentCaptcha
+          .replace(/\s+/g, "")
+          .replace(/[^A-Za-z0-9]/g, "")
+          .toLowerCase();
 
-			if (!normalizedValue) {
-				messageEl.textContent = 'Please enter the CAPTCHA.';
-				messageEl.className = 'message error';
-				return false;
-			}
+        if (!normalizedValue) {
+          messageEl.textContent = "Please enter the CAPTCHA.";
+          messageEl.className = "message error";
+          return false;
+        }
 
-			if (normalizedValue === normalizedCaptcha) {
-				successCount++;
-				const msg = successMessages[(successCount - 1) % successMessages.length];
-				messageEl.textContent = msg;
-				messageEl.className = 'message ok';
-				// After a short moment, give them a new, slightly sassier CAPTCHA
-				setTimeout(renderCaptcha, 1200);
-				return true;
-			} else {
-				const msg = failureMessages[Math.floor(Math.random() * failureMessages.length)];
-				messageEl.textContent = msg;
-				messageEl.className = 'message error';
-				renderCaptcha();
-				return false;
-			}
-		}
+        if (normalizedValue === normalizedCaptcha) {
+          successCount++;
+          const msg =
+            successMessages[(successCount - 1) % successMessages.length];
+          messageEl.textContent = msg;
+          messageEl.className = "message ok";
+          // After a short moment, give them a new, slightly sassier CAPTCHA
+          setTimeout(renderCaptcha, 1200);
+          return true;
+        } else {
+          const msg =
+            failureMessages[Math.floor(Math.random() * failureMessages.length)];
+          messageEl.textContent = msg;
+          messageEl.className = "message error";
+          renderCaptcha();
+          return false;
+        }
+      }
 
-		function handleUsbClick() {
-			usbAttempts++;
-			if (usbAttempts < 3) {
-				const msg = usbFailureMessages[Math.floor(Math.random() * usbFailureMessages.length)];
-				messageEl.textContent = msg;
-				messageEl.className = 'message error';
-			} else {
-				messageEl.textContent = 'USB flash drive inserted correctly!';
-				messageEl.className = 'message ok';
-				usbBtnAsIs.disabled = true;
-				usbBtnRotate.disabled = true;
-			}
-		}
+      function handleUsbClick() {
+        usbAttempts++;
+        if (usbAttempts < 3) {
+          const msg =
+            usbFailureMessages[
+              Math.floor(Math.random() * usbFailureMessages.length)
+            ];
+          messageEl.textContent = msg;
+          messageEl.className = "message error";
+        } else {
+          messageEl.textContent = "USB flash drive inserted correctly!";
+          messageEl.className = "message ok";
+          usbBtnAsIs.disabled = true;
+          usbBtnRotate.disabled = true;
+        }
+      }
 
-		refreshBtn.addEventListener('click', function () {
-			renderCaptcha();
-		});
+      refreshBtn.addEventListener("click", function () {
+        renderCaptcha();
+      });
 
-		submitBtn.addEventListener('click', function () {
-			verifyCaptcha();
-		});
+      submitBtn.addEventListener("click", function () {
+        verifyCaptcha();
+      });
 
-		captchaInputEl.addEventListener('keydown', function (e) {
-			if (e.key === 'Enter') {
-				verifyCaptcha();
-			}
-		});
+      captchaInputEl.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          verifyCaptcha();
+        }
+      });
 
-		usbBtnAsIs.addEventListener('click', handleUsbClick);
-		usbBtnRotate.addEventListener('click', handleUsbClick);
+      usbBtnAsIs.addEventListener("click", handleUsbClick);
+      usbBtnRotate.addEventListener("click", handleUsbClick);
 
-		renderCaptcha();
-	</script>
-</body>
+      renderCaptcha();
+    </script>
+  </body>
 </html>
-

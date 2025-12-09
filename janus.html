@@ -518,7 +518,11 @@
         if (!input) return;
 
         // 0. ХАРД РЕЗЕТ
-        if (input === "SYSTEM_RESET" || input === "СБРОС") {
+        if (
+          input === "SYSTEM_RESET" ||
+          input === "СБРОС" ||
+          input === "RESET"
+        ) {
           hardReset();
           return;
         }

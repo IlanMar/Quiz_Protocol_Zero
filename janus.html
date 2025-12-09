@@ -458,6 +458,10 @@
           if (state.ceoStage === 2) {
             if (state.flags.ceoKicked) {
               response = "ОШИБКА: НЕДОСТАТОЧНО ПРАВ. CEO ОТСТРАНЕН.";
+            } else if (state.flags.ctoFired) {
+              // Блокируем удаление логов, если CTO уже уволен
+              response =
+                "ОШИБКА: ОПЕРАЦИЯ ЗАБЛОКИРОВАНА. ДОСТУП ОГРАНИЧЕН (CTO УВОЛЕН).";
             } else {
               state.flags.finLogDeleted = true;
               addLog(

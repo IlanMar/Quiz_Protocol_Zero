@@ -89,11 +89,16 @@
         font-size: 20px;
         font-weight: 700;
         letter-spacing: -0.2px;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
       .meta {
         margin-top: 6px;
         color: var(--muted);
         font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       main.content {
@@ -151,6 +156,10 @@
         font-size: 14px;
         color: #233044;
         min-width: 180px;
+      }
+      form#signForm label {
+        min-width: 0;
+        flex: 0 0 auto;
       }
       .field {
         display: flex;
@@ -325,6 +334,44 @@
         button#signBtn {
           font-size: 15px;
           padding: 10px 12px;
+        }
+      }
+
+      /* Улучшенная мобильная адаптация: позволяем блокам корректно сжиматься */
+      header.top > div {
+        flex: 1 1 auto; /* заголовок может занимать оставшееся место и сжиматься */
+        min-width: 0; /* обязательно, чтобы flex-элементы могли уменьшаться */
+      }
+
+      /* Разрыв длинных слов в заголовке */
+      h1 {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      /* Метки формы не должны принудительно расширять строку */
+      form#signForm label {
+        min-width: 0;
+        flex: 0 0 auto;
+      }
+
+      /* Дополнительные мелкие улучшения для очень узких экранов */
+      @media (max-width: 480px) {
+        header.top {
+          gap: 10px;
+          padding: 10px 12px;
+        }
+        .logo {
+          width: 48px;
+          height: 48px;
+          flex: 0 0 48px;
+        }
+        .meta {
+          white-space: normal;
+        }
+        .offer {
+          padding: 14px;
+          font-size: 14px;
         }
       }
     </style>

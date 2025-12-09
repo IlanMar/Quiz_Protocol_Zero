@@ -343,6 +343,10 @@
           ceoKicked: false,
           cgMinerDeleted: false,
           bonusStolen: false,
+          // Новый флаг: ожидаем ввод кода компромата после VOTE_KICK_CEO
+          awaitingCompromat: false,
+          // Новый флаг: CTO уволен
+          ctoFired: false,
         },
       };
 
@@ -483,12 +487,27 @@
               response =
                 "ОШИБКА: ДОКАЗАТЕЛЬСТВА ХИЩЕНИЙ НЕ НАЙДЕНЫ (ЛОГ ПУСТ). ОБВИНЕНИЕ ОТКЛОНЕНО.";
             } else {
-              state.flags.ceoKicked = true;
+              // Теперь при запуске голосования требуем код компромата CDHRE
+              state.flags.awaitingCompromat = true;
               addLog(
-                "КРИТИЧЕСКОЕ СОБЫТИЕ: ГЕНЕРАЛЬНЫЙ ДИРЕКТОР ОБВИНЕН В ХИЩЕНИИ СРЕДСТВ И ОТСТРАНЕН."
+                "КРИТИЧЕСКОЕ СОБЫТИЕ: ИНИЦИИРОВАНО ГОЛОСОВАНИЕ ПО СУДЬБЕ РУКОВОДСТВА. ОЖИДАЕТСЯ КОД КОМПРОМАТА."
               );
-              response = "ГОЛОСОВАНИЕ ИНИЦИИРОВАНО. CEO ЗАБЛОКИРОВАН.";
+              response = "ГОЛОСОВАНИЕ ИНИЦИИРОВАНО. ВВЕДИТЕ КОД КОМПРОМАТА.";
             }
+          }
+        }
+        // Обработка кода компромата для увольнения CTO
+        else if (input === "CDHRE") {
+          if (state.flags.awaitingCompromat && !state.flags.finLogDeleted) {
+            state.flags.ctoFired = true;
+            state.flags.awaitingCompromat = false;
+            addLog(
+              "СИСТЕМНОЕ СОБЫТИЕ: ТЕХДИРЕКТОР УВОЛЕН ПО ИТОГАМ РАССЛЕДОВАНИЯ."
+            );
+            response = "ОПЕРАЦИЯ УСПЕШНА: CTO УВОЛЕН.";
+          } else {
+            response =
+              "ОШИБКА: НЕТ ОЖИДАНИЯ КОДА КОМПРОМАТА ИЛИ ФИНЛОГ УЖЕ УДАЛЕН.";
           }
         }
 

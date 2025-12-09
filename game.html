@@ -256,6 +256,32 @@
         color: #374151;
         text-align: center;
       }
+
+      /* BETA-600 overlay */
+      .beta-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(2, 6, 23, 0.85);
+        z-index: 9999;
+      }
+
+      .beta-text {
+        color: #fef3c7;
+        font-size: 88px;
+        font-weight: 900;
+        letter-spacing: 8px;
+        text-shadow: 0 6px 30px rgba(0, 0, 0, 0.6),
+          0 1px 0 rgba(255, 255, 255, 0.05);
+        transform: scale(0.9);
+        transition: transform 400ms cubic-bezier(0.2, 0.9, 0.3, 1);
+      }
+
+      .beta-overlay.show .beta-text {
+        transform: scale(1);
+      }
     </style>
   </head>
   <body>
@@ -302,10 +328,16 @@
       <div id="message" class="message"></div>
     </div>
 
+    <!-- BETA-600 overlay (hidden until user passes all tests) -->
+    <div id="betaOverlay" class="beta-overlay" aria-hidden="true">
+      <div class="beta-text">BETA-600</div>
+    </div>
+
     <script>
       const captchaTextEl = document.getElementById("captchaText");
       const captchaInputEl = document.getElementById("captchaInput");
       const messageEl = document.getElementById("message");
+      const betaOverlayEl = document.getElementById("betaOverlay");
       const refreshBtn = document.getElementById("refreshCaptcha");
       const submitBtn = document.getElementById("submitBtn");
       const headerEl = document.querySelector("h1");
@@ -468,7 +500,17 @@
           messageEl.className = "message ok";
           usbBtnAsIs.disabled = true;
           usbBtnRotate.disabled = true;
+          // Reveal the BETA-600 overlay when USB test completes
+          showBeta600();
         }
+      }
+
+      function showBeta600() {
+        if (!betaOverlayEl) return;
+        betaOverlayEl.style.display = "flex";
+        // allow CSS transition
+        setTimeout(() => betaOverlayEl.classList.add("show"), 10);
+        betaOverlayEl.setAttribute("aria-hidden", "false");
       }
 
       refreshBtn.addEventListener("click", function () {

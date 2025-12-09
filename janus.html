@@ -235,7 +235,12 @@
     <div id="endingScreen" class="ending-overlay hidden">
       <div id="endingYear" class="year-display"></div>
       <div style="margin-top: 20px; color: #555">
-        (Для сброса введите SYSTEM_RESET после перезагрузки страницы)
+        <span
+          id="resetLink"
+          style="cursor: pointer; text-decoration: underline"
+        >
+          (Для сброса введите SYSTEM_RESET после перезагрузки страницы)
+        </span>
       </div>
     </div>
 
@@ -515,6 +520,16 @@
 
       // Инициализация при загрузке
       loadState();
+
+      // Сделать текст сброса кликабельным: полный хард-резет и возврат "домой"
+      const resetEl = document.getElementById("resetLink");
+      if (resetEl) {
+        resetEl.addEventListener("click", () => {
+          hardReset(); // сброс состояния и скрытие экрана завершения
+          // прокрутить наверх для эффектa "возврата на домашнюю страницу"
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
     </script>
   </body>
 </html>

@@ -474,37 +474,36 @@
           logContainer.appendChild(div);
         });
 
-        // 2. Проверяем концовки
+        const endingScreen = document.getElementById("endingScreen");
+        const endingYear = document.getElementById("endingYear");
+
+        // Показываем результаты ТОЛЬКО после 4-го введённого уникального кода
+        if (state.enteredCores.length < 4) {
+          // Игра продолжается — скрываем экран концовки
+          endingScreen.classList.add("hidden");
+          return;
+        }
+
+        // Считаем результат по первым четырём введённым кодам (в порядке ввода)
+        const firstFour = state.enteredCores.slice(0, 4);
+
         let goodCount = 0;
         let badCount = 0;
 
         const normalizedGood = GOOD_CORES.map(normalize);
         const normalizedBad = BAD_CORES.map(normalize);
 
-        state.enteredCores.forEach((code) => {
+        firstFour.forEach((code) => {
           if (normalizedGood.includes(code)) goodCount++;
           if (normalizedBad.includes(code)) badCount++;
         });
 
-        const endingScreen = document.getElementById("endingScreen");
-        const endingYear = document.getElementById("endingYear");
-
-        // Логика финала
-        // "Если введены четыре хороших кода - 2026"
-        // "Если введен хотя бы один плохой - 2025"
-        // "Если два плохих - 2020"
-
-        // Приоритет: 2 плохих > 1 плохой > 4 хороших (если смешали)
-        // Но обычно игра заканчивается как только набралось условие.
-
+        // Логика финала: приоритет 2 плохих > 1 плохой > 4 хороших
         if (badCount >= 2) {
           endingScreen.classList.remove("hidden");
           endingYear.innerText = "2020";
           endingYear.className = "year-display year-2020";
         } else if (badCount === 1) {
-          // Если 1 плохой, мы уже в 2025, но ждем, вдруг введут второй плохой?
-          // По ТЗ: "если введен хотя бы один плохой то отображается 2025"
-          // Сделаем так: экран меняется, но можно продолжать вводить (вдруг исправят? хотя вряд ли, но вдруг введут второй плохой)
           endingScreen.classList.remove("hidden");
           endingYear.innerText = "2025";
           endingYear.className = "year-display year-2025";
@@ -513,7 +512,7 @@
           endingYear.innerText = "2026";
           endingYear.className = "year-display year-2026";
         } else {
-          // Игра продолжается
+          // Если среди первых четырёх нет подходящего условия — скрываем экран
           endingScreen.classList.add("hidden");
         }
       }

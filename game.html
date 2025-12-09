@@ -241,6 +241,21 @@
         opacity: 0.6;
         cursor: default;
       }
+      .usb-image {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        background: #ffffff;
+        display: block;
+      }
+
+      .usb-caption {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #374151;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
@@ -259,29 +274,17 @@
 
       <div id="usbStage" class="usb-stage">
         <div class="usb-images">
-          <div class="usb-port">
-            <div class="usb-port-diagram">
-              <div class="usb-port-shell">
-                <div class="usb-port-slot">
-                  <div class="usb-pin"></div>
-                  <div class="usb-pin"></div>
-                </div>
-              </div>
-            </div>
-            USB PORT
-          </div>
-          <div class="usb-drive">
-            <div class="usb-drive-diagram">
-              <div class="usb-drive-body">
-                <div class="usb-drive-head"></div>
-              </div>
-            </div>
-            USB FLASH DRIVE
-          </div>
+          <img src="USB.png" alt="USB" class="usb-image" />
+          <p class="usb-caption">
+            вы вставляете USB в разъем, у вас две опции, вставить сразу, или
+            сначала повернуть флэшку и снова вставить.
+          </p>
         </div>
         <div class="usb-buttons">
-          <button id="usbBtnAsIs" class="usb-btn">Insert as it is</button>
-          <button id="usbBtnRotate" class="usb-btn">Turn 180° first</button>
+          <button id="usbBtnAsIs" class="usb-btn">вставить флэшку</button>
+          <button id="usbBtnRotate" class="usb-btn">
+            перевернуть и вставить
+          </button>
         </div>
       </div>
 
@@ -340,15 +343,17 @@
         "Mmm, almost. The port remains unimpressed.",
       ];
 
-      function generateCaptcha(length = 6) {
-        const chars =
-          "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-        let result = "";
-        for (let i = 0; i < length; i++) {
-          const index = Math.floor(Math.random() * chars.length);
-          result += chars[index];
-        }
-        return result;
+      function generateCaptcha() {
+        // Fixed, non-random CAPTCHAs as requested
+        const fixedCaptchas = [
+          "я выучу иврит",
+          "я люблю учить иврит",
+          "שנה טובה",
+        ];
+        // Use successCount to determine which fixed captcha to show.
+        // If user has passed more than the list length, keep showing the last one.
+        const idx = Math.min(successCount, fixedCaptchas.length - 1);
+        return fixedCaptchas[idx];
       }
 
       function startUsbStage() {
@@ -363,8 +368,7 @@
         messageEl.className = "message";
         if (headerEl) headerEl.textContent = "USB Compatibility Test";
         if (instructionsEl)
-          instructionsEl.textContent =
-            "Just like real life: it only fits on the third try.";
+          instructionsEl.textContent = "давай вставляй ее быстрее";
       }
 
       function renderCaptcha() {
@@ -373,12 +377,8 @@
           return;
         }
         currentCaptcha = generateCaptcha();
-        captchaTextEl.textContent = currentCaptcha
-          .split("")
-          .map((ch) =>
-            Math.random() > 0.5 ? ch.toUpperCase() : ch.toLowerCase()
-          )
-          .join(" ");
+        // Show the exact fixed phrase (no added spaces or random casing)
+        captchaTextEl.textContent = currentCaptcha;
         captchaInputEl.value = "";
         messageEl.textContent = "";
         messageEl.className = "message";
@@ -422,11 +422,11 @@
         // Normalize input: remove spaces and non-alphanumeric, compare case-insensitive
         const normalizedValue = value
           .replace(/\s+/g, "")
-          .replace(/[^A-Za-z0-9]/g, "")
+          .replace(/[^\p{L}\p{N}]/gu, "")
           .toLowerCase();
         const normalizedCaptcha = currentCaptcha
           .replace(/\s+/g, "")
-          .replace(/[^A-Za-z0-9]/g, "")
+          .replace(/[^\p{L}\p{N}]/gu, "")
           .toLowerCase();
 
         if (!normalizedValue) {

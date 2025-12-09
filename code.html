@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#071022" />
     <title>Quiz — Введите код</title>
     <style>
       :root {
@@ -69,6 +70,23 @@
         color: #042027;
         font-weight: 600;
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Mobile / touch improvements */
+      input[type="text"],
+      button,
+      a.home {
+        touch-action: manipulation;
+      }
+      button {
+        min-height: 44px; /* recommended tap target */
+      }
+      a.home {
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
       button.secondary {
         background: transparent;
@@ -109,12 +127,35 @@
         border: 1px solid rgba(255, 255, 255, 0.04);
         background: transparent;
       }
+      @media (max-width: 640px) {
+        .card {
+          padding: 20px;
+        }
+        h1 {
+          font-size: 18px;
+        }
+        p.lead {
+          font-size: 14px;
+        }
+      }
+
       @media (max-width: 460px) {
         .input-row {
           flex-direction: column;
+          gap: 10px;
         }
         input[type="text"] {
           width: 100%;
+          font-size: 18px;
+          padding: 14px 16px;
+        }
+        button {
+          width: 100%;
+          padding: 14px 16px;
+          font-size: 17px;
+        }
+        .home-row {
+          padding-top: 6px;
         }
       }
     </style>
@@ -122,7 +163,7 @@
   <body>
     <div class="card" role="main">
       <h1>Введите код</h1>
-      <p class="lead">Введите код, чтобы получить доступ к сообщению.f</p>
+      <p class="lead">Введите код, чтобы получить доступ к сообщению.</p>
 
       <div class="input-row">
         <input

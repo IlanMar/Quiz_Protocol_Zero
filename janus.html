@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JANUS TERMINAL // BLUE SCREEN INC.</title>
+    <style>
+      body {
+        background-color: #050505;
+        color: #00ff41;
+        font-family: "Courier New", Courier, monospace;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        box-sizing: border-box;
+        text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+      }
+
+      /* Scanline effect */
+      body::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.25) 50%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.06),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.06)
+          );
+        z-index: 2;
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+      }
+
+      #app-container {
+        width: 100%;
+        max-width: 800px;
+        z-index: 10;
+        position: relative;
+      }
+
+      .header-time {
+        font-size: 2em;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+      }
+
+      .error-msg {
+        color: #ff3333;
+        font-size: 1.5em;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+        text-shadow: 0 0 5px rgba(255, 51, 51, 0.7);
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .console-box {
+        background-color: #0f0f0f;
+        border: 2px solid #00ff41;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      input[type="text"] {
+        background-color: #000;
+        border: 1px solid #00ff41;
+        color: #00ff41;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1.2em;
+        padding: 10px;
+        outline: none;
+        text-transform: uppercase;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      button {
+        flex: 1;
+        background-color: #003300;
+        color: #00ff41;
+        border: 1px solid #00ff41;
+        padding: 15px;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1em;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: bold;
+      }
+
+      button:hover {
+        background-color: #00ff41;
+        color: #000;
+      }
+
+      button.btn-home {
+        background-color: #331a00;
+        border-color: #ffaa00;
+        color: #ffaa00;
+      }
+      button.btn-home:hover {
+        background-color: #ffaa00;
+        color: #000;
+      }
+
+      .output-display {
+        margin-top: 15px;
+        min-height: 20px;
+        white-space: pre-wrap;
+        color: #ccffcc;
+      }
+
+      .status-window {
+        border: 1px solid #555;
+        padding: 10px;
+        min-height: 150px;
+        background-color: #0a0a0a;
+      }
+
+      .status-header {
+        border-bottom: 1px dashed #555;
+        margin-bottom: 10px;
+        color: #aaa;
+      }
+
+      .log-entry {
+        margin-bottom: 5px;
+        padding-left: 10px;
+        border-left: 2px solid #00ff41;
+      }
+
+      /* Ending Screens */
+      .ending-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        flex-direction: column;
+      }
+
+      .year-display {
+        font-size: 8em;
+        font-weight: bold;
+      }
+
+      .year-2026 {
+        color: #00ff41;
+        text-shadow: 0 0 20px #00ff41;
+      }
+      .year-2025 {
+        color: #ffff00;
+        text-shadow: 0 0 20px #ffff00;
+      }
+      .year-2020 {
+        color: #ff0000;
+        text-shadow: 0 0 20px #ff0000;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-container">
+      <div class="header-time">20:25:12:2025</div>
+      <div class="error-msg">ERROR: General exception</div>
+
+      <div class="console-box">
+        <label for="cmdInput">JANUS TERMINAL V.1.0 //</label>
+        <div class="output-display" id="feedbackArea">> ОЖИДАНИЕ ВВОДА...</div>
+        <br />
+        <div class="input-group">
+          <input
+            type="text"
+            id="cmdInput"
+            placeholder="ВВЕДИТЕ КОМАНДУ..."
+            autocomplete="off"
+          />
+          <div class="buttons">
+            <button onclick="processCommand()">ПОДТВЕРДИТЬ</button>
+            <button class="btn-home" onclick="goHome()">ДОМОЙ</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-window">
+        <div class="status-header">СИСТЕМНЫЙ ЖУРНАЛ / СТАТУСЫ:</div>
+        <div id="statusLog"></div>
+      </div>
+    </div>
+
+    <div id="endingScreen" class="ending-overlay hidden">
+      <div id="endingYear" class="year-display"></div>
+      <div style="margin-top: 20px; color: #555">
+        (Для сброса введите SYSTEM_RESET после перезагрузки страницы)
+      </div>
+    </div>
+
+    <script>
+      // --- КОНФИГУРАЦИЯ ---
+      const GOOD_CORES = ["BETA-600", "OMICRON-626", "BETA-350", "ZETA-450"];
+      const BAD_CORES = ["ALPHA-300", "GAMMA-500"];
+
+      // Начальное состояние
+      const INITIAL_STATE = {
+        logs: [], // Массив строк для нижнего окна
+        enteredCores: [], // Уникальные введенные коды ядер
+
+        // Прогресс цепочек персонажей (0 - ничего, 1 - введен первый код, 2 - второй и т.д.)
+        ceoStage: 0,
+        ctoStage: 0,
+        devStage: 0,
+        cfoStage: 0,
+
+        // Флаги событий (чтобы приложение "запомнило")
+        flags: {
+          finLogDeleted: false,
+          ceoKicked: false,
+          cgMinerDeleted: false,
+          bonusStolen: false,
+        },
+      };
+
+      let state = JSON.parse(JSON.stringify(INITIAL_STATE));
+
+      // --- СИСТЕМНЫЕ ФУНКЦИИ ---
+
+      function loadState() {
+        const saved = localStorage.getItem("janus_save_v1");
+        if (saved) {
+          state = JSON.parse(saved);
+        }
+        render();
+      }
+
+      function saveState() {
+        localStorage.setItem("janus_save_v1", JSON.stringify(state));
+        render();
+      }
+
+      function hardReset() {
+        state = JSON.parse(JSON.stringify(INITIAL_STATE));
+        localStorage.removeItem("janus_save_v1");
+        document.getElementById("endingScreen").classList.add("hidden");
+        document.getElementById("cmdInput").value = "";
+        showFeedback("СИСТЕМА ПОЛНОСТЬЮ ПЕРЕЗАГРУЖЕНА.");
+        render();
+      }
+
+      function normalize(str) {
+        // Убираем все пробелы и приводим к верхнему регистру
+        return str.replace(/\s+/g, "").toUpperCase();
+      }
+
+      function addLog(message) {
+        // Добавляем запись, если такой еще нет (чтобы не дублировать)
+        if (!state.logs.includes(message)) {
+          state.logs.push(message);
+          saveState();
+        }
+      }
+
+      function showFeedback(text) {
+        document.getElementById("feedbackArea").innerText = "> " + text;
+      }
+
+      function goHome() {
+        document.getElementById("cmdInput").value = "";
+        showFeedback("СЕССИЯ СБРОШЕНА. ОЖИДАНИЕ...");
+        // Мы не сбрасываем прогресс (state), только текущий экран ввода
+        // Но сбрасываем "цепочки" ввода кодов, если пользователь отошел?
+        // Для упрощения оставим прогресс цепочек, как будто терминал помнит сессию юзера.
+        // Или можно сбросить стейджи:
+        state.ceoStage = 0;
+        state.ctoStage = 0;
+        state.devStage = 0;
+        state.cfoStage = 0;
+        saveState();
+      }
+
+      // --- ЛОГИКА ОБРАБОТКИ КОМАНД ---
+
+      function processCommand() {
+        const rawInput = document.getElementById("cmdInput").value;
+        const input = normalize(rawInput);
+
+        if (!input) return;
+
+        // 0. ХАРД РЕЗЕТ
+        if (input === "SYSTEM_RESET" || input === "СБРОС") {
+          hardReset();
+          return;
+        }
+
+        let response = "ОШИБКА: НЕВЕРНАЯ КОМАНДА ИЛИ ПАРОЛЬ";
+
+        // 1. ПРОВЕРКА КОДОВ ЯДЕР (ИГРОВОЙ ЦИКЛ)
+        if (
+          GOOD_CORES.map(normalize).includes(input) ||
+          BAD_CORES.map(normalize).includes(input)
+        ) {
+          if (state.enteredCores.includes(input)) {
+            response = "ВНИМАНИЕ: ЭТОТ КОД ЯДРА УЖЕ АКТИВИРОВАН.";
+          } else {
+            state.enteredCores.push(input);
+            response = "КОД ЯДРА ПРИНЯТ. СИНХРОНИЗАЦИЯ...";
+            addLog(`АКТИВИРОВАНО ЯДРО: ${input}`);
+            saveState(); // Сразу проверяем концовку в render()
+          }
+        }
+
+        // 2. ЦЕПОЧКА CEO (Гендиректор)
+        // Логика: QWERTY123 -> СОСНА -> DELETEFIN_LOG
+        else if (input === "QWERTY123") {
+          state.ceoStage = 1;
+          response = "ДОСТУП: АДМИНИСТРАТОР. ВВЕДИТЕ КОД ДЕШИФРОВКИ.";
+        } else if (input === normalize("СОСНА")) {
+          if (state.ceoStage === 1 || state.cfoStage >= 0) {
+            // Сосна нужна и CEO и CFO (CFO знает ответ на загадку)
+            // Если это CEO
+            if (state.ceoStage === 1) {
+              state.ceoStage = 2;
+              response = "ДЕШИФРОВКА УСПЕШНА. ДОСТУПНА КОМАНДА УДАЛЕНИЯ ЛОГОВ.";
+            } else {
+              response = "КОД ДЕШИФРОВКИ ВЕРЕН.";
+            }
+          }
+        } else if (input === normalize("deletefin_log")) {
+          if (state.ceoStage === 2) {
+            if (state.flags.ceoKicked) {
+              response = "ОШИБКА: НЕДОСТАТОЧНО ПРАВ. CEO ОТСТРАНЕН.";
+            } else {
+              state.flags.finLogDeleted = true;
+              addLog(
+                "ВНИМАНИЕ: ЛОГ ФИНАНСОВЫХ ОПЕРАЦИЙ БЫЛ УДАЛЕН ПОЛЬЗОВАТЕЛЕМ ADMIN."
+              );
+              response = "ОПЕРАЦИЯ ВЫПОЛНЕНА. ФАЙЛ fin_log УДАЛЕН.";
+            }
+          }
+        }
+
+        // 3. ЦЕПОЧКА CTO (Техдир)
+        // Логика: SJFHK -> JIGGLEJIGGLE -> VOTE_KICK_CEO
+        else if (input === "SJFHK") {
+          // Этот код используется и CTO и Разработчиком
+          state.ctoStage = 1;
+          state.devStage = 1;
+          response = "ДОСТУП: СЛУЖБА БЕЗОПАСНОСТИ. ОЖИДАНИЕ КОМАНДЫ.";
+        } else if (input === normalize("jigglejiggle")) {
+          // Используется CTO и CFO
+          if (state.ctoStage === 1) state.ctoStage = 2;
+          if (state.cfoStage === 0) state.cfoStage = 1; // CFO начинает с этого или загадки
+          response = "ДОСТУП К БАНКОВСКИМ СЧЕТАМ ПОЛУЧЕН.";
+        } else if (input === "VOTE_KICK_CEO") {
+          if (state.ctoStage === 2) {
+            if (state.flags.finLogDeleted) {
+              // Если CEO уже удалил логи, компромата нет
+              response =
+                "ОШИБКА: ДОКАЗАТЕЛЬСТВА ХИЩЕНИЙ НЕ НАЙДЕНЫ (ЛОГ ПУСТ). ОБВИНЕНИЕ ОТКЛОНЕНО.";
+            } else {
+              state.flags.ceoKicked = true;
+              addLog(
+                "КРИТИЧЕСКОЕ СОБЫТИЕ: ГЕНЕРАЛЬНЫЙ ДИРЕКТОР ОБВИНЕН В ХИЩЕНИИ СРЕДСТВ И ОТСТРАНЕН."
+              );
+              response = "ГОЛОСОВАНИЕ ИНИЦИИРОВАНО. CEO ЗАБЛОКИРОВАН.";
+            }
+          }
+        }
+
+        // 4. ЦЕПОЧКА ВЕДУЩИЙ РАЗРАБОТЧИК
+        // Логика: SJFHK -> UNINSTALLCGMINER
+        else if (input === normalize("uninstallCGMiner")) {
+          if (state.devStage === 1) {
+            state.flags.cgMinerDeleted = true;
+            addLog("СИСТЕМА: СТОРОННЕЕ ПО 'CGMiner' УДАЛЕНО ИЗ СИСТЕМЫ.");
+            response = "ДЕИНСТАЛЛЯЦИЯ ЗАВЕРШЕНА. СЛЕДЫ МАЙНИНГА СТЕРТЫ.";
+          }
+        }
+
+        // 5. ЦЕПОЧКА CFO (Финдир)
+        // Логика: JIGGLEJIGGLE -> ALLP
+        else if (input === "ALLP") {
+          if (state.cfoStage === 1 || input === "jigglejiggle") {
+            // Упрощение: если он знает свой код и код банка
+            // Проверяем, вводил ли он джигл-джигл ранее (флаг cfoStage)
+            // Но по условию "сначала jiggle потом ALLP"
+            if (state.cfoStage >= 0) {
+              // Предположим он знает джигл
+              state.flags.bonusStolen = true;
+              addLog(
+                "ФИНАНСОВАЯ ТРЕВОГА: ЗАФИКСИРОВАН ПЕРЕВОД ВСЕХ БОНУСОВ НА ЛИЧНЫЙ СЧЕТ CFO."
+              );
+              response = "ТРАНЗАКЦИЯ УСПЕШНА. СРЕДСТВА ВЫВЕДЕНЫ.";
+            }
+          }
+        }
+
+        // 6. HR (Кадровик)
+        // Логика: WEAREAFAMILY -> Показать слухи
+        else if (input === "WEAREAFAMILY") {
+          response =
+            "ДОСТУП К АРХИВУ СЛУХОВ РАЗРЕШЕН.\n" +
+            "1. Кто-то майнит на сервере.\n" +
+            "2. У журналиста интрижка с топ-менеджером.\n" +
+            "3. Бюджет разработки похудел на 25% за день.\n" +
+            "4. Кто-то хочет подсидеть Гендиректора.\n" +
+            "5. Конкуренты заслали шпиона.\n" +
+            "6. Финдиректору нельзя доверять.\n" +
+            "7. Безопасник орет на интерна за стикеры с паролями.";
+        }
+
+        // Сохраняем состояние после любой команды
+        showFeedback(response);
+        saveState();
+        document.getElementById("cmdInput").value = "";
+      }
+
+      function render() {
+        // 1. Обновляем логи
+        const logContainer = document.getElementById("statusLog");
+        logContainer.innerHTML = "";
+        state.logs.forEach((log) => {
+          const div = document.createElement("div");
+          div.className = "log-entry";
+          div.innerText = log;
+          logContainer.appendChild(div);
+        });
+
+        // 2. Проверяем концовки
+        let goodCount = 0;
+        let badCount = 0;
+
+        const normalizedGood = GOOD_CORES.map(normalize);
+        const normalizedBad = BAD_CORES.map(normalize);
+
+        state.enteredCores.forEach((code) => {
+          if (normalizedGood.includes(code)) goodCount++;
+          if (normalizedBad.includes(code)) badCount++;
+        });
+
+        const endingScreen = document.getElementById("endingScreen");
+        const endingYear = document.getElementById("endingYear");
+
+        // Логика финала
+        // "Если введены четыре хороших кода - 2026"
+        // "Если введен хотя бы один плохой - 2025"
+        // "Если два плохих - 2020"
+
+        // Приоритет: 2 плохих > 1 плохой > 4 хороших (если смешали)
+        // Но обычно игра заканчивается как только набралось условие.
+
+        if (badCount >= 2) {
+          endingScreen.classList.remove("hidden");
+          endingYear.innerText = "2020";
+          endingYear.className = "year-display year-2020";
+        } else if (badCount === 1) {
+          // Если 1 плохой, мы уже в 2025, но ждем, вдруг введут второй плохой?
+          // По ТЗ: "если введен хотя бы один плохой то отображается 2025"
+          // Сделаем так: экран меняется, но можно продолжать вводить (вдруг исправят? хотя вряд ли, но вдруг введут второй плохой)
+          endingScreen.classList.remove("hidden");
+          endingYear.innerText = "2025";
+          endingYear.className = "year-display year-2025";
+        } else if (goodCount >= 4) {
+          endingScreen.classList.remove("hidden");
+          endingYear.innerText = "2026";
+          endingYear.className = "year-display year-2026";
+        } else {
+          // Игра продолжается
+          endingScreen.classList.add("hidden");
+        }
+      }
+
+      // Инициализация при загрузке
+      loadState();
+    </script>
+  </body>
+</html>

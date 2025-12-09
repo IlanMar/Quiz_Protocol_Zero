@@ -352,6 +352,108 @@
 
       let state = JSON.parse(JSON.stringify(INITIAL_STATE));
 
+      // --- ЗВУКИ ПЕЧАТАНИЯ (добавлено) ---
+      let _audioCtx = null;
+      function ensureAudioCtx() {
+        if (!_audioCtx) {
+          _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+      function playTypeSound(kind = "key") {
+        try {
+          ensureAudioCtx();
+          if (_audioCtx.state === "suspended") _audioCtx.resume();
+          const now = _audioCtx.currentTime;
+          const osc = _audioCtx.createOscillator();
+          const gain = _audioCtx.createGain();
+          // разный тон для удаления
+          osc.type = "square";
+          osc.frequency.value = kind === "back" ? 600 : 1200;
+          gain.gain.value = 0.0001;
+          osc.connect(gain);
+          gain.connect(_audioCtx.destination);
+          // быстрый ADSR-подобный огибающий
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.02, now + 0.005);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+          osc.start(now);
+          osc.stop(now + 0.07);
+        } catch (e) {
+          // игнорировать ошибки аудио
+          console.debug("audio error", e);
+        }
+      }
+
+      // --- ЗВУКИ ДЛЯ КНОПОК (добавлено) ---
+      function playButtonSound(kind = "confirm") {
+        try {
+          ensureAudioCtx();
+          if (_audioCtx.state === "suspended") _audioCtx.resume();
+          const now = _audioCtx.currentTime;
+          const osc = _audioCtx.createOscillator();
+          const gain = _audioCtx.createGain();
+          osc.type = "sine";
+          // подтвердить — более высокий короткий щелчок, домой — низкий мягкий тон
+          osc.frequency.value = kind === "home" ? 400 : 1400;
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.06, now + 0.002);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+          osc.connect(gain);
+          gain.connect(_audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } catch (e) {
+          console.debug("audio error", e);
+        }
+      }
+
+      // Слушатель для поля ввода
+      const _inputListener = (e) => {
+        const k = e.key;
+        // игнорируем только системные модификаторы
+        if (["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab"].includes(k))
+          return;
+        if (k === "Backspace") playTypeSound("back");
+        else playTypeSound("key");
+        // Нажатие Enter — подтверждаем команду (удобство)
+        if (k === "Enter") {
+          e.preventDefault();
+          processCommand();
+        }
+      };
+      // Подключаем слушатель после определения элементов (render/loadState ниже вызовет его)
+      function attachTypingSounds() {
+        const el = document.getElementById("cmdInput");
+        if (!el) return;
+        el.removeEventListener("keydown", _inputListener);
+        el.addEventListener("keydown", _inputListener);
+      }
+
+      // Привязка звуков к кнопкам (pointerdown чтобы звук шел сразу при нажатии)
+      function attachButtonSounds() {
+        const confirmBtn = document.querySelector(
+          'button[onclick="processCommand()"]'
+        );
+        const homeBtn = document.querySelector("button.btn-home");
+
+        if (confirmBtn) {
+          // очистка предыдущего обработчика при повторном вызове
+          if (confirmBtn._soundHandler)
+            confirmBtn.removeEventListener(
+              "pointerdown",
+              confirmBtn._soundHandler
+            );
+          confirmBtn._soundHandler = () => playButtonSound("confirm");
+          confirmBtn.addEventListener("pointerdown", confirmBtn._soundHandler);
+        }
+        if (homeBtn) {
+          if (homeBtn._soundHandler)
+            homeBtn.removeEventListener("pointerdown", homeBtn._soundHandler);
+          homeBtn._soundHandler = () => playButtonSound("home");
+          homeBtn.addEventListener("pointerdown", homeBtn._soundHandler);
+        }
+      }
+
       // --- СИСТЕМНЫЕ ФУНКЦИИ ---
 
       function loadState() {
@@ -619,6 +721,9 @@
 
       // Инициализация при загрузке
       loadState();
+      // привязать звуки после инициализации
+      attachTypingSounds();
+      attachButtonSounds();
 
       // Сделать текст сброса кликабельным: полный хард-резет и возврат "домой"
       const resetEl = document.getElementById("resetLink");

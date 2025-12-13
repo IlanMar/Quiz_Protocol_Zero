@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HR Confidential: Case #69</title>
+    <style>
+      body {
+        background-color: #f0f0f0;
+        color: #333;
+        font-family: "Georgia", serif; /* Шрифт как в документах */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .dossier {
+        background-color: #fff;
+        width: 100%;
+        max-width: 600px;
+        padding: 40px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid #ccc;
+        position: relative;
+        transform: rotate(-1deg); /* Эффект небрежно брошенной папки */
+      }
+
+      .stamp {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        border: 3px solid #d9534f;
+        color: #d9534f;
+        font-weight: bold;
+        padding: 5px 10px;
+        font-size: 1.2em;
+        text-transform: uppercase;
+        transform: rotate(15deg);
+        opacity: 0.8;
+        font-family: "Impact", sans-serif;
+      }
+
+      h1 {
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+        font-size: 1.5em;
+        text-transform: uppercase;
+        text-align: center;
+        margin-top: 0;
+      }
+
+      .warning-text {
+        background-color: #ffeeee;
+        color: #d9534f;
+        padding: 10px;
+        font-size: 0.9em;
+        margin-bottom: 20px;
+        border-left: 4px solid #d9534f;
+      }
+
+      .riddle-container {
+        margin-top: 20px;
+      }
+
+      .question {
+        font-size: 1.1em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-style: italic;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #999;
+        background: #fafafa;
+        box-sizing: border-box;
+        margin-bottom: 15px;
+        font-family: "Courier New", monospace;
+      }
+
+      button {
+        background-color: #333;
+        color: #fff;
+        border: none;
+        padding: 12px 25px;
+        font-size: 1em;
+        cursor: pointer;
+        width: 100%;
+        text-transform: uppercase;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background-color: #555;
+      }
+
+      .hint-link {
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+        color: #777;
+        font-size: 0.8em;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .evidence-photo {
+        width: 100%;
+        height: 150px;
+        display: block;
+        margin-top: 20px;
+        object-fit: cover;
+        border: 1px solid #ccc;
+        background-color: #f4f4f4;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dossier">
+      <div class="stamp">CONFIDENTIAL<br />18+</div>
+
+      <h1>Дело № 69: "Нецелевое расходование... средств"</h1>
+      <p id="suspects"><strong>Подозреваемые:</strong> ###### и #####.</p>
+
+      <div class="warning-text">
+        [!] Доступ к файлам заблокирован этическим комитетом. Для снятия защиты
+        подтвердите понимание "Неформальных корпоративных отношений".
+      </div>
+
+      <div id="level-1" class="riddle-container">
+        <p><strong>Вопрос 1: Место Преступления</strong></p>
+        <p class="question">
+          "Я нахожусь в комнате отдыха, но на мне не отдыхают. <br />
+          Я видел больше карьерных взлетов, чем кабинет Гендиректора.<br />
+          Обычно у меня четыре ножки, но по вечерам пятницы бывает и восемь.<br />
+          Что я?"
+        </p>
+        <input
+          type="text"
+          id="input-1"
+          placeholder="Введите название предмета..."
+          autocomplete="off"
+        />
+        <button onclick="checkLevel1()">Открыть папку</button>
+        <div
+          class="hint-link"
+          onclick="alert('Подсказка: Самый мягкий предмет мебели в офисе.')"
+        >
+          Нужна подсказка?
+        </div>
+      </div>
+
+      <div id="level-2" class="riddle-container hidden">
+        <p><strong>Вопрос 2: Метод Воздействия</strong></p>
+        <p class="question">
+          "Это древнейший способ получить подпись на документе или эксклюзивное
+          интервью.<br />
+          Это не взятка, потому что денег не дают.<br />
+          Это игра, где стреляют глазами, а попадают в репутацию.<br />
+          Как называется этот процесс?"
+        </p>
+        <input
+          type="text"
+          id="input-2"
+          placeholder="Введите слово..."
+          autocomplete="off"
+        />
+        <button onclick="checkLevel2()">Снять защиту</button>
+        <div
+          class="hint-link"
+          onclick="alert('Подсказка: Начинается на Ф. Рифмуется со спирт.')"
+        >
+          Нужна подсказка?
+        </div>
+      </div>
+
+      <div id="level-3" class="riddle-container hidden">
+        <p><strong>Вопрос 3: Главная Улика</strong></p>
+        <p class="question">
+          "Красная печать страсти на белой рубашке бюджета.<br />
+          Журналист приносит её с собой в тюбике, а Финансовый Директор уносит
+          её на своем воротнике домой к жене.<br />
+          Что это?"
+        </p>
+        <input
+          type="text"
+          id="input-3"
+          placeholder="Введите название предмета..."
+          autocomplete="off"
+        />
+        <button onclick="checkLevel3()">ПОЛУЧИТЬ КОМПРОМАТ</button>
+        <div
+          class="hint-link"
+          onclick="alert('Подсказка: Косметика. Kiss-proof (или нет).')"
+        >
+          Нужна подсказка?
+        </div>
+      </div>
+
+      <div id="final-screen" class="hidden">
+        <h2 style="color: #d9534f; text-align: center">ДОСТУП РАЗРЕШЕН</h2>
+        <p>Система этического контроля отключена.</p>
+        <p>Найден файл: <strong>photo_cfo_kiss.jpg</strong></p>
+
+        <img
+          class="evidence-photo"
+          src="kiss.jpg"
+          alt="CFO и Журналист целуются в архиве"
+          onerror="this.style.display='none'"
+        />
+
+        <p style="text-align: center; margin-top: 20px">Код доказательства:</p>
+        <div
+          style="
+            background: #eee;
+            padding: 15px;
+            text-align: center;
+            font-size: 2em;
+            letter-spacing: 5px;
+            border: 2px dashed #333;
+          "
+        >
+          CFODROP
+        </div>
+        <p style="text-align: center; font-size: 0.8em; color: #555">
+          (Введите этот код в главной консоли, чтобы разрушить карьеру CFO)
+        </p>
+      </div>
+    </div>
+
+    <script>
+      function clean(val) {
+        return val.trim().toUpperCase().replace(/\s/g, "");
+      }
+
+      function checkLevel1() {
+        const val = clean(document.getElementById("input-1").value);
+        // Ответы: ДИВАН, СОФА
+        if (val === "ДИВАН" || val === "СОФА" || val === "DIVAN") {
+          document.getElementById("level-1").classList.add("hidden");
+          document.getElementById("level-2").classList.remove("hidden");
+        } else {
+          alert(
+            "Ошибка. Подумайте, на чем удобнее всего... проводить совещания лежа."
+          );
+        }
+      }
+
+      function checkLevel2() {
+        const val = clean(document.getElementById("input-2").value);
+        // Ответы: ФЛИРТ, СОБЛАЗНЕНИЕ, КОКЕТСТВО
+        if (val === "ФЛИРТ" || val === "FLIRT" || val === "СОБЛАЗНЕНИЕ") {
+          document.getElementById("level-2").classList.add("hidden");
+          document.getElementById("level-3").classList.remove("hidden");
+        } else {
+          alert('Ошибка. Это не "шантаж", это мягче.');
+        }
+      }
+
+      function checkLevel3() {
+        const val = clean(document.getElementById("input-3").value);
+        // Ответы: ПОМАДА, ГУБНАЯПОМАДА
+        if (val.includes("ПОМАДА") || val.includes("LIPSTICK")) {
+          // Показываем реальные имена подозреваемых при успешном разблокировании
+          var suspectsEl = document.getElementById("suspects");
+          if (suspectsEl) {
+            suspectsEl.innerHTML =
+              "<strong>Подозреваемые:</strong> CFO и Журналист.";
+          }
+          document.getElementById("level-3").classList.add("hidden");
+          document.getElementById("final-screen").classList.remove("hidden");
+        } else {
+          alert("Ошибка. Это оставляет следы после поцелуя.");
+        }
+      }
+
+      // Enter key support
+      document
+        .getElementById("input-1")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkLevel1();
+        });
+      document
+        .getElementById("input-2")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkLevel2();
+        });
+      document
+        .getElementById("input-3")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkLevel3();
+        });
+    </script>
+  </body>
+</html>

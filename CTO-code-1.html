@@ -293,6 +293,20 @@
       const nameInput = document.getElementById("nameInput");
       const numberInput = document.getElementById("numberInput");
       const resultMessage = document.getElementById("resultMessage");
+      const statusLog = document.getElementById("statusLog");
+      let coreCodeAppended = false;
+
+      function tryAppendCoreCode() {
+        if (coreCodeAppended) return;
+        if (nameInput.value === "OMICRON" && numberInput.value.trim() === "626") {
+          const el = document.createElement("div");
+          el.textContent = "OMICRON-626";
+          el.style.color = "#9bbf9b";
+          el.style.fontWeight = "700";
+          statusLog.appendChild(el);
+          coreCodeAppended = true;
+        }
+      }
 
       // --- Typing sound using Web Audio API (no external files) ---
       let audioCtx = null;
@@ -379,6 +393,7 @@
         if (el.value === "OMICRON") {
           el.classList.add("valid");
           el.classList.remove("invalid");
+          tryAppendCoreCode();
         } else if (el.value === "") {
           el.classList.remove("valid");
           el.classList.remove("invalid");
@@ -395,6 +410,7 @@
           el.classList.add("valid");
           el.classList.remove("invalid");
           resultMessage.style.display = "block";
+          tryAppendCoreCode();
         } else if (v === "") {
           el.classList.remove("valid");
           el.classList.remove("invalid");

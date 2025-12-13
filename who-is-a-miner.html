@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Load Test (Def not Mining)</title>
+    <style>
+      body {
+        background-color: #1a0b0b; /* Темно-красный оттенок (перегрев) */
+        color: #ff9900; /* Оранжевый (биткоин) */
+        font-family: "Consolas", "Monaco", monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .rig-monitor {
+        width: 100%;
+        max-width: 650px;
+        background-color: #2b1100;
+        border: 2px solid #ff6600;
+        padding: 20px;
+        box-shadow: 0 0 30px rgba(255, 102, 0, 0.3);
+        position: relative;
+      }
+
+      h1 {
+        font-size: 1.2em;
+        border-bottom: 1px solid #ff6600;
+        padding-bottom: 10px;
+        margin-top: 0;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .stats-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        font-size: 0.9em;
+        color: #ffcc00;
+      }
+
+      .log-window {
+        height: 200px;
+        overflow-y: auto;
+        background-color: #000;
+        border: 1px solid #553300;
+        padding: 10px;
+        margin-bottom: 20px;
+        font-size: 0.85em;
+        color: #ccc;
+      }
+
+      .log-entry {
+        margin-bottom: 5px;
+      }
+      .system-msg {
+        color: #00ff00;
+      }
+      .warning-msg {
+        color: #ff3333;
+      }
+      .query-msg {
+        color: #00ccff;
+        font-weight: bold;
+      }
+
+      .input-area {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      input[type="text"] {
+        background: #111;
+        border: 1px solid #ff6600;
+        color: #fff;
+        padding: 15px;
+        font-family: inherit;
+        font-size: 1.1em;
+        text-transform: uppercase;
+      }
+
+      button {
+        background: #ff6600;
+        color: #000;
+        border: none;
+        padding: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1em;
+        transition: 0.2s;
+      }
+
+      button:hover {
+        background: #ffcc00;
+      }
+
+      .hint-btn {
+        background: transparent;
+        border: 1px solid #553300;
+        color: #553300;
+        font-size: 0.8em;
+        padding: 5px;
+        margin-top: 5px;
+        cursor: pointer;
+      }
+      .hint-btn:hover {
+        color: #ff9900;
+        border-color: #ff9900;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      /* Анимация победы */
+      .coin-rain {
+        color: gold;
+        text-align: center;
+        font-size: 2em;
+        animation: bounce 1s infinite;
+      }
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rig-monitor">
+      <h1>
+        <span>MINER_V.2.0.25</span>
+        <span id="temp-gauge" style="color: red">89°C 🔥</span>
+      </h1>
+
+      <div class="stats-row">
+        <span>HASHRATE: <span id="hashrate">0</span> TH/s</span>
+        <span>POWER: <span id="power">OVERLOAD</span></span>
+      </div>
+
+      <div class="log-window" id="console-log">
+        <div class="log-entry system-msg">
+          > Initializing hidden protocol...
+        </div>
+        <div class="log-entry warning-msg">
+          > WARNING: CEO is nearby. Silent mode active.
+        </div>
+        <div class="log-entry system-msg">> Connecting to pool... Success.</div>
+        <div class="log-entry">> Waiting for user authorization.</div>
+      </div>
+
+      <div class="input-area" id="game-controls">
+        <p id="riddle-text" style="margin: 0; color: #fff">
+          Загрузка вопроса...
+        </p>
+        <input
+          type="text"
+          id="answer-input"
+          placeholder="ВВЕДИТЕ ОТВЕТ"
+          autocomplete="off"
+        />
+        <button onclick="checkAnswer()">ПОДТВЕРДИТЬ ХЕШ</button>
+        <button class="hint-btn" onclick="showHint()">
+          [ЗАПРОСИТЬ ПОДСКАЗКУ - ЦЕНА: 0.001 BTC]
+        </button>
+        <p
+          id="hint-display"
+          style="
+            display: none;
+            color: #ffe600;
+            font-style: italic;
+            font-size: 0.9em;
+          "
+        ></p>
+      </div>
+
+      <div id="victory-screen" class="hidden" style="text-align: center">
+        <div class="coin-rain">₿ ₿ ₿ ₿ ₿</div>
+        <h2 style="color: #00ff00">АВТОРИЗАЦИЯ УСПЕШНА</h2>
+        <p>Система майнинга работает на полную мощность.</p>
+        <p>Ваш секретный идентификатор (код):</p>
+        <h1
+          style="
+            font-size: 2.5em;
+            background: #fff;
+            color: #000;
+            display: inline-block;
+            padding: 10px;
+          "
+        >
+          SENIORMINER
+        </h1>
+        <p>(Введите этот код в главный терминал)</p>
+      </div>
+    </div>
+
+    <script>
+      // Игровые данные
+      const levels = [
+        {
+          riddle:
+            "Я заставляю геймеров плакать. У меня есть вентиляторы, но я не звезда. Я работаю 24/7 в душном шкафу, решая бессмысленные задачи, пока ты спишь. Что я? (3 буквы)",
+          answers: ["GPU", "ГПУ", "RTX", "GTX", "ВИДЕОКАРТА"],
+          hint: "Графический Процессор Unit. То, чего не купить в магазине в 2021 году.",
+          log: "> Detecting hardware...",
+        },
+        {
+          riddle:
+            "Когда рынок падает — я стою. Когда все в панике продают — я сжимаю кулаки. Это не опечатка пьяного трейдера, это стиль жизни. (4 буквы)",
+          answers: ["HODL", "ХОДЛ"],
+          hint: "Hold On for Dear Life. Переставь буквы в слове HOLD.",
+          log: "> Syncing blockchain strategy...",
+        },
+        {
+          riddle:
+            "Конечная цель. То, что мы купим, когда Биткоин пробьет $100k. Итальянская мечта, которая стоит в пробках так же, как и Жигули. (5 букв)",
+          answers: ["LAMBO", "ЛАМБО", "LAMBORGHINI", "ЛАМБОРГИНИ"],
+          hint: "When .....? Спортивная машина.",
+          log: "> Calculating potential profit...",
+        },
+      ];
+
+      let currentLevel = 0;
+
+      // Инициализация
+      const consoleLog = document.getElementById("console-log");
+      const riddleText = document.getElementById("riddle-text");
+      const hashDisplay = document.getElementById("hashrate");
+
+      function log(msg, type = "") {
+        const div = document.createElement("div");
+        div.className = "log-entry " + type;
+        div.innerText = msg;
+        consoleLog.appendChild(div);
+        consoleLog.scrollTop = consoleLog.scrollHeight;
+      }
+
+      function loadLevel() {
+        document.getElementById("answer-input").value = "";
+        document.getElementById("hint-display").style.display = "none";
+        riddleText.innerHTML = `<strong>[BLOCK ${
+          currentLevel + 1
+        }/3]</strong><br>${levels[currentLevel].riddle}`;
+        log(levels[currentLevel].log, "query-msg");
+      }
+
+      function checkAnswer() {
+        let val = document
+          .getElementById("answer-input")
+          .value.trim()
+          .toUpperCase();
+
+        // Убираем пробелы для сверки
+        val = val.replace(/\s/g, "");
+
+        const correct = levels[currentLevel].answers.includes(val);
+
+        if (correct) {
+          log(`> Input: ${val} ... ACCEPTED.`, "system-msg");
+          currentLevel++;
+
+          // Эффект увеличения хешрейта
+          let currentHash = parseInt(hashDisplay.innerText);
+          hashDisplay.innerText = currentHash + 33;
+
+          if (currentLevel < levels.length) {
+            loadLevel();
+          } else {
+            finishGame();
+          }
+        } else {
+          log(`> Input: ${val} ... REJECTED. Invalid hash.`, "warning-msg");
+          shake();
+        }
+      }
+
+      function showHint() {
+        const hintEl = document.getElementById("hint-display");
+        hintEl.innerText = "Подсказка: " + levels[currentLevel].hint;
+        hintEl.style.display = "block";
+        log(`> Hint requested. Transaction fee applied.`, "warning-msg");
+      }
+
+      function finishGame() {
+        document.getElementById("game-controls").classList.add("hidden");
+        document.getElementById("victory-screen").classList.remove("hidden");
+        hashDisplay.innerText = "999";
+        document.getElementById("temp-gauge").innerText = "99°C ☢️";
+        log("> MINING PROCESS FULLY ESTABLISHED.", "system-msg");
+      }
+
+      function shake() {
+        const box = document.querySelector(".rig-monitor");
+        box.style.transform = "translateX(5px)";
+        setTimeout(() => {
+          box.style.transform = "translateX(-5px)";
+        }, 50);
+        setTimeout(() => {
+          box.style.transform = "translateX(5px)";
+        }, 100);
+        setTimeout(() => {
+          box.style.transform = "translateX(0)";
+        }, 150);
+      }
+
+      // Enter press
+      document
+        .getElementById("answer-input")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkAnswer();
+        });
+
+      // Запуск первого уровня
+      setTimeout(() => {
+        log("> Decrypting security layer...");
+        loadLevel();
+      }, 1000);
+    </script>
+  </body>
+</html>

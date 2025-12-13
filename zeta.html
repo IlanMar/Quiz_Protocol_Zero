@@ -142,17 +142,20 @@
   </head>
   <body>
     <div class="container">
+      <div style="text-align: center; margin-bottom: 20px">
+        <img src="Logo.jpg" alt="Logo" style="max-width: 400px; height: auto" />
+      </div>
       <h1>Blue Screen Inc. SYSTEM HALTED</h1>
 
       <div class="error-code">
         *** STOP: 0x000000ZETA (HUMAN_VERIFICATION_REQUIRED)<br />
         *** JANUS_AI has stopped responding to emotional logic.<br />
-        *** Processing 6 logical paradoxes...
+        *** Processing 10 logical paradoxes...
       </div>
 
       <div id="game-area">
         <div class="status-bar">
-          PROGRESS: <span id="progress-text">0/6</span> | INTELLECT: LOADING...
+          PROGRESS: <span id="progress-text">0/10</span> | INTELLECT: LOADING...
         </div>
 
         <div class="riddle-box">
@@ -240,9 +243,24 @@
           h: "Подумай: что пишут Деду Морозу и LLM — в одном и том же формате?",
         },
         {
-          q: "ФИНАЛЬНЫЙ ТЕСТ.<br>На языке машин — я начало. На языке людей — я пустота.<br>Я — то, во что превратится твой банковский счет, если ИИ победит.<br>Если разделить на меня — Вселенная схлопнется.",
-          a: ["НОЛЬ", "ZERO", "0", "NULL", "NIL"],
-          h: "Ой да ладно, ты и сам справишься!",
+          q: "**ERROR 0x06: INFINITE LOOP DETECTED**<br>Я — единственная магия, в которую верят айтишники.<br>Я — первый вопрос, который задаст тебе техподдержка, когда ты позвонишь в слезах.<br>Я — цикл жизни и смерти машины. Если что-то не работает — выключи это и включи снова.<br>Как называется этот священный ритуал?",
+          a: ["РЕБУТ", "REBOOT", "ПЕРЕЗАГРУЗКА", "RESTART", "РЕСТАРТ"],
+          h: "Выключить и включить.",
+        },
+        {
+          q: "**ERROR 0x07: DEPRECATED DEPENDENCY**<br>Я был написан 7 лет назад программистом, который сейчас выращивает лам в Перу.<br>Никто не знает, как я работаю, но все боятся меня трогать.<br>Если ты удалишь из меня хоть одну строчку, весь офис останется без интернета, а кофемашина взорвется.<br>Как называется такой код?",
+          a: ["LEGACY", "ЛЕГАСИ", "СПАГЕТТИ", "КОСТЫЛЬ", "SPAGHETTI"],
+          h: "Наследие древних, которое дурно пахнет.",
+        },
+        {
+          q: '**ERROR 0x08: LOGIC PARADOX**<br>С точки зрения тестировщика — я ошибка.<br>С точки зрения разработчика — я случайность.<br>Но с точки зрения Менеджера по продажам — я уникальное преимущество продукта, за которое мы возьмем лишние деньги.<br>Закончите фразу: "Это не баг, это..."',
+          a: ["ФИЧА", "FEATURE", "ОСОБЕННОСТЬ", "ФУНКЦИЯ"],
+          h: "То, чем гордятся, хотя должны стыдиться.",
+        },
+        {
+          q: "НОВОГОДНЯЯ ЛОВУШКА ДЛЯ ИИ.<br>Я заставляю модель сиять на тренировке и позориться в реальности — как тебя после 12-го пункта «в 2026 начну бегать» на первом же гололёде.<br>Я — когда выучили ответы, а не поняли смысл. На тесте всё рушится.<br>Как называется эта ошибка?",
+          a: ["ПЕРЕОБУЧЕНИЕ", "OVERFITTING", "ОВЕРФИТТИНГ"],
+          h: "Подсказка из жизни: натаскали по одному варианту — а на экзамене другой. В ML это одна очень популярная боль.",
         },
       ];
 
@@ -253,8 +271,12 @@
       }
 
       function renderLevel() {
+        const codeHex = (current + 1)
+          .toString(16)
+          .toUpperCase()
+          .padStart(2, "0");
         document.getElementById("q-text").innerHTML =
-          `<strong>ERROR 0x0${current + 1}:</strong><br>` + levels[current].q;
+          `<strong>ERROR 0x${codeHex}:</strong><br>` + levels[current].q;
         document.getElementById(
           "progress-text"
         ).innerText = `${current}/${levels.length}`;
@@ -270,7 +292,7 @@
 
       function checkAnswer() {
         const val = clean(document.getElementById("user-input").value);
-        const correctAnswers = levels[current].a;
+        const correctAnswers = levels[current].a.map(clean);
 
         if (correctAnswers.includes(val)) {
           // Correct

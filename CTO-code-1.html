@@ -237,12 +237,12 @@
         <pre class="comment">
 /*
  * AUTHOR: Senior_Dev_Vassily (Fired in 2020)
- * DATE: 31.05.2020
+ * DATE: 15.11.2021
  * TICKET: JIRA-666 "Fix everything"
  * TODO: Refactor this mess before the AI takes over.
  *
  * Если ты это читаешь, значит, документации снова нет.
- * Пароль к ядру я зашифровал так, чтобы его понял только тот,  кто болея ковидом,  познал дзен в серверной.
+ * Пароль к ядру я зашифровал так, чтобы его понял только тот, кто болея ковидом,  познал дзен в серверной.
  
  * ЧАСТЬ 1 (Слово):
  - Coffee overdose (пульс 140)
@@ -298,7 +298,10 @@
 
       function tryAppendCoreCode() {
         if (coreCodeAppended) return;
-        if (nameInput.value === "OMICRON" && numberInput.value.trim() === "626") {
+        if (
+          nameInput.value === "OMICRON" &&
+          numberInput.value.trim() === "626"
+        ) {
           const el = document.createElement("div");
           el.textContent = "OMICRON-626";
           el.style.color = "#9bbf9b";

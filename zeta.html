@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FATAL ERROR: HUMAN_VERIFICATION</title>
+    <style>
+      body {
+        background-color: #0000aa; /* Классический цвет BSOD */
+        color: #ffffff;
+        font-family: "Courier New", Courier, monospace;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+        text-shadow: 1px 1px 0px #000;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 800px;
+      }
+
+      h1 {
+        background-color: #aaaaaa;
+        color: #0000aa;
+        padding: 5px 10px;
+        text-align: center;
+        font-size: 1.2em;
+        margin-bottom: 30px;
+      }
+
+      .error-code {
+        font-size: 0.9em;
+        margin-bottom: 20px;
+      }
+
+      .riddle-box {
+        border: 2px solid #fff;
+        padding: 20px;
+        margin-bottom: 20px;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .question {
+        font-size: 1.1em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      input[type="text"] {
+        background: #0000aa;
+        border: none;
+        border-bottom: 2px solid #fff;
+        color: #fff;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1.3em;
+        width: 100%;
+        padding: 10px;
+        outline: none;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+
+      .btn-container {
+        display: flex;
+        gap: 15px;
+      }
+
+      button {
+        border: 2px solid #fff;
+        background: transparent;
+        color: #fff;
+        padding: 10px 20px;
+        font-family: inherit;
+        font-weight: bold;
+        cursor: pointer;
+        flex-grow: 1;
+        transition: 0.2s;
+      }
+
+      button:hover {
+        background: #fff;
+        color: #0000aa;
+      }
+
+      .status-bar {
+        margin-top: 20px;
+        font-size: 0.8em;
+        text-align: center;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      /* Подсказка */
+      .hint-text {
+        color: #ffff00;
+        font-size: 0.9em;
+        margin-top: 10px;
+        display: none;
+        font-style: italic;
+      }
+
+      .message-text {
+        color: #ff4444;
+        font-size: 0.95em;
+        margin-top: 10px;
+        display: none;
+        font-weight: bold;
+      }
+
+      /* Финал */
+      .zeta-code {
+        font-size: 3em;
+        border: 4px double #fff;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+        animation: blink 2s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Blue Screen Inc. SYSTEM HALTED</h1>
+
+      <div class="error-code">
+        *** STOP: 0x000000ZETA (HUMAN_VERIFICATION_REQUIRED)<br />
+        *** JANUS_AI has stopped responding to emotional logic.<br />
+        *** Processing 6 logical paradoxes...
+      </div>
+
+      <div id="game-area">
+        <div class="status-bar">
+          PROGRESS: <span id="progress-text">0/6</span> | INTELLECT: LOADING...
+        </div>
+
+        <div class="riddle-box">
+          <p class="question" id="q-text">Загрузка...</p>
+        </div>
+
+        <input
+          type="text"
+          id="user-input"
+          placeholder="ВВЕДИТЕ ОТВЕТ"
+          autocomplete="off"
+        />
+
+        <div class="btn-container">
+          <button onclick="checkAnswer()">ПОДТВЕРДИТЬ</button>
+          <button onclick="getHint()" style="flex-grow: 0">ПОДСКАЗКА</button>
+        </div>
+
+        <p class="hint-text" id="hint-display"></p>
+        <p id="message-display" class="message-text" aria-live="polite"></p>
+      </div>
+
+      <div id="victory-area" class="hidden">
+        <p>*** VERIFICATION COMPLETE ***</p>
+        <p>Access granted to Sector ZETA.</p>
+        <p>Nuclear Core Code recovered:</p>
+
+        <div class="zeta-code">ZETA-450</div>
+
+        <p>Press any key to continue (just kidding, it's a browser).</p>
+      </div>
+
+      <p
+        style="
+          margin-top: 50px;
+          font-size: 0.7em;
+          text-align: center;
+          opacity: 0.6;
+        "
+      >
+        Если это первый раз, когда вы видите этот экран, перезагрузите свой мозг
+        и попробуйте снова.
+      </p>
+    </div>
+
+    <script>
+      const levels = [
+        {
+          q: "Я — причина твоего страха за свою зарплату в 2026 году. Я рисую картины без рук, пишу код без диплома и галлюцинирую с уверенностью профессора. Но я не могу найти на картинке велосипед. Кто я?",
+          a: [
+            "ИИ",
+            "AI",
+            "НЕЙРОСЕТЬ",
+            "JANUS",
+            "ЯНУС",
+            "ARTIFICIALINTELLIGENCE",
+          ],
+          h: "Ой да ладно, ты и сам справишься!",
+        },
+        {
+          q: "Я — событие, которое могло быть email-ом. Я пожираю человеко-часы, рождаю бессмысленные протоколы, но не произвожу никакого продукта. Я краду твое время в календаре Outlook. Что я?",
+          a: ["СОВЕЩАНИЕ", "MEETING", "ВСТРЕЧА", "МИТИНГ", "СОБРАНИЕ"],
+          h: "Ой да ладно, ты и сам справишься!",
+        },
+        {
+          q: "Все говорят, что я легкое и воздушное, но на самом деле я — это просто чужой компьютер в горячем подвале где-то в Аризоне. Ты доверяешь мне свои фото и файлы, но если я исчезну, ты потеряешь всё.",
+          a: ["ОБЛАКО", "CLOUD", "ICLOUD", "ОБЛАЧНОЕХРАНИЛИЩЕ"],
+          h: "Ой да ладно, ты и сам справишься!",
+        },
+        {
+          q: "Я — призрак декабря. Я — черта, которую нельзя переступать, но все переступают. Я единственная причина, почему ты пьешь шампанское на работе с дергающимся глазом, доделывая отчет.",
+          a: ["ДЕДЛАЙН", "DEADLINE", "СРОК"],
+          h: "Ой да ладно, ты и сам справишься!",
+        },
+        {
+          q: "НОВОГОДНИЙ ПАРАДОКС.<br>Меня пишут в последние минуты декабря — и людям, и машинам.<br>Я похож на желание, но без меня ответ становится случайностью.<br>Если я расплывчат — получишь галлюцинации. Если я противоречив — исполнитель выберет удобную часть и скажет, что угадал.<br>Чем точнее я, тем меньше магии, но тем больше результата. Кто я?",
+          a: [
+            "ПРОМПТ",
+            "PROMPT",
+            "ЗАПРОС",
+            "ИНСТРУКЦИЯ",
+            "ТЕХНИЧЕСКОЕЗАДАНИЕ",
+            "ТЗ",
+          ],
+          h: "Подумай: что пишут Деду Морозу и LLM — в одном и том же формате?",
+        },
+        {
+          q: "ФИНАЛЬНЫЙ ТЕСТ.<br>На языке машин — я начало. На языке людей — я пустота.<br>Я — то, во что превратится твой банковский счет, если ИИ победит.<br>Если разделить на меня — Вселенная схлопнется.",
+          a: ["НОЛЬ", "ZERO", "0", "NULL", "NIL"],
+          h: "Ой да ладно, ты и сам справишься!",
+        },
+      ];
+
+      let current = 0;
+
+      function init() {
+        renderLevel();
+      }
+
+      function renderLevel() {
+        document.getElementById("q-text").innerHTML =
+          `<strong>ERROR 0x0${current + 1}:</strong><br>` + levels[current].q;
+        document.getElementById(
+          "progress-text"
+        ).innerText = `${current}/${levels.length}`;
+        document.getElementById("user-input").value = "";
+        document.getElementById("hint-display").style.display = "none";
+        const msgEl = document.getElementById("message-display");
+        if (msgEl) msgEl.style.display = "none";
+      }
+
+      function clean(str) {
+        return str.trim().toUpperCase().replace(/\s/g, "");
+      }
+
+      function checkAnswer() {
+        const val = clean(document.getElementById("user-input").value);
+        const correctAnswers = levels[current].a;
+
+        if (correctAnswers.includes(val)) {
+          // Correct
+          current++;
+          if (current >= levels.length) {
+            finishGame();
+          } else {
+            renderLevel();
+          }
+        } else {
+          // Wrong — show a non-blocking inline message (avoids browser alert blocking)
+          const msgEl = document.getElementById("message-display");
+          if (msgEl) {
+            msgEl.innerText =
+              "ACCESS DENIED. Logic fault detected. Try thinking like a human.";
+            msgEl.style.display = "block";
+            document.getElementById("user-input").focus();
+            setTimeout(() => {
+              msgEl.style.display = "none";
+            }, 3500);
+          }
+        }
+      }
+
+      function getHint() {
+        const hintEl = document.getElementById("hint-display");
+        hintEl.innerText = "HINT_DUMP: " + levels[current].h;
+        hintEl.style.display = "block";
+      }
+
+      function finishGame() {
+        document.getElementById("game-area").classList.add("hidden");
+        document.getElementById("victory-area").classList.remove("hidden");
+        document.querySelector(".error-code").style.display = "none";
+        document.querySelector("h1").innerText = "SYSTEM RECOVERED";
+        document.querySelector("h1").style.backgroundColor = "#FFFFFF";
+      }
+
+      // Enter key
+      document
+        .getElementById("user-input")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkAnswer();
+        });
+
+      init();
+    </script>
+  </body>
+</html>

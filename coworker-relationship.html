@@ -197,10 +197,56 @@
           placeholder="Введите название предмета..."
           autocomplete="off"
         />
-        <button onclick="checkLevel3()">ПОЛУЧИТЬ КОМПРОМАТ</button>
+        <button onclick="checkLevel3()">ПРОДОЛЖИТЬ РАССЛЕДОВАНИЕ</button>
         <div
           class="hint-link"
           onclick="alert('Подсказка: Косметика. Kiss-proof (или нет).')"
+        >
+          Нужна подсказка?
+        </div>
+      </div>
+
+      <div id="level-4" class="riddle-container hidden">
+        <p><strong>Вопрос 4: Канал Связи</strong></p>
+        <p class="question">
+          "Он начинается как обсуждение квартального отчёта,<br />
+          а заканчивается реакцией \"огонёк\" под сообщением в 23:47.<br />
+          В нём всё \"по делу\", но почему-то с эмодзи и стикерами.<br />
+          Как называется этот жанр общения?"
+        </p>
+        <input
+          type="text"
+          id="input-4"
+          placeholder="Введите словосочетание..."
+          autocomplete="off"
+        />
+        <button onclick="checkLevel4()">ОТКРЫТЬ ПЕРЕПИСКУ</button>
+        <div
+          class="hint-link"
+          onclick="alert('Подсказка: Два слова. Первое — служебный.')"
+        >
+          Нужна подсказка?
+        </div>
+      </div>
+
+      <div id="level-5" class="riddle-container hidden">
+        <p><strong>Вопрос 5: Красная Линия</strong></p>
+        <p class="question">
+          "Это когда ты ставишь человеку задачи и дедлайны,<br />
+          а он в ответ ставит тебе сердечки и \"доброе утро\" без повода.<br />
+          Встречи называются \"1:1\", но HR читает их как \"1:0\".<br />
+          Как называется то, что тут важнее всего соблюдать?"
+        </p>
+        <input
+          type="text"
+          id="input-5"
+          placeholder="Введите слово или термин..."
+          autocomplete="off"
+        />
+        <button onclick="checkLevel5()">СНЯТЬ ЭТИЧЕСКИЙ ЗАМОК</button>
+        <div
+          class="hint-link"
+          onclick="alert('Подсказка: Часто начинается с &quot;суб...&quot; (и нет, это не субботник).')"
         >
           Нужна подсказка?
         </div>
@@ -270,16 +316,51 @@
         const val = clean(document.getElementById("input-3").value);
         // Ответы: ПОМАДА, ГУБНАЯПОМАДА
         if (val.includes("ПОМАДА") || val.includes("LIPSTICK")) {
-          // Показываем реальные имена подозреваемых при успешном разблокировании
+          document.getElementById("level-3").classList.add("hidden");
+          document.getElementById("level-4").classList.remove("hidden");
+        } else {
+          alert("Ошибка. Это оставляет следы после поцелуя.");
+        }
+      }
+
+      function checkLevel4() {
+        const val = clean(document.getElementById("input-4").value);
+        // Ответы: СЛУЖЕБНЫЙ РОМАН / OFFICE ROMANCE
+        if (
+          val.includes("СЛУЖЕБНЫЙРОМАН") ||
+          val === "РОМАН" ||
+          val.includes("OFFICEROMANCE")
+        ) {
+          document.getElementById("level-4").classList.add("hidden");
+          document.getElementById("level-5").classList.remove("hidden");
+        } else {
+          alert(
+            'Ошибка. Подумайте о том, что начинается "по работе", а продолжается "ну мы просто общаемся".'
+          );
+        }
+      }
+
+      function checkLevel5() {
+        const val = clean(document.getElementById("input-5").value);
+        // Ответы: СУБОРДИНАЦИЯ / КОНФЛИКТ ИНТЕРЕСОВ / ЭТИКА
+        if (
+          val.includes("СУБОРДИНАЦИЯ") ||
+          val.includes("КОНФЛИКТИНТЕРЕСОВ") ||
+          val === "ЭТИКА" ||
+          val.includes("ETHICS")
+        ) {
+          // Показываем реальные имена подозреваемых при успешном разблокировании (финальная загадка)
           var suspectsEl = document.getElementById("suspects");
           if (suspectsEl) {
             suspectsEl.innerHTML =
               "<strong>Подозреваемые:</strong> CFO и Журналист.";
           }
-          document.getElementById("level-3").classList.add("hidden");
+          document.getElementById("level-5").classList.add("hidden");
           document.getElementById("final-screen").classList.remove("hidden");
         } else {
-          alert("Ошибка. Это оставляет следы после поцелуя.");
+          alert(
+            'Ошибка. Это то самое слово, которое вспоминают, когда "мы же взрослые люди" внезапно встречается с оргструктурой.'
+          );
         }
       }
 
@@ -298,6 +379,18 @@
         .getElementById("input-3")
         .addEventListener("keypress", function (e) {
           if (e.key === "Enter") checkLevel3();
+        });
+
+      document
+        .getElementById("input-4")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkLevel4();
+        });
+
+      document
+        .getElementById("input-5")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkLevel5();
         });
     </script>
   </body>

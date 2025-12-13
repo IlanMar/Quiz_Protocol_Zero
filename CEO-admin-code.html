@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blue Screen Inc. - Executive Override</title>
+    <style>
+      body {
+        background-color: #000;
+        color: #0f0;
+        font-family: "Courier New", Courier, monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .terminal {
+        width: 100%;
+        max-width: 700px;
+        border: 2px solid #0f0;
+        background-color: #050505;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        position: relative;
+        min-height: 480px; /* Еще немного увеличил высоту для подсказок */
+      }
+
+      /* Scanlines effect */
+      .terminal::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.25) 50%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.06),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.06)
+          );
+        z-index: 2;
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+      }
+
+      h1 {
+        text-align: center;
+        border-bottom: 2px dashed #0f0;
+        padding-bottom: 10px;
+        margin-top: 0;
+        text-transform: uppercase;
+        font-size: 1.5em;
+      }
+
+      .status-bar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        font-size: 0.8em;
+        color: #0f0;
+        opacity: 0.8;
+      }
+
+      .puzzle-container {
+        margin-top: 30px;
+      }
+
+      .question-text {
+        font-size: 1.1em;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        color: #ddd;
+      }
+
+      /* Поле ввода */
+      input[type="text"] {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #0f0;
+        color: #0f0;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1.2em;
+        width: 100%;
+        padding: 10px;
+        outline: none;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+      }
+
+      /* Кнопки */
+      .btn-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      button.main-btn {
+        background-color: #0f0;
+        color: #000;
+        border: 2px solid #0f0;
+        padding: 10px 20px;
+        font-family: "Courier New", Courier, monospace;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1em;
+        flex-grow: 1;
+        transition: 0.3s;
+      }
+
+      button.main-btn:hover {
+        background-color: #fff;
+        border-color: #fff;
+      }
+
+      button.hint-btn {
+        background-color: transparent;
+        color: #0f0;
+        border: 1px solid #0f0;
+        padding: 10px 15px;
+        font-family: "Courier New", Courier, monospace;
+        cursor: pointer;
+        font-size: 0.9em;
+        opacity: 0.7;
+        transition: 0.3s;
+      }
+
+      button.hint-btn:hover {
+        background-color: rgba(0, 255, 0, 0.1);
+        opacity: 1;
+      }
+
+      /* Сообщения */
+      .error-msg {
+        color: #ff3333;
+        margin-top: 15px;
+        display: none;
+        font-weight: bold;
+      }
+
+      .hint-text {
+        color: #ffff00; /* Желтый цвет для подсказки */
+        margin-top: 15px;
+        display: none;
+        font-style: italic;
+        border-left: 2px solid #ffff00;
+        padding-left: 10px;
+        font-size: 0.9em;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      /* Финальный экран */
+      .final-reward {
+        text-align: center;
+        border: 2px solid #fff;
+        padding: 20px;
+        margin-top: 20px;
+        animation: blinkBorder 2s infinite;
+      }
+
+      @keyframes blinkBorder {
+        0% {
+          border-color: #fff;
+        }
+        50% {
+          border-color: #0f0;
+        }
+        100% {
+          border-color: #fff;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="terminal">
+      <h1>Protocol: EXECUTIVE_OVERRIDE</h1>
+      <div class="status-bar">
+        <span id="user-id">USER: CEO_BSI</span>
+        <span id="level-indicator">SECURITY LEVEL: 1/3</span>
+      </div>
+
+      <div id="level-1" class="puzzle-container">
+        <p class="question-text">
+          <strong>[ПРОВЕРКА МЫШЛЕНИЯ: УРОВЕНЬ 1]</strong><br /><br />
+          В обычной математике 1 + 1 = 2.<br />
+          Но в нашем отчете для инвесторов 1 + 1 = 3.<br /><br />
+          Назовите слово на букву <strong>S</strong> (или <strong>С</strong>),
+          описывающее эффект, когда совместная работа дает больший результат,
+          чем по отдельности.<br />
+          <em
+            >"Красивое слово для презентаций, но в реальности означает просто
+            совещание."</em
+          >
+        </p>
+
+        <input
+          type="text"
+          id="input-1"
+          placeholder="ВВЕДИТЕ СЛОВО..."
+          autocomplete="off"
+        />
+
+        <div class="btn-row">
+          <button class="main-btn" onclick="checkLevel1()">ПОДТВЕРДИТЬ</button>
+          <button class="hint-btn" onclick="showHint(1)" title="Получить намек">
+            ?
+          </button>
+        </div>
+
+        <p class="error-msg" id="error-1">
+          ОТКАЗАНО. Слишком простое мышление.
+        </p>
+        <p class="hint-text" id="hint-text-1">
+          Подсказка: Это когда целое больше суммы частей. Любимое слово
+          бизнес-коучей.
+        </p>
+      </div>
+
+      <div id="level-2" class="puzzle-container hidden">
+        <p class="question-text">
+          <strong>[ПРОВЕРКА КОМПЕТЕНЦИИ: УРОВЕНЬ 2]</strong><br /><br />
+          Какой финансовый показатель из 6 букв позволяет превратить убытки в
+          "операционную эффективность"?<br /><br />
+          Это Прибыль до вычета: процентов, налогов, износа и амортизации.
+        </p>
+
+        <input
+          type="text"
+          id="input-2"
+          placeholder="ВВЕДИТЕ АББРЕВИАТУРУ..."
+          autocomplete="off"
+        />
+
+        <div class="btn-row">
+          <button class="main-btn" onclick="checkLevel2()">ПОДТВЕРДИТЬ</button>
+          <button class="hint-btn" onclick="showHint(2)" title="Получить намек">
+            ?
+          </button>
+        </div>
+
+        <p class="error-msg" id="error-2">ОТКАЗАНО. Акционеры недовольны.</p>
+        <p class="hint-text" id="hint-text-2">
+          Подсказка: Соберите аббревиатуру из английских названий того, что мы
+          вычитаем. Это прибыль, если «забыть» про налоги и амортизацию.
+        </p>
+      </div>
+
+      <div id="level-3" class="puzzle-container hidden">
+        <p class="question-text">
+          <strong>[ПРОВЕРКА ВНИМАНИЯ: УРОВЕНЬ 3]</strong><br /><br />
+          Пароль Администратора — это классика.<br />
+          Посмотрите на свою клавиатуру.<br />
+          Возьмите <strong>первые 6 букв слева</strong> в верхнем ряду.<br />
+          И добавьте <strong>три цифры</strong>, с которых начинается счет.<br />
+        </p>
+
+        <input
+          type="text"
+          id="input-3"
+          placeholder="ВВЕДИТЕ ПАТТЕРН..."
+          autocomplete="off"
+        />
+
+        <div class="btn-row">
+          <button class="main-btn" onclick="checkLevel3()">
+            РАЗБЛОКИРОВАТЬ
+          </button>
+          <button class="hint-btn" onclick="showHint(3)" title="Получить намек">
+            ?
+          </button>
+        </div>
+
+        <p class="error-msg" id="error-3">
+          ОТКАЗАНО. Ответ под вашими пальцами.
+        </p>
+        <p class="hint-text" id="hint-text-3">
+          Подсказка: Буквально посмотрите вниз. Начните с верхнего левого угла
+          буквенного блока и двигайтесь вправо.
+        </p>
+      </div>
+
+      <div id="victory-screen" class="hidden">
+        <div class="final-reward">
+          <h2 style="color: white; margin: 0">ДОСТУП РАЗРЕШЕН</h2>
+          <p>Добро пожаловать в систему, Администратор.</p>
+          <p>Ваш мастер-код:</p>
+          <h1 style="font-size: 3em; margin: 10px 0; color: #0f0">QWERTY123</h1>
+          <p><em>(Введите его в главной консоли)</em></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Функция очистки ввода
+      function clean(val) {
+        // Убираем пробелы по краям, переводим в верхний регистр
+        // ВАЖНО: мы больше не удаляем пробелы внутри (replace(/\s/g, '')),
+        // чтобы не ломать ввод, если пользователь случайно ввел пробел.
+        // Проверка ответов сама решит.
+        return val.trim().toUpperCase();
+      }
+
+      // Показ подсказки
+      function showHint(level) {
+        const hintElement = document.getElementById("hint-text-" + level);
+        hintElement.style.display = "block";
+
+        // Скрываем ошибку если она была, чтобы не загромождать
+        document.getElementById("error-" + level).style.display = "none";
+      }
+
+      // Уровень 1
+      function checkLevel1() {
+        const val = clean(document.getElementById("input-1").value);
+        // Простая проверка, допускаем варианты
+        if (val.includes("SYNERGY") || val.includes("СИНЕРГИЯ")) {
+          document.getElementById("level-1").classList.add("hidden");
+          document.getElementById("level-2").classList.remove("hidden");
+          document.getElementById("level-indicator").innerText =
+            "SECURITY LEVEL: 2/3";
+        } else {
+          showError(1);
+        }
+      }
+
+      // Уровень 2
+      function checkLevel2() {
+        const val = clean(document.getElementById("input-2").value);
+        if (val.includes("EBITDA")) {
+          document.getElementById("level-2").classList.add("hidden");
+          document.getElementById("level-3").classList.remove("hidden");
+          document.getElementById("level-indicator").innerText =
+            "SECURITY LEVEL: 3/3";
+        } else {
+          showError(2);
+        }
+      }
+
+      // Уровень 3
+      function checkLevel3() {
+        let val = clean(document.getElementById("input-3").value);
+        // Для последнего уровня уберем все пробелы, чтобы Q W E R T Y сработало
+        val = val.replace(/\s/g, "");
+
+        if (val === "QWERTY123" || val === "ЙЦУКЕН123") {
+          document.getElementById("level-3").classList.add("hidden");
+          document.getElementById("victory-screen").classList.remove("hidden");
+          document.getElementById("level-indicator").innerText =
+            "SECURITY LEVEL: ADMIN";
+          document.getElementById("level-indicator").style.color = "white";
+        } else {
+          showError(3);
+        }
+      }
+
+      function showError(level) {
+        document.getElementById("error-" + level).style.display = "block";
+        // Скрываем подсказку, если она была открыта, чтобы привлечь внимание к ошибке
+        document.getElementById("hint-text-" + level).style.display = "none";
+        shake();
+      }
+
+      // Тряска экрана
+      function shake() {
+        const term = document.querySelector(".terminal");
+        term.style.transform = "translate(5px, 0)";
+        setTimeout(() => {
+          term.style.transform = "translate(-5px, 0)";
+        }, 50);
+        setTimeout(() => {
+          term.style.transform = "translate(5px, 0)";
+        }, 100);
+        setTimeout(() => {
+          term.style.transform = "translate(0, 0)";
+        }, 150);
+      }
+
+      // Enter работает как клик по кнопке
+      document
+        .getElementById("input-1")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkLevel1();
+        });
+      document
+        .getElementById("input-2")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkLevel2();
+        });
+      document
+        .getElementById("input-3")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkLevel3();
+        });
+    </script>
+  </body>
+</html>

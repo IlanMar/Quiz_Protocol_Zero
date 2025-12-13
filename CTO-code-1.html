@@ -2,7 +2,10 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <title>Код ядра</title>
     <style>
       :root {
@@ -34,6 +37,14 @@
         box-sizing: border-box;
         text-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
         -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      }
+
+      /* Reduce text-shadow on narrow screens to improve legibility */
+      @media (max-width: 420px) {
+        body {
+          text-shadow: none;
+        }
       }
 
       body::before {
@@ -82,6 +93,11 @@
         padding: clamp(12px, 3vw, 20px);
         margin-bottom: 20px;
         box-shadow: 0 0 15px rgba(0, 255, 65, 0.08);
+        border-radius: 8px;
+        /* Allow scrolling on small screens and smooth native scrolling on iOS */
+        max-height: calc(100vh - 160px);
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
       .output-display {
@@ -91,6 +107,8 @@
         color: #ccffcc;
         word-break: break-word;
         overflow-wrap: anywhere;
+        max-height: 8vh;
+        overflow: auto;
       }
 
       pre.comment {
@@ -99,9 +117,13 @@
         border-radius: 6px;
         color: #aaffb3;
         font-family: inherit;
-        font-size: 0.95rem;
+        font-size: clamp(0.8rem, 2.4vw, 0.95rem);
         border-left: 3px solid rgba(0, 255, 65, 0.12);
         white-space: pre-wrap;
+        /* Give the puzzle text more vertical room by default */
+        max-height: 40vh;
+        min-height: 18vh;
+        overflow: auto;
       }
 
       .field {
@@ -118,13 +140,15 @@
         border: 1px solid var(--accent);
         color: var(--accent);
         font-family: "Courier New", monospace;
-        font-size: 16px;
-        padding: 10px;
+        font-size: clamp(16px, 3.8vw, 18px);
+        padding: clamp(10px, 3.5vw, 12px);
         outline: none;
         text-transform: uppercase;
         width: 100%;
         box-sizing: border-box;
         border-radius: 6px;
+        min-height: 44px; /* touch-friendly */
+        -webkit-appearance: none;
       }
       input.valid {
         background: rgba(34, 139, 34, 0.06);
@@ -155,11 +179,47 @@
         min-height: 80px;
         background-color: #0a0a0a;
         margin-top: 10px;
+        max-height: 22vh;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
       @media (max-width: 600px) {
         #app-container {
           width: calc(100% - 24px);
+        }
+        .console-box {
+          padding: 12px;
+          margin-bottom: 14px;
+        }
+        pre.comment {
+          font-size: 0.9rem;
+        }
+      }
+
+      /* Extra adjustments for very small phones */
+      @media (max-width: 420px) {
+        body {
+          padding: calc(var(--pad) / 2 + env(safe-area-inset-top))
+            env(safe-area-inset-right)
+            calc(var(--pad) / 2 + env(safe-area-inset-bottom))
+            env(safe-area-inset-left);
+        }
+        .header-time {
+          font-size: 1.1rem;
+        }
+        .output-display {
+          max-height: 10vh;
+          font-size: 14px;
+        }
+        pre.comment {
+          padding: 10px;
+        }
+        label {
+          font-size: 14px;
+        }
+        .hint {
+          font-size: 12px;
         }
       }
     </style>
@@ -234,6 +294,83 @@
       const numberInput = document.getElementById("numberInput");
       const resultMessage = document.getElementById("resultMessage");
 
+      // --- Typing sound using Web Audio API (no external files) ---
+      let audioCtx = null;
+
+      function ensureAudioContext() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+
+      function playKeySound() {
+        try {
+          ensureAudioContext();
+          const ctx = audioCtx;
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = "square";
+          o.frequency.value = 1000 + Math.random() * 400;
+          g.gain.value = 0.0015;
+          o.connect(g);
+          g.connect(ctx.destination);
+          const now = ctx.currentTime;
+          g.gain.cancelScheduledValues(now);
+          g.gain.setValueAtTime(0.0015, now);
+          g.gain.exponentialRampToValueAtTime(0.00001, now + 0.06);
+          o.start(now);
+          o.stop(now + 0.07);
+        } catch (err) {
+          // audio may be blocked or unavailable — silently ignore
+        }
+      }
+
+      // Resume suspended AudioContext after first user gesture (mobile/Chrome policy)
+      function resumeAudioOnUserGesture() {
+        if (!audioCtx) return;
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume().catch(() => {});
+        }
+        document.removeEventListener("touchstart", resumeAudioOnUserGesture);
+        document.removeEventListener("click", resumeAudioOnUserGesture);
+        document.removeEventListener("keydown", resumeAudioOnUserGesture);
+      }
+      document.addEventListener("click", resumeAudioOnUserGesture, {
+        once: true,
+      });
+      document.addEventListener("touchstart", resumeAudioOnUserGesture, {
+        once: true,
+      });
+      document.addEventListener("keydown", resumeAudioOnUserGesture, {
+        once: true,
+      });
+
+      // Play sound for printable keys and common edit keys
+      function shouldPlayForKey(e) {
+        const k = e.key;
+        return (
+          k.length === 1 ||
+          k === "Backspace" ||
+          k === "Delete" ||
+          k === "Enter" ||
+          k === " "
+        );
+      }
+
+      [nameInput, numberInput].forEach((el) => {
+        el.addEventListener("keydown", (e) => {
+          ensureAudioContext();
+          if (shouldPlayForKey(e)) playKeySound();
+        });
+        // Also play on virtual keyboard input events if needed
+        el.addEventListener("input", (e) => {
+          // Keep original behavior (validation) below — but also attempt a sound
+          // This covers some mobile keyboards that don't fire keydown for characters
+          playKeySound();
+        });
+      });
+
+      // --- Existing input validation logic ---
       nameInput.addEventListener("input", (e) => {
         const el = e.target;
         const start = el.selectionStart;
@@ -253,7 +390,6 @@
 
       numberInput.addEventListener("input", (e) => {
         const el = e.target;
-        // Allow trimming spaces
         const v = el.value.trim();
         if (v === "626") {
           el.classList.add("valid");

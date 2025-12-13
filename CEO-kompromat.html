@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CorpFinance: Expense Report #666</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        color: #333;
+      }
+      .container {
+        background: white;
+        width: 90%;
+        max-width: 500px;
+        padding: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        border-top: 5px solid #d9534f;
+      }
+      .header {
+        border-bottom: 2px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .header h1 {
+        font-size: 1.2rem;
+        margin: 0;
+        color: #555;
+      }
+      .status-badge {
+        background: #ffeeba;
+        color: #856404;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+      }
+      .bill-item {
+        background: #fafafa;
+        border: 1px solid #eee;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        position: relative;
+      }
+      .bill-price {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-weight: bold;
+        color: #d9534f;
+      }
+      .bill-desc {
+        font-style: italic;
+        color: #666;
+        margin-bottom: 10px;
+        padding-right: 60px;
+        font-size: 0.9rem;
+      }
+      .input-group {
+        margin-top: 5px;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      input:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+      .btn-submit {
+        background: #d9534f;
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 15px;
+        font-size: 1rem;
+        border-radius: 4px;
+        margin-top: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        letter-spacing: 1px;
+      }
+      .btn-submit:hover {
+        background: #c9302c;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .modal-content {
+        background: #222;
+        color: #f00;
+        padding: 40px;
+        border-radius: 10px;
+        text-align: center;
+        border: 2px solid #f00;
+        font-family: "Courier New", monospace;
+        box-shadow: 0 0 30px #f00;
+      }
+      .secret-code {
+        font-size: 3rem;
+        margin: 20px 0;
+        letter-spacing: 5px;
+        font-weight: bold;
+        color: white;
+        text-shadow: 0 0 10px red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>EXPENSE REPORT #13-2025</h1>
+        <span class="status-badge">Audit: BLOCKED</span>
+      </div>
+
+      <p style="font-size: 0.9em; color: #555">
+        <strong>Внимание:</strong> Автоматический аудит заблокировал отчет CEO.
+        Причина: "Необоснованная роскошь". <br />
+        Для доступа к архиву подтвердите названия позиций (на английском).
+      </p>
+
+      <div class="bill-item">
+        <div class="bill-price">$4,500</div>
+        <div class="bill-desc">
+          "Подземный гриб, который ищут свиньи. Пахнет как грязные носки, но
+          стоит как почка джуниора."
+        </div>
+        <div class="input-group">
+          <input
+            type="text"
+            id="item1"
+            placeholder="Гриб? (На T...)"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div class="bill-item">
+        <div class="bill-price">$8,000</div>
+        <div class="bill-desc">
+          "Коньяк Richard. В бутылке — слезы французских виноделов, в бокале —
+          годовой бюджет IT-отдела на скрепки."
+        </div>
+        <div class="input-group">
+          <input
+            type="text"
+            id="item2"
+            placeholder="Бренд коньяка? (На H...)"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div class="bill-item">
+        <div class="bill-price">$1,200</div>
+        <div class="bill-desc">
+          "Французские улитки в масле. Скользкие гады без позвоночника. Прямо
+          как наши юристы."
+        </div>
+        <div class="input-group">
+          <input
+            type="text"
+            id="item3"
+            placeholder="Блюдо? (На E...)"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div class="bill-item">
+        <div class="bill-price">$3,500</div>
+        <div class="bill-desc">
+          "Паштет из печени перекормленной утки. Запрещен в Калифорнии, но
+          законы писаны для бедных."
+        </div>
+        <div class="input-group">
+          <input
+            type="text"
+            id="item4"
+            placeholder="Деликатес? (На F...)"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div class="bill-item">
+        <div class="bill-price">$2,000</div>
+        <div class="bill-desc">
+          "Мексиканский кактус. Clase Azul Ultra. Бутылка красивее, чем лицо
+          нашего главного бухгалтера."
+        </div>
+        <div class="input-group">
+          <input
+            type="text"
+            id="item5"
+            placeholder="Напиток? (На T...)"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div
+        style="
+          text-align: right;
+          margin-top: 15px;
+          font-weight: bold;
+          font-size: 1.1em;
+        "
+      >
+        TOTAL STOLEN: $19,200
+      </div>
+
+      <button class="btn-submit" onclick="checkExpenses()">
+        РАСШИФРОВАТЬ КОМПРОМАТ
+      </button>
+    </div>
+
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <h2>ХИЩЕНИЕ ПОДТВЕРЖДЕНО</h2>
+        <p>Код преступления:</p>
+        <div class="secret-code">THEFT</div>
+        <p style="font-size: 0.8em; color: #fff">
+          Введите в консоль Януса вместе с командой VOTE_KICK_CEO
+        </p>
+        <button
+          onclick="location.reload()"
+          style="
+            background: transparent;
+            border: 1px solid #f00;
+            color: #f00;
+            margin-top: 10px;
+            cursor: pointer;
+            padding: 5px 20px;
+          "
+        >
+          ЗАКРЫТЬ
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function checkExpenses() {
+        const answers = {
+          item1: ["TRUFFLE", "TRUFFLES", "ТРЮФЕЛЬ", "ТРЮФЕЛИ"],
+          item2: ["HENNESSY", "HENNESSY XO", "HENNESY", "ХЕННЕССИ", "ХЕНЕСИ"],
+          item3: ["ESCARGOT", "ESCARGOTS", "SNAILS", "ЭСКАРГО", "УЛИТКИ"],
+          item4: ["FOIE GRAS", "FOIEGRAS", "FOIE-GRAS", "ФУАГРА", "ФУА-ГРА"],
+          item5: ["TEQUILA", "TEKILA", "ТЕКИЛА"],
+        };
+
+        let isCorrect = true;
+
+        for (let i = 1; i <= 5; i++) {
+          const input = document.getElementById(`item${i}`);
+          const val = input.value.trim().toUpperCase();
+          const valid = answers[`item${i}`].some((ans) => val.includes(ans));
+
+          if (!valid) {
+            input.style.borderColor = "red";
+            input.style.backgroundColor = "#fff0f0";
+            isCorrect = false;
+          } else {
+            input.style.borderColor = "green";
+            input.style.backgroundColor = "#f0fff0";
+          }
+        }
+
+        if (isCorrect) {
+          document.getElementById("modal").style.display = "flex";
+        }
+      }
+    </script>
+  </body>
+</html>

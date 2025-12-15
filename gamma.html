@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Protocol: ZERO - Corporate Compatibility Test</title>
+    <style>
+      :root {
+        --term-green: #33ff00;
+        --term-glow: #33ff00;
+        --term-bg: #051005;
+        --err-red: #ff3333;
+        --xmas-gold: #ffff33;
+      }
+
+      body {
+        background-color: #000;
+        color: var(--term-green);
+        font-family: "Courier New", Courier, monospace;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-shadow: 0 0 5px var(--term-glow);
+      }
+
+      /* Эффект старого монитора */
+      #monitor {
+        width: 95%;
+        height: 90%;
+        background-color: var(--term-bg);
+        border: 4px solid #333;
+        border-radius: 10px;
+        position: relative;
+        box-shadow: 0 0 20px rgba(51, 255, 0, 0.2);
+        overflow: hidden;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      /* Скан-линии */
+      #monitor::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.25) 50%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.06),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.06)
+          );
+        z-index: 2;
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+      }
+
+      /* Мерцание */
+      #monitor::after {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: rgba(18, 16, 16, 0.1);
+        opacity: 0;
+        z-index: 2;
+        pointer-events: none;
+        animation: flicker 0.15s infinite;
+      }
+
+      /* Падающий снег (символы) */
+      .snow-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.3;
+      }
+      .snowflake {
+        position: absolute;
+        color: white;
+        animation: fall linear infinite;
+      }
+
+      /* Контент терминала */
+      #terminal {
+        position: relative;
+        z-index: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        scrollbar-width: none; /* Firefox */
+      }
+      #terminal::-webkit-scrollbar {
+        display: none;
+      } /* Chrome */
+
+      .output-line {
+        margin-bottom: 10px;
+        line-height: 1.4;
+        white-space: pre-wrap;
+      }
+
+      .system-msg {
+        color: var(--xmas-gold);
+        font-weight: bold;
+      }
+      .error-msg {
+        color: var(--err-red);
+      }
+      .input-area {
+        display: flex;
+        margin-top: 10px;
+        padding-bottom: 20px;
+      }
+      .prompt {
+        margin-right: 10px;
+      }
+
+      input[type="text"] {
+        background: transparent;
+        border: none;
+        color: var(--term-green);
+        font-family: "Courier New", Courier, monospace;
+        font-size: 16px;
+        flex-grow: 1;
+        outline: none;
+        text-transform: uppercase;
+        text-shadow: 0 0 5px var(--term-glow);
+      }
+
+      /* Анимации */
+      @keyframes flicker {
+        0% {
+          opacity: 0.02;
+        }
+        50% {
+          opacity: 0.05;
+        }
+        100% {
+          opacity: 0.02;
+        }
+      }
+
+      @keyframes fall {
+        to {
+          transform: translateY(100vh);
+        }
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .ascii-art {
+        font-size: 10px;
+        line-height: 10px;
+        color: var(--err-red);
+        margin-bottom: 20px;
+      }
+
+      .progress-bar {
+        border: 1px solid var(--term-green);
+        width: 300px;
+        height: 15px;
+        margin-top: 5px;
+        display: flex;
+      }
+      .progress-fill {
+        background-color: var(--term-green);
+        height: 100%;
+        width: 0%;
+        transition: width 0.5s;
+      }
+
+      /* Стиль для курсора */
+      .cursor {
+        display: inline-block;
+        width: 10px;
+        height: 1em;
+        background-color: var(--term-green);
+        animation: blink 1s step-end infinite;
+        vertical-align: bottom;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="monitor">
+      <div class="snow-container" id="snow"></div>
+      <div id="terminal" onclick="focusInput()">
+        <div class="output-line ascii-art"></div>
+        <div id="log"></div>
+        <div class="input-area" id="input-container">
+          <span class="prompt">guest@BlueScreenInc:~$</span>
+          <input type="text" id="command-input" autocomplete="off" autofocus />
+          <span class="cursor"></span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- КОНФИГУРАЦИЯ ЗАГАДОК ---
+      const riddles = [
+        {
+          q: "ЗАГРУЗКА ВОПРОСА 1...\n\n«Я — истинный Senior Developer в этой компании. Меня спрашивают чаще, чем техлида. Я знаю ответы на все вопросы, от 'как центрировать div' до 'симптом похмелья'. Если интерн не знает, что делать, он идёт ко мне. Кто я?»\n(6 букв, English)",
+          a: ["GOOGLE", "ГУГЛ"],
+          char: "G",
+        },
+        {
+          q: "СИСТЕМА ПРИНЯТА. ЗАГРУЗКА ВОПРОСА 2...\n\n«Все клянутся, что работают по этой методологии. Мы клеим стикеры, стоим по утрам в кругу и называем это 'стендапом', хотя всем хочется лечь. Мы обещаем быть гибкими, но дедлайны ломают нам хребет. Как называется эта религия разработки?»\n(5 букв, English)",
+          a: ["AGILE", "ЭДЖАЙЛ", "АГИЛЕ"],
+          char: "A",
+        },
+        {
+          q: "СИСТЕМА ПРИНЯТА. ЗАГРУЗКА ВОПРОСА 3...\n\n«Я — черная дыра рабочего времени. Я могу длиться час, но если бы это был email, мы бы справились за минуту. На мне принято кивать, рисовать каракули в блокноте и мечтать об увольнении.»\n(7 букв, English)",
+          a: ["MEETING", "MITING", "МИТИНГ", "ДЭЙЛИ", "DAILY"],
+          char: "M",
+        },
+        {
+          q: "СИСТЕМА ПРИНЯТА. ЗАГРУЗКА ВОПРОСА 4...\n\n«Я — самый страшный день. День, когда календарь кричит 'Начинай сначала!', а организм шепчет 'Убей меня'. В этот день коммиты самые кривые, а лица самые кислые.»\n(6 букв, English)",
+          a: ["MONDAY", "ПОНЕДЕЛЬНИК"],
+          char: "M",
+        },
+        {
+          q: "СИСТЕМА ПРИНЯТА. ЗАГРУЗКА ВОПРОСА 5...\n\n«У меня есть власть удалить твой аккаунт. У меня есть доступ к твоей переписке. Я тот, кто просит тебя 'попробовать выключить и включить снова'. Я — бог этой локальной сети, хотя мой пароль обычно '123456'.»\n(5 букв, English)",
+          a: [
+            "ADMIN",
+            "SYSADMIN",
+            "АДМИН",
+            "СИСАДМИН",
+            "АДМИНИСТРАТОР",
+            "СИСТЕМНЫЙ АДМИНИСТРАТОР",
+          ],
+          char: "A",
+        },
+        {
+          q: "ВНИМАНИЕ. СБОРКА СЛОВА ЗАВЕРШЕНА: [G-A-M-M-A]\n\nКРИТИЧЕСКАЯ ОШИБКА ЯДРА.\n«Я — число, которое видит разработчик, когда всё падает. Я — внутренняя ошибка сервера. Если бы я был деньгами, я был бы купюрой с Петром I, но в мире HTTP я означаю, что 'Янус' устал и прилег отдохнуть.»\nВведите число:",
+          a: ["500"],
+          char: "-500", // Тире добавим для красоты
+        },
+      ];
+
+      let currentStep = 0;
+      let collectedCode = "";
+      let isTyping = false;
+
+      const log = document.getElementById("log");
+      const input = document.getElementById("command-input");
+      const inputContainer = document.getElementById("input-container");
+
+      // --- ЭФФЕКТ СНЕГА ---
+      function createSnow() {
+        const snowContainer = document.getElementById("snow");
+        const characters = ["0", "1", "*", ".", "+"];
+        const count = 30;
+
+        for (let i = 0; i < count; i++) {
+          const flake = document.createElement("div");
+          flake.className = "snowflake";
+          flake.innerText =
+            characters[Math.floor(Math.random() * characters.length)];
+          flake.style.left = Math.random() * 100 + "%";
+          flake.style.animationDuration = Math.random() * 5 + 3 + "s";
+          flake.style.opacity = Math.random();
+          flake.style.fontSize = Math.random() * 20 + 10 + "px";
+          flake.style.animationDelay = Math.random() * 5 + "s";
+          snowContainer.appendChild(flake);
+        }
+      }
+
+      // --- ТЕРМИНАЛЬНЫЙ ВЫВОД ---
+      function printLine(text, className = "", speed = 20) {
+        return new Promise((resolve) => {
+          const line = document.createElement("div");
+          line.className = "output-line " + className;
+          log.appendChild(line);
+
+          // Прокрутка вниз
+          const terminal = document.getElementById("terminal");
+          terminal.scrollTop = terminal.scrollHeight;
+
+          let i = 0;
+          isTyping = true;
+          input.disabled = true;
+
+          function typeChar() {
+            if (i < text.length) {
+              line.textContent += text.charAt(i);
+              i++;
+              terminal.scrollTop = terminal.scrollHeight;
+              setTimeout(typeChar, speed);
+            } else {
+              isTyping = false;
+              input.disabled = false;
+              input.focus();
+              resolve();
+            }
+          }
+          typeChar();
+        });
+      }
+
+      // --- ЛОГИКА ИГРЫ ---
+      async function initGame() {
+        createSnow();
+        await printLine("JANUS AI v20.25 (c) Blue Screen Inc.", "system-msg");
+        await printLine("INITIALIZING CORPORATE HUMOR MODULE... [OK]");
+        await printLine("CHECKING EMPLOYEES LOYALTY... [FAIL]");
+        await printLine(
+          "WARNING: Legacy Personnel Detected. Verification Required.",
+          "error-msg"
+        );
+        await printLine("---------------------------------------------------");
+        await startLevel();
+      }
+
+      async function startLevel() {
+        if (currentStep < riddles.length) {
+          await printLine(riddles[currentStep].q);
+        } else {
+          finishGame();
+        }
+      }
+
+      async function handleInput(val) {
+        const userVal = val.trim().toUpperCase();
+
+        // Отобразить то, что ввел юзер
+        const echo = document.createElement("div");
+        echo.className = "output-line";
+        echo.style.opacity = "0.7";
+        echo.textContent = `> ${userVal}`;
+        log.appendChild(echo);
+
+        input.value = "";
+
+        if (currentStep >= riddles.length) return;
+
+        const currentRiddle = riddles[currentStep];
+
+        // Простая проверка (включает варианты ответов)
+        if (currentRiddle.a.includes(userVal)) {
+          // ПРАВИЛЬНО
+          collectedCode += currentRiddle.char;
+          currentStep++;
+
+          await printLine(
+            `>> CORRECT. DECRYPTED SEGMENT: [ ${currentRiddle.char} ]`,
+            "system-msg"
+          );
+          await printLine(`>> CURRENT BUFFER: ${collectedCode}`, "system-msg");
+          await printLine(
+            "---------------------------------------------------"
+          );
+
+          if (currentStep < riddles.length) {
+            setTimeout(startLevel, 500);
+          } else {
+            finishGame();
+          }
+        } else {
+          // НЕПРАВИЛЬНО
+          const errors = [
+            "ERROR: Corporate Bullshit not detected. Try again.",
+            "ACCESS DENIED: You are thinking like a human, stop it.",
+            "SYNTAX ERROR: Does not compute with company policy.",
+            "FAIL: HR has been notified of your incompetence.",
+          ];
+          const randomErr = errors[Math.floor(Math.random() * errors.length)];
+          await printLine(randomErr, "error-msg");
+        }
+      }
+
+      async function finishGame() {
+        inputContainer.style.display = "none";
+        await printLine("\nPROCESSING FINAL HASH...", "system-msg");
+        await new Promise((r) => setTimeout(r, 1500));
+
+        const finalCode = "GAMMA-500";
+
+        log.innerHTML = ""; // Очистить экран для драматизма
+
+        const winDiv = document.createElement("div");
+        winDiv.style.textAlign = "center";
+        winDiv.style.marginTop = "20%";
+        winDiv.innerHTML = `
+                <h1 style="color:white; font-size:40px;">ACCESS GRANTED</h1>
+                <p>PROTOCOL RESTORED</p>
+                <br>
+                <div style="border: 2px dashed var(--term-green); padding: 20px; display:inline-block;">
+                    <span style="font-size: 32px; color: var(--xmas-gold); letter-spacing: 5px;">${finalCode}</span>
+                </div>
+                <br><br>
+                <p style="color: var(--err-red)">DO NOT TELL THE HR.</p>
+            `;
+        log.appendChild(winDiv);
+      }
+
+      // --- СОБЫТИЯ ---
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !isTyping) {
+          if (input.value.trim() !== "") {
+            handleInput(input.value);
+          }
+        }
+      });
+
+      function focusInput() {
+        if (!isTyping) input.focus();
+      }
+
+      // Запуск
+      window.onload = initGame;
+    </script>
+  </body>
+</html>

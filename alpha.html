@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Legacy Protocol Alert</title>
+    <style>
+      body {
+        background-color: #0d0d0d;
+        color: #33ff33; /* Терминальный зеленый */
+        font-family: "Courier New", Courier, monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+        overflow-x: hidden;
+      }
+
+      .terminal {
+        max-width: 600px;
+        width: 100%;
+        border: 2px solid #33ff33;
+        padding: 20px;
+        position: relative;
+        box-shadow: 0 0 15px rgba(51, 255, 51, 0.2);
+      }
+
+      /* Эффект мерцания экрана */
+      .terminal::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.25) 50%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.06),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.06)
+          );
+        z-index: 2;
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+      }
+
+      h1 {
+        font-size: 1.5em;
+        text-transform: uppercase;
+        border-bottom: 1px dashed #33ff33;
+        padding-bottom: 10px;
+        margin-top: 0;
+        text-shadow: 2px 2px #003300;
+      }
+
+      .alert-box {
+        background-color: #1a0000;
+        color: #ff3333;
+        border: 1px solid #ff3333;
+        padding: 10px;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      .riddle-section {
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .variable-block {
+        margin-bottom: 15px;
+        padding-left: 15px;
+        border-left: 2px solid #33ff33;
+      }
+
+      .label {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        background: #000;
+        border: 1px solid #33ff33;
+        color: #33ff33;
+        padding: 15px;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1.2em;
+        margin-bottom: 15px;
+        box-sizing: border-box;
+        outline: none;
+      }
+
+      input[type="text"]:focus {
+        box-shadow: 0 0 10px #33ff33;
+      }
+
+      button {
+        background: #33ff33;
+        color: #000;
+        border: none;
+        padding: 15px 30px;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1.2em;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        text-transform: uppercase;
+      }
+
+      button:hover {
+        background: #22cc22;
+      }
+
+      #result {
+        margin-top: 20px;
+        font-size: 1.2em;
+        font-weight: bold;
+        white-space: pre-wrap;
+      }
+
+      .success {
+        color: #33ff33;
+        border: 1px solid #33ff33;
+        padding: 10px;
+      }
+
+      .error {
+        color: #ff3333;
+        border: 1px solid #ff3333;
+        padding: 10px;
+      }
+
+      /* Анимация курсора */
+      .cursor {
+        display: inline-block;
+        width: 10px;
+        height: 1em;
+        background-color: #33ff33;
+        animation: blink 1s step-end infinite;
+        vertical-align: bottom;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="terminal">
+      <div class="alert-box">⚠ SYSTEM ALERT: LEGACY PROTOCOL DETECTED</div>
+
+      <p>
+        Чтобы восстановить целостность данных (и получить код ядра), решите
+        уравнение старого мира.
+      </p>
+      <p>Формула сборки: <strong>X-Y</strong></p>
+
+      <hr style="border: 0; border-top: 1px dashed #33ff33; margin: 20px 0" />
+
+      <div class="riddle-section">
+        <div class="variable-block">
+          <div class="label">ПЕРЕМЕННАЯ X:</div>
+          <p>
+            Я — первая буква в начале начал,<br />
+            Где код еще сыр, а ПМ'щик кричал.<br />
+          </p>
+          <small>*(Введи это слово латиницей)*</small>
+        </div>
+
+        <div class="variable-block">
+          <div class="label">ПЕРЕМЕННАЯ Y:</div>
+          <p>1. Возьмите год текущий наш.</p>
+          <p>2. И вычти год, в который мы боимся упасть.</p>
+          <p>3. Умножь результат на количество секунд в минуте.</p>
+        </div>
+      </div>
+
+      <input
+        type="text"
+        id="answerInput"
+        placeholder="ВВЕДИТЕ РЕЗУЛЬТАТ (X-Y)"
+        autocomplete="off"
+      />
+      <button onclick="checkAnswer()">ИНИЦИАЛИЗАЦИЯ</button>
+
+      <div id="result"></div>
+    </div>
+
+    <script>
+      function checkAnswer() {
+        const input = document.getElementById("answerInput");
+        const resultDiv = document.getElementById("result");
+        // Убираем пробелы и переводим в верхний регистр
+        const answer = input.value.trim().toUpperCase().replace(/\s/g, "");
+
+        // Очищаем предыдущий результат
+        resultDiv.className = "";
+        resultDiv.innerHTML = "";
+
+        // Проверка (допускаем ввод с тире или без, но в загадке просим формулу X-Y)
+        if (answer === "ALPHA-300" || answer === "ALPHA300") {
+          resultDiv.className = "success";
+          resultDiv.innerHTML = `
+                    > ACCESS GRANTED<br>
+                    > CODE IDENTIFIED: <strong>ALPHA-300</strong><br>
+                    > STATUS: UNSTABLE (OLD CORE)<br>
+                    > ВНИМАНИЕ: Используйте этот код в Главном Терминале с осторожностью.
+                `;
+        } else {
+          resultDiv.className = "error";
+          resultDiv.innerHTML = `
+                    > ACCESS DENIED<br>
+                    > ERROR: CHECKSUM MISMATCH<br>
+                    > TRY AGAIN...<span class="cursor"></span>
+                `;
+
+          // Эффект тряски поля ввода при ошибке
+          input.style.animation = "shake 0.5s";
+          setTimeout(() => {
+            input.style.animation = "none";
+          }, 500);
+        }
+      }
+
+      // Добавляем стили для тряски через JS (проще чем в CSS плодить)
+      const styleSheet = document.createElement("style");
+      styleSheet.innerText = `
+            @keyframes shake {
+                0% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                50% { transform: translateX(5px); }
+                75% { transform: translateX(-5px); }
+                100% { transform: translateX(0); }
+            }
+        `;
+      document.head.appendChild(styleSheet);
+    </script>
+  </body>
+</html>

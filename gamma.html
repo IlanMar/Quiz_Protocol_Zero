@@ -19,18 +19,22 @@
         font-family: "Courier New", Courier, monospace;
         margin: 0;
         padding: 0;
-        height: 100vh;
-        overflow: hidden;
+        min-height: 100vh;
+        overflow-y: auto;
         display: flex;
         justify-content: center;
         align-items: center;
         text-shadow: 0 0 5px var(--term-glow);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
 
       /* Эффект старого монитора */
       #monitor {
         width: 95%;
-        height: 90%;
+        max-width: 900px;
+        height: auto;
+        max-height: 90vh;
         background-color: var(--term-bg);
         border: 4px solid #333;
         border-radius: 10px;
@@ -144,6 +148,7 @@
         outline: none;
         text-transform: uppercase;
         text-shadow: 0 0 5px var(--term-glow);
+        min-width: 0;
       }
 
       /* Анимации */
@@ -161,7 +166,7 @@
 
       @keyframes fall {
         to {
-          transform: translateY(100vh);
+          transform: translateY(120vh);
         }
       }
 
@@ -178,7 +183,8 @@
 
       .progress-bar {
         border: 1px solid var(--term-green);
-        width: 300px;
+        width: 100%;
+        max-width: 300px;
         height: 15px;
         margin-top: 5px;
         display: flex;
@@ -193,11 +199,50 @@
       /* Стиль для курсора */
       .cursor {
         display: inline-block;
-        width: 10px;
+        width: 8px;
         height: 1em;
         background-color: var(--term-green);
         animation: blink 1s step-end infinite;
         vertical-align: bottom;
+      }
+
+      /* Responsive tweaks for small screens */
+      @media (max-width: 600px) {
+        body {
+          align-items: flex-start;
+          padding-top: 18px;
+        }
+        #monitor {
+          width: 98%;
+          padding: 14px;
+          border-radius: 6px;
+          max-height: calc(100vh - 40px);
+        }
+        #terminal {
+          height: auto;
+          max-height: calc(100vh - 120px);
+        }
+        .ascii-art {
+          font-size: 9px;
+          line-height: 9px;
+        }
+        .input-area {
+          margin-top: 10px;
+          padding-bottom: 26px;
+          gap: 8px;
+        }
+        .prompt {
+          display: none;
+        }
+        input[type="text"] {
+          font-size: 15px;
+        }
+        .snowflake {
+          opacity: 0.6;
+        }
+        .progress-bar {
+          max-width: 100%;
+        }
       }
       @keyframes blink {
         50% {
@@ -256,9 +301,9 @@
           char: "A",
         },
         {
-          q: "SYSTEM ALERT: Legacy Protocol Detected Чтобы восстановить целостность данных, решите уравнение старого мира.\n\nПеременная X: Я — первая буква в начале начал, Где код еще сыр, а продюсер кричал. Я версия теста, где багов не счесть, И статус самца, у которого... (честь? нет, власть). (Введи это слово латиницей)\n\nПеременная Y: Возьми год, в котором мы застряли (2025). Вычти год, в который мы боимся упасть, где маски и гречка (2020). Умножь результат на количество секунд в минуте.\n\nФормула сборки: X-Y",
-          a: ["ALPHA-300", "ALPHA300"],
-          char: "-300",
+          q: "ВНИМАНИЕ. СБОРКА СЛОВА ЗАВЕРШЕНА: [G-A-M-M-A]\n\nКРИТИЧЕСКАЯ ОШИБКА ЯДРА.\n«Я — число, которое видит разработчик, когда всё падает. Я — внутренняя ошибка сервера. Если бы я был деньгами, я был бы купюрой с Петром I, но в мире HTTP я означаю, что 'Янус' устал и прилег отдохнуть.»\nВведите число:",
+          a: ["500"],
+          char: "-500",
         },
       ];
 
@@ -338,6 +383,9 @@
 
       async function startLevel() {
         if (currentStep < riddles.length) {
+          if (currentStep > 0) {
+            log.innerHTML = "";
+          }
           await printLine(riddles[currentStep].q);
         } else {
           finishGame();
@@ -376,7 +424,7 @@
           );
 
           if (currentStep < riddles.length) {
-            setTimeout(startLevel, 500);
+            setTimeout(startLevel, 2000);
           } else {
             finishGame();
           }
@@ -419,8 +467,88 @@
       }
 
       // --- СОБЫТИЯ ---
+      // --- ЗВУКОВАЯ ОБРАТНАЯ СВЯЗЬ ПРИ ВВОДЕ ---
+      // Использует WebAudio для краткого клика при вводе символа
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioCtx();
+
+      function playClick() {
+        try {
+          if (audioCtx.state === "suspended") audioCtx.resume();
+        } catch (e) {}
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "square";
+        osc.frequency.value = 800; // частота в Гц
+        gain.gain.value = 0.02;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        // Быстрый спад громкости для короткого клика
+        gain.gain.setValueAtTime(0.02, now);
+        gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.06);
+        osc.start(now);
+        osc.stop(now + 0.07);
+      }
+
+      // Отдельный звук для нажатия Enter
+      function playEnter() {
+        try {
+          if (audioCtx.state === "suspended") audioCtx.resume();
+        } catch (e) {}
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = 420; // более низкий тон для Enter
+        gain.gain.value = 0.045;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        gain.gain.setValueAtTime(0.045, now);
+        gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.14);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+
+      // Воспроизводить звук для всех input/textarea/contenteditable при вводе
+      document.addEventListener(
+        "input",
+        (e) => {
+          const t = e.target;
+          if (!t) return;
+          const tag = t.tagName;
+          if (tag === "INPUT" || tag === "TEXTAREA" || t.isContentEditable) {
+            playClick();
+          }
+        },
+        true
+      );
+
+      // На случай, если input не сработал — ловим нажатия клавиш
+      document.addEventListener(
+        "keydown",
+        (e) => {
+          const active = document.activeElement;
+          if (!active) return;
+          const tag = active.tagName;
+          if (
+            tag === "INPUT" ||
+            tag === "TEXTAREA" ||
+            active.isContentEditable
+          ) {
+            // Enter — отдельный звук, прочие печатаемые — клик
+            if (e.key === "Enter") {
+              playEnter();
+            } else if (e.key && e.key.length === 1) playClick();
+          }
+        },
+        true
+      );
+
       input.addEventListener("keydown", function (e) {
         if (e.key === "Enter" && !isTyping) {
+          // Звук отправки при нажатии Enter
+          playEnter();
           if (input.value.trim() !== "") {
             handleInput(input.value);
           }

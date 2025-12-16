@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UPLINK: SECURE CHANNEL</title>
     <style>
+      /* Make sizing predictable */
+      * {
+        box-sizing: border-box;
+      }
       body {
         background-color: #0f0f0f; /* Почти черный */
         color: #ff3333; /* Красный шпионский */
@@ -146,6 +150,57 @@
         text-shadow: 0 0 10px red;
         margin: 10px 0;
       }
+
+      /* Responsive adjustments for small screens (smartphones) */
+      @media (max-width: 480px) {
+        body {
+          padding: 12px;
+        }
+
+        .terminal {
+          padding: 16px;
+          max-width: 100%;
+          box-shadow: none;
+          border-width: 1px;
+        }
+
+        h1 {
+          font-size: 1.1em;
+          letter-spacing: 1.5px;
+        }
+
+        .status-line {
+          font-size: 0.75em;
+          margin-bottom: 16px;
+        }
+
+        p {
+          font-size: 1em;
+        }
+
+        .riddle-text {
+          font-size: 0.95em;
+        }
+
+        input[type="text"] {
+          padding: 12px;
+          font-size: 1em;
+        }
+
+        button {
+          padding: 12px;
+          font-size: 1em;
+        }
+
+        .code-display {
+          font-size: 2em;
+        }
+
+        /* Remove heavy scan-line effect on small screens for performance */
+        .terminal::after {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -157,7 +212,10 @@
       </div>
 
       <div id="login-screen" class="content">
-        <p>Введите код инициализации протокола утечки данных:</p>
+        <p>
+          Введите код инициализации протокола утечки данных (личный код ведущего
+          разработчика):
+        </p>
         <input
           type="text"
           id="login-input"

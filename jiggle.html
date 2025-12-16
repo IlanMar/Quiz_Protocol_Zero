@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shadow Ledger v.0.0.1</title>
+    <style>
+      body {
+        background-color: #0d2b1d; /* Темно-зеленый (цвет денег в тени) */
+        color: #5cdb95; /* Светло-зеленый терминальный */
+        font-family: "Courier New", Courier, monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 600px;
+        background-color: #05160e;
+        border: 2px solid #5cdb95;
+        padding: 30px;
+        box-shadow: 0 0 20px rgba(92, 219, 149, 0.2);
+        position: relative;
+      }
+
+      h1 {
+        text-align: center;
+        border-bottom: 1px dashed #5cdb95;
+        padding-bottom: 15px;
+        margin-top: 0;
+        text-transform: uppercase;
+        font-size: 1.4em;
+      }
+
+      .status {
+        font-size: 0.8em;
+        margin-bottom: 20px;
+        text-align: right;
+        opacity: 0.7;
+      }
+
+      .content-box {
+        margin-top: 30px;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      p {
+        line-height: 1.6;
+        font-size: 1.1em;
+      }
+
+      input[type="text"] {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #5cdb95;
+        color: #fff;
+        font-family: inherit;
+        font-size: 1.2em;
+        width: 100%;
+        padding: 10px;
+        margin-top: 20px;
+        outline: none;
+        text-transform: uppercase;
+      }
+
+      button {
+        background-color: #5cdb95;
+        color: #05160e;
+        border: none;
+        padding: 15px;
+        width: 100%;
+        margin-top: 20px;
+        font-weight: bold;
+        font-size: 1.1em;
+        cursor: pointer;
+        font-family: inherit;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        background-color: #379683;
+        color: #fff;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .error-msg {
+        color: #ff6b6b;
+        margin-top: 10px;
+        display: none;
+        font-weight: bold;
+      }
+
+      /* Анимация для финального кода */
+      .jiggle-text {
+        font-size: 2.5em;
+        text-align: center;
+        margin: 20px 0;
+        color: #edf5e1;
+        animation: jiggle 0.5s infinite;
+        border: 2px dashed #edf5e1;
+        padding: 10px;
+      }
+
+      @keyframes jiggle {
+        0% {
+          transform: rotate(0deg);
+        }
+        25% {
+          transform: rotate(2deg);
+        }
+        50% {
+          transform: rotate(0deg);
+        }
+        75% {
+          transform: rotate(-2deg);
+        }
+        100% {
+          transform: rotate(0deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>$$$ PRIVATE ASSETS $$$</h1>
+      <div class="status">ENCRYPTION: AES-256 | TAX_LEVEL: 0%</div>
+
+      <div id="stage-1" class="content-box">
+        <p><strong>[СИСТЕМА ЗАЩИТЫ БОНУСОВ]</strong></p>
+        <p>Доступ к скрытым счетам заблокирован.</p>
+        <p>
+          Введите кодовое слово-дешифратор (Подсказка: Дерево из 4 предлогов):
+        </p>
+
+        <input
+          type="text"
+          id="input-key"
+          placeholder="ВВЕДИТЕ КЛЮЧ..."
+          autocomplete="off"
+        />
+        <button onclick="checkKey()">РАЗБЛОКИРОВАТЬ</button>
+        <p class="error-msg" id="error-key">
+          НЕВЕРНЫЙ КЛЮЧ. НАЛОГОВАЯ УЖЕ ВЫЕХАЛА.
+        </p>
+      </div>
+
+      <div id="stage-2" class="content-box hidden">
+        <p><strong>[ПРОВЕРКА ФИНАНСОВОЙ ГРАМОТНОСТИ]</strong></p>
+        <p>Чтобы увидеть код счета, решите загадку:</p>
+        <p
+          style="
+            font-style: italic;
+            color: #8ee4af;
+            border-left: 3px solid #8ee4af;
+            padding-left: 15px;
+          "
+        >
+          "Я — волшебный остров (или страна), где деньги не задают лишних
+          вопросов.<br />
+          Здесь бонусы превращаются в яхты, а налоги превращаются в пыль.<br />
+          Я — лучшее место для отпуска твоего капитала.<br />
+          Кто я?"
+        </p>
+
+        <input
+          type="text"
+          id="input-riddle"
+          placeholder="ОТВЕТ..."
+          autocomplete="off"
+        />
+        <button onclick="checkRiddle()">ПОДТВЕРДИТЬ ТРАНЗАКЦИЮ</button>
+        <p class="error-msg" id="error-riddle">
+          ОТКАЗАНО. ВЫ МЫСЛИТЕ СЛИШКОМ "БЕЛО".
+        </p>
+      </div>
+
+      <div id="stage-3" class="content-box hidden">
+        <p style="text-align: center"><strong>ДОСТУП РАЗРЕШЕН</strong></p>
+        <p style="text-align: center">Налоговая беспомощьно разводит руками</p>
+        <p style="text-align: center">Ваш секретный код доступа к счетам:</p>
+
+        <div class="jiggle-text">jigglejiggle</div>
+
+        <p style="text-align: center; font-size: 0.8em; opacity: 0.7">
+          (Мои деньги не складываются,<br />они звенят - jiggle jiggle)
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // Функция очистки (убираем пробелы, верхний регистр)
+      function clean(val) {
+        return val.trim().toUpperCase().replace(/\s/g, "");
+      }
+
+      // Этап 1: Проверка СОСНА
+      function checkKey() {
+        const val = clean(document.getElementById("input-key").value);
+
+        if (val === "СОСНА") {
+          document.getElementById("stage-1").classList.add("hidden");
+          document.getElementById("stage-2").classList.remove("hidden");
+        } else {
+          showError("error-key");
+        }
+      }
+
+      // Этап 2: Проверка загадки (ОФШОР)
+      function checkRiddle() {
+        const val = clean(document.getElementById("input-riddle").value);
+        const answers = [
+          "ОФШОР",
+          "ОФФШОР",
+          "OFFSHORE",
+          "КИПР",
+          "CYPRUS",
+          "CAYMAN",
+          "КАЙМАН",
+        ];
+
+        if (answers.includes(val)) {
+          document.getElementById("stage-2").classList.add("hidden");
+          document.getElementById("stage-3").classList.remove("hidden");
+        } else {
+          showError("error-riddle");
+        }
+      }
+
+      // Показ ошибки с анимацией
+      function showError(id) {
+        const el = document.getElementById(id);
+        el.style.display = "block";
+
+        // Тряска контейнера
+        const con = document.querySelector(".container");
+        con.style.transform = "translateX(5px)";
+        setTimeout(() => {
+          con.style.transform = "translateX(-5px)";
+        }, 50);
+        setTimeout(() => {
+          con.style.transform = "translateX(5px)";
+        }, 100);
+        setTimeout(() => {
+          con.style.transform = "translateX(0)";
+        }, 150);
+      }
+
+      // Enter key support
+      document
+        .getElementById("input-key")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkKey();
+        });
+      document
+        .getElementById("input-riddle")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkRiddle();
+        });
+    </script>
+  </body>
+</html>

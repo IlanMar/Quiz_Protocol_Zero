@@ -163,6 +163,14 @@
         <div class="subtext" id="subtext">
           просмотрев логи камеры вы не заметили ничего подозрительного
         </div>
+        <a
+          id="nextLink"
+          href="https://ilanmar.github.io/Quiz_Protocol_Zero/zeta.html"
+          target="_blank"
+          rel="noopener"
+          style="display: none; margin-top: 12px; color: #90caf9"
+          >Перейти к следующей загадке</a
+        >
       </div>
     </div>
 
@@ -184,11 +192,13 @@
       const floppy = document.getElementById("floppyIcon");
       const cam = document.getElementById("camImage");
       const sub = document.getElementById("subtext");
+      const next = document.getElementById("nextLink");
 
       function showImage() {
         floppy.style.display = "none";
         cam.style.display = "block";
         sub.style.display = "block";
+        if (next) next.style.display = "inline-block";
       }
 
       function invalid() {

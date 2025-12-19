@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Protocol: ZERO - Карточки Ролей</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+      }
+
+      .card {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 300px; /* A4 width is roughly 210mm. 300px is good for screen, for print we adjust */
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .role-title {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+      }
+
+      .section-title {
+        font-weight: bold;
+        margin-top: 10px;
+        color: #e74c3c;
+        text-transform: uppercase;
+        font-size: 0.9em;
+      }
+
+      .content {
+        font-size: 0.95em;
+        margin-bottom: 5px;
+        line-height: 1.4;
+      }
+
+      .inventory-list {
+        margin: 5px 0;
+        padding-left: 20px;
+        font-size: 0.9em;
+      }
+
+      .qr-container {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .qr-item {
+        text-align: center;
+      }
+
+      .qr-item img {
+        width: 120px;
+        height: 120px;
+        border: 1px solid #ddd;
+      }
+
+      .qr-label {
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+        }
+        .cards-container {
+          display: block;
+        }
+        .card {
+          width: 100%;
+          max-width: 100%;
+          border: 1px solid #000;
+          box-shadow: none;
+          page-break-inside: avoid;
+          margin-bottom: 20px;
+        }
+        .qr-container {
+          flex-direction: row;
+          justify-content: space-around;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cards-container">
+      <!-- 1. CEO -->
+      <div class="card">
+        <div class="role-title">Генеральный Директор (CEO)</div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">Попасть в 2026. Остаться CEO. Скрыть хищения.</div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">
+          Прикарманил бюджет разработки. Если это всплывет — конец.
+        </div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Личный код: <b>BIGBOSS</b></li>
+          <li>Знает про команду <code>delete fin_log</code></li>
+          <li>QR-код на game.html (Код ядра BETA-600)</li>
+          <li>QR-код на загадку (Админ-пароль)</li>
+        </ul>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_CEO_admin_code.jpg" alt="QR Admin Code" />
+            <div class="qr-label">Загадка Админа</div>
+          </div>
+          <!-- game.html QR missing in workspace -->
+        </div>
+      </div>
+
+      <!-- 2. CTO -->
+      <div class="card">
+        <div class="role-title">Технический Директор (CTO)</div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">Попасть в 2026. Сместить CEO.</div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">Хочет подставить CEO и занять его место.</div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Личный код: <b>CTOISANEWBOSS</b></li>
+          <li>Знает про уязвимость в папке CEO</li>
+          <li>QR-код на скачивание ИИ</li>
+          <li>QR-код на Код ядра OMICRON-626</li>
+        </ul>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_AI_Copy.jpg" alt="QR AI Copy" />
+            <div class="qr-label">Скачивание ИИ</div>
+          </div>
+          <div class="qr-item">
+            <img src="CTO_code_QR.jpg" alt="QR CTO Code" />
+            <div class="qr-label">Код Ядра</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Security -->
+      <div class="card">
+        <div class="role-title">Начальник СБ</div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">Попасть в 2026. Скачать ИИ для конкурентов.</div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">Промышленный шпион.</div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Личный спец-ключ: <b>SJFHK</b></li>
+          <li>Знает, что видеоархив за нужную дату пропал.</li>
+        </ul>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_security.jpg" alt="QR Security" />
+            <div class="qr-label">Терминал СБ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Developer -->
+      <div class="card">
+        <div class="role-title">Ведущий Разработчик</div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">Попасть в 2026. Скрыть майнинг.</div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">
+          Майнил биткоин на серверах. Спрятал флешку с бэкапом ИИ.
+        </div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Личный код: <b>FOMO</b></li>
+          <li>Флешка (QR): при вводе FOMO дает пароль AICOPY</li>
+          <li>Флешка с видеоархивом (QR)</li>
+        </ul>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_who-is-a-miner.jpg" alt="QR Miner" />
+            <div class="qr-label">Флешка (Майнинг)</div>
+          </div>
+          <div class="qr-item">
+            <img src="cam_log_QR.jpg" alt="QR Cam Log" />
+            <div class="qr-label">Видеоархив</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. CFO -->
+      <div class="card">
+        <div class="role-title">Финансовый Директор (CFO)</div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">Попасть в 2025. Перевести бонусы себе.</div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">
+          Роман с Журналистом, слив инфы. Хищение денег.
+        </div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Личный код: <b>ALLP</b></li>
+          <li>QR-код на Код ядра ALPHA-300 (Плохой!)</li>
+          <li>QR-код загадки (выдает jiggle jiggle)</li>
+        </ul>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_jiggle.jpg" alt="QR Jiggle" />
+            <div class="qr-label">Загадка</div>
+          </div>
+          <!-- alpha.html QR missing -->
+        </div>
+      </div>
+
+      <!-- 6. HR -->
+      <div class="card">
+        <div class="role-title">Глава HR</div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">Попасть в 2026. Собрать компромат и акции.</div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">Шантажист, серый кардинал.</div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Личный код: <b>WeAreAFamily</b></li>
+          <li>Терминал HR (QR): база слухов</li>
+          <li>Бланки найма и сбора акций (QR)</li>
+          <li>Компромат на CEO (QR)</li>
+        </ul>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_HR_take_your_stocks.jpg" alt="QR HR Stocks" />
+            <div class="qr-label">Акции</div>
+          </div>
+          <div class="qr-item">
+            <img src="Offer-QR.jpg" alt="QR Offer" />
+            <div class="qr-label">Найм</div>
+          </div>
+          <div class="qr-item">
+            <img src="QR_CEO_kompromat.jpg" alt="QR Kompromat" />
+            <div class="qr-label">Компромат CEO</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Journalist -->
+      <div class="card">
+        <div class="role-title">Журналист</div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">Сбор грязи (не важен год).</div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">Ищет сенсацию. Роман с CFO.</div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Знает личный код CFO (<b>ALLP</b>)</li>
+          <li>QR-код на Код ядра BETA-350</li>
+        </ul>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_beta.jpg" alt="QR Beta 350" />
+            <div class="qr-label">Код Ядра BETA-350</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. CMO -->
+      <div class="card">
+        <div class="role-title">Директор по Маркетингу (CMO)</div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">Остаться в 2025. Удалить фейковый анонс.</div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">Опубликовал анонс несуществующего продукта.</div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Личный код: <b>HYPE</b></li>
+          <li>QR-код на Код ядра GAMMA-500 (Плохой!)</li>
+          <li>QR-код на соцсеть компании</li>
+        </ul>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_gamma.jpg" alt="QR CMO" />
+            <div class="qr-label">Соцсеть</div>
+          </div>
+          <!-- gamma.html QR missing -->
+        </div>
+      </div>
+
+      <!-- 9. Intern -->
+      <div class="card">
+        <div class="role-title">Стажер (Интерн)</div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">Попасть в 2026. Выжить.</div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">
+          Записал Key-salt (<b>СОСНА</b>). Видел роман CFO и Журналиста.
+        </div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Личный код: <b>STUDENT</b></li>
+          <li>Знает ответ на загадку: <b>СОСНА</b></li>
+          <li>QR-код, где спрятан пароль от соцсетей</li>
+          <li>Компромат на CFO (QR)</li>
+        </ul>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_coworker-relationship.jpg" alt="QR Relationship" />
+            <div class="qr-label">Компромат CFO</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

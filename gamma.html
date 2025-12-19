@@ -250,7 +250,19 @@
           display: none;
         }
         input[type="text"] {
-          font-size: 15px;
+          font-size: 18px;
+          padding: 10px 8px;
+          height: 44px;
+          border-radius: 6px;
+          -webkit-appearance: none;
+          appearance: none;
+          box-sizing: border-box;
+        }
+        .output-line {
+          font-size: 16px;
+        }
+        .snowflake {
+          opacity: 0.6;
         }
         .snowflake {
           opacity: 0.6;
@@ -341,7 +353,9 @@
       function createSnow() {
         const snowContainer = document.getElementById("snow");
         const characters = ["0", "1", "*", ".", "+"];
-        const count = 30;
+        const isSmall = window.innerWidth <= 600;
+        const count = isSmall ? 12 : 30;
+        const maxSize = isSmall ? 12 : 30;
 
         for (let i = 0; i < count; i++) {
           const flake = document.createElement("div");
@@ -349,9 +363,11 @@
           flake.innerText =
             characters[Math.floor(Math.random() * characters.length)];
           flake.style.left = Math.random() * 100 + "%";
-          flake.style.animationDuration = Math.random() * 5 + 3 + "s";
-          flake.style.opacity = Math.random();
-          flake.style.fontSize = Math.random() * 20 + 10 + "px";
+          flake.style.animationDuration =
+            Math.random() * (isSmall ? 6 : 5) + 3 + "s";
+          flake.style.opacity = isSmall ? 0.6 * Math.random() : Math.random();
+          flake.style.fontSize =
+            Math.random() * maxSize + (isSmall ? 8 : 10) + "px";
           flake.style.animationDelay = Math.random() * 5 + "s";
           snowContainer.appendChild(flake);
         }

@@ -257,7 +257,7 @@
         switch (code) {
           case "FOMO":
             detailsBox.textContent =
-              "(Ведущий разработчик) — майнит на главном сервере.\nQR ведет на страницу с загадками, в финале будет пароль SENIORMINER.\nПосле ввода пароля в основной терминал, а затем личного кода FOMO, в статусах появится надпись, что разработчик майнит.\nВажно: это сработает только если команду UNINSTALL CGMINER еще не вводили.";
+              "(Ведущий разработчик) — майнит на главном сервере.\nQR ведет на страницу с загадками, в финале будет пароль.\nПосле ввода пароля в основной терминал, а затем личного кода FOMO, в статусах появится надпись, что разработчик майнит.\n";
             renderQR(
               "QR_who-is-a-miner.jpg",
               "who-is-a-miner.html",
@@ -288,6 +288,16 @@
               "security.html",
               "Открыть SECURITY",
               "QR на безопасность"
+            );
+            break;
+          case "SJFHK":
+            detailsBox.textContent =
+              "(Ключ начальника службы безопасности) — даёт прямую ссылку на страницу безопасности (GH Pages).";
+            renderQR(
+              "QR_security.jpg",
+              "https://ilanmar.github.io/Quiz_Protocol_Zero/security.html",
+              "Открыть SECURITY (GH Pages)",
+              "QR на SECURITY (GH Pages)"
             );
             break;
           case "CEO":

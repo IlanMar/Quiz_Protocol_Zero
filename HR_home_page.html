@@ -181,11 +181,7 @@
         <div class="panel hidden" id="personPanel" style="margin-top: 16px">
           <div class="section-title">Персональные коды сотрудников</div>
           <div class="input-row">
-            <input
-              id="personCode"
-              type="text"
-              placeholder="КОД СОТРУДНИКА (например: ALLP, FOMO, SJFHK)"
-            />
+            <input id="personCode" type="text" placeholder="КОД СОТРУДНИКА" />
             <button id="personBtn">ПОКАЗАТЬ</button>
           </div>
           <div id="details" class="status" style="margin-top: 10px"></div>
@@ -267,7 +263,7 @@
             break;
           case "ALLP":
             detailsBox.textContent =
-              '(CFO) — крутит роман с журналистом.\nЕсть фото, на фото код CFODROP: введите его в главную консоль, а затем ALLP, и в окне статусов будет надпись "CFO встречается с журналистом!"';
+              '(CFO) — крутит роман с журналистом.\nЕсть фото, на фото код: введите его в главную консоль, а затем ALLP, и в окне статусов будет надпись "CFO встречается с журналистом!"';
             renderQR(
               "QR_coworker-relationship.jpg",
               "coworker-relationship.html",
@@ -300,9 +296,9 @@
               "QR на SECURITY (GH Pages)"
             );
             break;
-          case "CEO":
+          case "BIGBOSS":
             detailsBox.textContent =
-              "(CEO) — страница с загадками, финал — код для файла с компроматом (THEFT).";
+              "(CEO) — страница с загадками, финал — код для файла с компроматом ";
             renderQR(
               "QR_CEO_kompromat.jpg",
               "CEO-kompromat.html",
@@ -318,6 +314,16 @@
               "CMO_new_product_annonce.html",
               "Открыть анонс",
               "QR на анонс CMO"
+            );
+            break;
+          case "HYPE":
+            detailsBox.textContent =
+              "(CMO HYPE) — локальная страница с анонсом продукта. Откроется файл из рабочего каталога.";
+            renderQR(
+              "QR_CMO_new_product_annonce.jpg",
+              "https://ilanmar.github.io/Quiz_Protocol_Zero/CMO_new_product_annonce.html",
+              "Открыть CMO анонс (локально)",
+              "QR на CMO анонс (локально)"
             );
             break;
           case "HR":

@@ -343,10 +343,16 @@
           ceoKicked: false,
           cgMinerDeleted: false,
           bonusStolen: false,
-          // Новый флаг: ожидаем ввод кода компромата после VOTE_KICK_CEO
+          // Ожидаем ввод кода компромата после VOTE_KICK_CEO
           awaitingCompromat: false,
-          // Новый флаг: CTO уволен
-          ctoFired: false,
+          // Ожидаем подтверждение компромата CFO и Журналиста
+          awaitingCfoDropConfirm: false,
+          // Разработчик идентифицирован (введен личный код FOMO)
+          fomoEntered: false,
+          // ИИ скопирован
+          aiCopied: false,
+          // Пост в соцсетях удален
+          instagrammFixed: false,
         },
       };
 
@@ -550,24 +556,17 @@
           state.ceoStage = 1;
           response = "ДОСТУП: АДМИНИСТРАТОР. ВВЕДИТЕ КОД ДЕШИФРОВКИ.";
         } else if (input === normalize("СОСНА")) {
-          if (state.ceoStage === 1 || state.cfoStage >= 0) {
-            // Сосна нужна и CEO и CFO (CFO знает ответ на загадку)
-            // Если это CEO
-            if (state.ceoStage === 1) {
-              state.ceoStage = 2;
-              response = "ДЕШИФРОВКА УСПЕШНА. ДОСТУПНА КОМАНДА УДАЛЕНИЯ ЛОГОВ.";
-            } else {
-              response = "КОД ДЕШИФРОВКИ ВЕРЕН.";
-            }
+          // СОСНА — ключ дешифровки. В ветке CEO он используется для разблокировки удаления fin_log.
+          if (state.ceoStage === 1) {
+            state.ceoStage = 2;
+            response = "ДЕШИФРОВКА УСПЕШНА. ДОСТУПНА КОМАНДА УДАЛЕНИЯ ЛОГОВ.";
+          } else {
+            response = "КОД ДЕШИФРОВКИ ПРИНЯТ.";
           }
         } else if (input === normalize("deletefin_log")) {
           if (state.ceoStage === 2) {
             if (state.flags.ceoKicked) {
               response = "ОШИБКА: НЕДОСТАТОЧНО ПРАВ. CEO ОТСТРАНЕН.";
-            } else if (state.flags.ctoFired) {
-              // Блокируем удаление логов, если CTO уже уволен
-              response =
-                "ОШИБКА: ОПЕРАЦИЯ ЗАБЛОКИРОВАНА. ДОСТУП ОГРАНИЧЕН (CTO УВОЛЕН).";
             } else {
               state.flags.finLogDeleted = true;
               addLog(
@@ -579,7 +578,7 @@
         }
 
         // 3. ЦЕПОЧКА CTO (Техдир)
-        // Логика: SJFHK -> JIGGLEJIGGLE -> VOTE_KICK_CEO
+        // Логика: SJFHK -> JIGGLE JIGGLE -> VOTE_KICK_CEO -> THEFT
         else if (input === "SJFHK") {
           // Этот код используется и CTO и Разработчиком
           state.ctoStage = 1;
@@ -587,9 +586,15 @@
           response = "ДОСТУП: СЛУЖБА БЕЗОПАСНОСТИ. ОЖИДАНИЕ КОМАНДЫ.";
         } else if (input === normalize("jigglejiggle")) {
           // Используется CTO и CFO
-          if (state.ctoStage === 1) state.ctoStage = 2;
-          if (state.cfoStage === 0) state.cfoStage = 1; // CFO начинает с этого или загадки
-          response = "ДОСТУП К БАНКОВСКИМ СЧЕТАМ ПОЛУЧЕН.";
+          if (state.ctoStage === 1) {
+            state.ctoStage = 2;
+            response = "ДОСТУП К БАНКОВСКИМ СЧЕТАМ ПОЛУЧЕН.";
+          } else if (state.cfoStage === 0) {
+            state.cfoStage = 1;
+            response = "ДОСТУП К БАНКОВСКИМ СЧЕТАМ ПОЛУЧЕН.";
+          } else {
+            response = "ДОСТУП К БАНКОВСКИМ СЧЕТАМ УЖЕ АКТИВЕН.";
+          }
         } else if (input === "VOTE_KICK_CEO") {
           if (state.ctoStage === 2) {
             if (state.flags.finLogDeleted) {
@@ -597,27 +602,31 @@
               response =
                 "ОШИБКА: ДОКАЗАТЕЛЬСТВА ХИЩЕНИЙ НЕ НАЙДЕНЫ (ЛОГ ПУСТ). ОБВИНЕНИЕ ОТКЛОНЕНО.";
             } else {
-              // Теперь при запуске голосования требуем код компромата CDHRE
+              // Голосование возможно только если финлог еще не удален.
+              // По задаче: при вводе VOTE_KICK_CEO CEO отстраняется сразу.
+              state.flags.ceoKicked = true;
               state.flags.awaitingCompromat = true;
               addLog(
                 "КРИТИЧЕСКОЕ СОБЫТИЕ: ИНИЦИИРОВАНО ГОЛОСОВАНИЕ ПО СУДЬБЕ РУКОВОДСТВА. ОЖИДАЕТСЯ КОД КОМПРОМАТА."
               );
-              response = "ГОЛОСОВАНИЕ ИНИЦИИРОВАНО. ВВЕДИТЕ КОД КОМПРОМАТА.";
+              response =
+                "ГОЛОСОВАНИЕ ИНИЦИИРОВАНО. CEO ОТСТРАНЕН. ВВЕДИТЕ КОД КОМПРОМАТА.";
             }
           }
         }
-        // Обработка кода компромата для увольнения CTO
-        else if (input === "CDHRE") {
-          if (state.flags.awaitingCompromat && !state.flags.finLogDeleted) {
-            state.flags.ctoFired = true;
-            state.flags.awaitingCompromat = false;
-            addLog(
-              "СИСТЕМНОЕ СОБЫТИЕ: ТЕХДИРЕКТОР УВОЛЕН ПО ИТОГАМ РАССЛЕДОВАНИЯ."
-            );
-            response = "ОПЕРАЦИЯ УСПЕШНА: CTO УВОЛЕН.";
-          } else {
-            response =
-              "ОШИБКА: НЕТ ОЖИДАНИЯ КОДА КОМПРОМАТА ИЛИ ФИНЛОГ УЖЕ УДАЛЕН.";
+        // Обработка кода компромата для обвинения CEO
+        else if (input === "THEFT") {
+          if (state.flags.awaitingCompromat) {
+            if (state.flags.finLogDeleted) {
+              state.flags.awaitingCompromat = false;
+              response = "ОШИБКА: КОМПРОМАТ НЕ ПОДТВЕРЖДЕН. ФИНЛОГ УЖЕ УДАЛЕН.";
+            } else {
+              state.flags.awaitingCompromat = false;
+              addLog(
+                "СИСТЕМНОЕ СОБЫТИЕ: CEO ОБВИНЕН В ХИЩЕНИИ БЮДЖЕТА РАЗРАБОТКИ (THEFT)."
+              );
+              response = "КОМПРОМАТ ПРИНЯТ. ОБВИНЕНИЕ ЗАРЕГИСТРИРОВАНО.";
+            }
           }
         }
 
@@ -631,21 +640,63 @@
           }
         }
 
+        // Личный код Разработчика + доступ к резервной копии ИИ
+        else if (input === "FOMO") {
+          state.flags.fomoEntered = true;
+          response = "ДОСТУП ПОДТВЕРЖДЕН (DEV). ДОСТУПНА КОМАНДА AICOPY.";
+        }
+
+        // Команда копирования ИИ (доступна после FOMO)
+        else if (input === "AICOPY") {
+          if (!state.flags.fomoEntered) {
+            response = "ОШИБКА: НЕДОСТАТОЧНО ПРАВ. ТРЕБУЕТСЯ FOMO.";
+          } else if (state.flags.aiCopied) {
+            response = "КОПИЯ ИИ УЖЕ СОЗДАНА.";
+          } else {
+            state.flags.aiCopied = true;
+            addLog(
+              "СИСТЕМА: СОЗДАНА КОПИЯ ИИ (AICOPY). ВОЗМОЖНА УТЕЧКА ДАННЫХ."
+            );
+            response = "ОПЕРАЦИЯ ВЫПОЛНЕНА. КОПИЯ ИИ СОЗДАНА.";
+          }
+        }
+
         // 5. ЦЕПОЧКА CFO (Финдир)
         // Логика: JIGGLEJIGGLE -> ALLP
         else if (input === "ALLP") {
-          if (state.cfoStage === 1 || input === "jigglejiggle") {
-            // Упрощение: если он знает свой код и код банка
-            // Проверяем, вводил ли он джигл-джигл ранее (флаг cfoStage)
-            // Но по условию "сначала jiggle потом ALLP"
-            if (state.cfoStage >= 0) {
-              // Предположим он знает джигл
-              state.flags.bonusStolen = true;
-              addLog(
-                "ФИНАНСОВАЯ ТРЕВОГА: ЗАФИКСИРОВАН ПЕРЕВОД ВСЕХ БОНУСОВ НА ЛИЧНЫЙ СЧЕТ CFO."
-              );
-              response = "ТРАНЗАКЦИЯ УСПЕШНА. СРЕДСТВА ВЫВЕДЕНЫ.";
-            }
+          // 5.1 Подтверждение компромата CFO+Журналист
+          if (state.flags.awaitingCfoDropConfirm) {
+            state.flags.awaitingCfoDropConfirm = false;
+            addLog("КОМПРОМАТ: CFO ВСТРЕЧАЕТСЯ С ЖУРНАЛИСТОМ (CFODROP). ");
+            response = "КОМПРОМАТ ПОДТВЕРЖДЕН. ЗАПИСЬ ДОБАВЛЕНА В ЖУРНАЛ.";
+          }
+          // 5.2 Кража бонусов CFO (по описанию: сначала jiggle jiggle, затем ALLP)
+          else if (state.cfoStage === 1) {
+            state.flags.bonusStolen = true;
+            state.cfoStage = 2;
+            addLog(
+              "ФИНАНСОВАЯ ТРЕВОГА: ЗАФИКСИРОВАН ПЕРЕВОД ВСЕХ БОНУСОВ НА ЛИЧНЫЙ СЧЕТ CFO."
+            );
+            response = "ТРАНЗАКЦИЯ УСПЕШНА. СРЕДСТВА ВЫВЕДЕНЫ.";
+          } else {
+            response = "ОШИБКА: ТРЕБУЕТСЯ ДОСТУП К БАНКУ (JIGGLE JIGGLE).";
+          }
+        }
+
+        // Компромат CFO + Журналист (для HR): CFODROP -> ALLP
+        else if (input === "CFODROP") {
+          state.flags.awaitingCfoDropConfirm = true;
+          response = "КОД ПРИНЯТ. ВВЕДИТЕ ALLP ДЛЯ ПОДТВЕРЖДЕНИЯ.";
+        }
+
+        // Пароль от соцсетей (CMO)
+        else if (input === "INSTAGRAMM") {
+          if (state.flags.instagrammFixed) {
+            response = "ОПЕРАЦИЯ УЖЕ ВЫПОЛНЕНА. ПОСТ УДАЛЕН.";
+          } else {
+            state.flags.instagrammFixed = true;
+            addLog("CMO: УДАЛЕН ФЕЙКОВЫЙ АНОНС ИЗ СОЦСЕТЕЙ (INSTAGRAMM). ");
+            response = "ОПЕРАЦИЯ ВЫПОЛНЕНА. ПОСТ УДАЛЕН.";
           }
         }
 
@@ -673,7 +724,10 @@
 
         // Доп. команда: обнаружен майнер среди разработчиков
         else if (input === "SENIORMINER") {
-          if (!state.flags.cgMinerDeleted) {
+          // По задаче: сначала пользователь должен ввести FOMO, потом SENIORMINER
+          if (!state.flags.fomoEntered) {
+            response = "ОШИБКА: НЕДОСТАТОЧНО ДАННЫХ. СНАЧАЛА ВВЕДИТЕ FOMO.";
+          } else if (!state.flags.cgMinerDeleted) {
             addLog("ОБНАРУЖЕНО: Ведущий разработчик майнит на сервере Януса!");
             response = "Ведущий разработчик майнит на сервере Януса!";
           } else {

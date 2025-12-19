@@ -416,9 +416,12 @@
           case "JOURNALIST":
             detailsBox.textContent = "Журналист не в штате, данных нет.";
             break;
-          default:
+          case "STUDENT":
             detailsBox.textContent =
-              "Нет данных по этому коду. Доступны примеры: FOMO, ALLP, SJFHK, CEO, SECURITY, CMO.";
+              "(Интерн) — знает шифр дешифровки, а также что-то знает про то, куда делся пароль от соцсетей.";
+            break;
+          default:
+            detailsBox.textContent = "Нет данных по этому коду.";
         }
       });
     </script>

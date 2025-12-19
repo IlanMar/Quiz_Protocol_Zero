@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HR TERMINAL // BLUE SCREEN INC.</title>
+    <style>
+      :root {
+        --green: #00ff41;
+        --bg: #0a0a0a;
+        --glass: rgba(0, 255, 65, 0.12);
+        --win98: #008080;
+        --border: #00aa33;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(
+          80% 120% at 50% 50%,
+          #000 0%,
+          #020202 55%,
+          #000 100%
+        );
+        color: var(--green);
+        font-family: "Courier New", Courier, monospace;
+        text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+
+      body::before {
+        content: " ";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+        background: linear-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.28) 50%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.05),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.05)
+          );
+        background-size: 100% 2px, 3px 100%;
+      }
+
+      .crt-wrapper {
+        width: min(920px, 96vw);
+        transform: perspective(900px) translateZ(0) scale(1.01);
+        filter: saturate(1.05) contrast(1.1);
+      }
+      .win98-window {
+        border: 2px solid var(--border);
+        box-shadow: 0 0 22px rgba(0, 255, 65, 0.15);
+        background: rgba(0, 0, 0, 0.75);
+      }
+      .win98-title {
+        background: var(--win98);
+        color: #fff;
+        padding: 8px 12px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+      }
+      .win98-body {
+        padding: 16px;
+        border-top: 2px solid var(--border);
+        background: linear-gradient(
+          180deg,
+          rgba(0, 255, 65, 0.05),
+          rgba(0, 0, 0, 0.7)
+        );
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        background: var(--glass);
+        padding: 14px;
+      }
+      .section-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+      .input-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: center;
+      }
+      input[type="text"] {
+        background: #000;
+        border: 1px solid var(--border);
+        color: var(--green);
+        padding: 10px;
+        text-transform: uppercase;
+      }
+      button {
+        background: #003300;
+        color: var(--green);
+        border: 1px solid var(--border);
+        padding: 10px 14px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--green);
+        color: #000;
+      }
+      .status {
+        border: 1px dashed var(--border);
+        min-height: 120px;
+        padding: 10px;
+        white-space: pre-wrap;
+      }
+      .qr-block {
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+      .qr-block img {
+        width: 96px;
+        height: 96px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+      }
+      .qr-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .muted {
+        color: #99cc99;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="crt-wrapper win98-window">
+      <div class="win98-title">
+        <span>HR TERMINAL // BLUE SCREEN INC.</span>
+        <span>WIN98 UI</span>
+      </div>
+
+      <div class="win98-body">
+        <!-- Initially only auth panel visible -->
+        <div class="panel" id="authPanel">
+          <div class="section-title">Доступ кадровика</div>
+          <div class="input-row">
+            <input
+              id="hrCode"
+              type="text"
+              placeholder="ВВЕДИТЕ ЛИЧНЫЙ КОД (WEAREAFAMILY)"
+            />
+            <button id="hrBtn">ПОДТВЕРДИТЬ</button>
+          </div>
+          <div id="authMsg" class="muted" style="margin-top: 8px">
+            Введите код, чтобы посмотреть слухи.
+          </div>
+        </div>
+
+        <div class="panel hidden" id="rumorsPanel" style="margin-top: 16px">
+          <div class="section-title">Архив слухов</div>
+          <div class="status" id="rumors"></div>
+          <div class="muted" style="margin-top: 8px">
+            Теперь можно ввести личный код сотрудника для подробностей.
+          </div>
+        </div>
+
+        <div class="panel hidden" id="personPanel" style="margin-top: 16px">
+          <div class="section-title">Персональные коды сотрудников</div>
+          <div class="input-row">
+            <input
+              id="personCode"
+              type="text"
+              placeholder="КОД СОТРУДНИКА (например: ALLP, FOMO, SJFHK)"
+            />
+            <button id="personBtn">ПОКАЗАТЬ</button>
+          </div>
+          <div id="details" class="status" style="margin-top: 10px"></div>
+          <div id="qrResult" style="margin-top: 10px"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const hrInput = document.getElementById("hrCode");
+      const hrBtn = document.getElementById("hrBtn");
+      const rumorsBox = document.getElementById("rumors");
+      const rumorsPanel = document.getElementById("rumorsPanel");
+      const personPanel = document.getElementById("personPanel");
+      const personInput = document.getElementById("personCode");
+      const personBtn = document.getElementById("personBtn");
+      const detailsBox = document.getElementById("details");
+      const qrResult = document.getElementById("qrResult");
+
+      function normalize(s) {
+        return (s || "").trim().toUpperCase();
+      }
+
+      function renderQR(imgSrc, linkHref, linkText, altText = "QR") {
+        if (!imgSrc || !linkHref) {
+          qrResult.innerHTML = "";
+          return;
+        }
+        qrResult.innerHTML =
+          '<div class="qr-block">' +
+          '<img src="' +
+          imgSrc +
+          '" alt="' +
+          (altText || "QR") +
+          '" />' +
+          '<div><div class="qr-actions"><a href="' +
+          linkHref +
+          '"><button>' +
+          linkText +
+          "</button></a></div></div></div>";
+      }
+
+      hrBtn.addEventListener("click", () => {
+        const v = normalize(hrInput.value);
+        if (v === "WEAREAFAMILY") {
+          rumorsBox.textContent = [
+            "ДОСТУП К АРХИВУ СЛУХОВ РАЗРЕШЕН.",
+            "1) говорят кто то майнит на главном сервере.",
+            "2) говорят у журналиста есть с кем то интрижка из высших менеджеров.",
+            "3) бюджет на разработку странным образом похудел аж на четверть за один день.",
+            "4) говорят кто то из топов пускает слюни на место ген дира.",
+            "5) ходят слухи что конкуренты закинули в нашу компанию своего шпиона.",
+            "6) финансовый директор это роль которая сама собой вызывает недоверие.",
+            "7) безопасник уже два раза делал выговор интерну за то что тот выписывает ключи и пароли на стикеры и оставляет их на своем рабочем столе.",
+          ].join("\n");
+          rumorsPanel.classList.remove("hidden");
+          personPanel.classList.remove("hidden");
+        } else {
+          rumorsBox.textContent = "ОШИБКА: Неверный код доступа.";
+          rumorsPanel.classList.add("hidden");
+          personPanel.classList.add("hidden");
+        }
+      });
+
+      personBtn.addEventListener("click", () => {
+        const code = normalize(personInput.value);
+        detailsBox.textContent = "";
+        qrResult.innerHTML = "";
+        switch (code) {
+          case "FOMO":
+            detailsBox.textContent =
+              "(Ведущий разработчик) — майнит на главном сервере.\nQR ведет на страницу с загадками, в финале будет пароль SENIORMINER.\nПосле ввода пароля в основной терминал, а затем личного кода FOMO, в статусах появится надпись, что разработчик майнит.\nВажно: это сработает только если команду UNINSTALL CGMINER еще не вводили.";
+            renderQR(
+              "QR_who-is-a-miner.jpg",
+              "who-is-a-miner.html",
+              "Открыть MINER-страницу",
+              "QR на страницу майнинга"
+            );
+            break;
+          case "ALLP":
+            detailsBox.textContent =
+              '(CFO) — крутит роман с журналистом.\nЕсть фото, на фото код CFODROP: введите его в главную консоль, а затем ALLP, и в окне статусов будет надпись "CFO встречается с журналистом!"';
+            renderQR(
+              "QR_coworker-relationship.jpg",
+              "coworker-relationship.html",
+              "Открыть фото",
+              "QR на отношения CFO"
+            );
+            break;
+          case "SJFHK":
+            detailsBox.textContent =
+              "(CTO) — скопировал в облако исходный код ИИ.\nЕго цепочка: SJFHK → JIGGLEJIGGLE → VOTE_KICK_CEO (см. квест CTO).";
+            renderQR(
+              "CTO_code_QR.jpg",
+              "CTO-code-1.html",
+              "Открыть CTO-квест",
+              "QR CTO"
+            );
+            break;
+          case "SECURITY":
+            detailsBox.textContent =
+              "(Начальник службы безопасности) — финал дает код на фото, где он разговаривает с конкурентами.";
+            renderQR(
+              "QR_security.jpg",
+              "security.html",
+              "Открыть SECURITY",
+              "QR на безопасность"
+            );
+            break;
+          case "CEO":
+            detailsBox.textContent =
+              "(CEO) — страница с загадками, финал — код для файла с компроматом (THEFT).";
+            renderQR(
+              "QR_CEO_kompromat.jpg",
+              "CEO-kompromat.html",
+              "Открыть CEO-компромат",
+              "QR на компромат CEO"
+            );
+            break;
+          case "CMO":
+            detailsBox.textContent =
+              "(CMO) — официальный пост об обещании запустить новый ИИ-сервис в новом году.";
+            renderQR(
+              "QR_CMO_new_product_annonce.jpg",
+              "CMO_new_product_annonce.html",
+              "Открыть анонс",
+              "QR на анонс CMO"
+            );
+            break;
+          case "HR":
+            detailsBox.textContent = "Для кадровика особых слухов нет.";
+            break;
+          case "JOURNALIST":
+            detailsBox.textContent = "Журналист не в штате, данных нет.";
+            break;
+          default:
+            detailsBox.textContent =
+              "Нет данных по этому коду. Доступны примеры: FOMO, ALLP, SJFHK, CEO, SECURITY, CMO.";
+        }
+      });
+    </script>
+  </body>
+</html>

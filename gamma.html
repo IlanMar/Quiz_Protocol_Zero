@@ -18,12 +18,12 @@
         color: var(--term-green);
         font-family: "Courier New", Courier, monospace;
         margin: 0;
-        padding: 18px;
+        padding: 18px 0; /* keep horizontal padding, avoid large vertical gap */
         min-height: 100vh;
         overflow-y: auto;
         display: flex;
-        justify-content: center;
-        align-items: center;
+        justify-content: center; /* keep horizontal centering */
+        align-items: flex-start; /* place monitor at top to avoid "window-in-window" */
         text-shadow: 0 0 5px var(--term-glow);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -43,7 +43,7 @@
         overflow: auto;
         padding: 18px;
         box-sizing: border-box;
-        margin: 0 auto;
+        margin: 18px auto; /* give a small top margin when aligned to top */
       }
 
       /* Скан-линии */

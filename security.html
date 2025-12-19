@@ -247,6 +247,77 @@
       <div id="error-3" class="error-msg"></div>
     </div>
 
+    <!-- NEW: Stage 3A -->
+    <div id="stage-3a" class="container hidden">
+      <h2>REMOTE CONNECTION <span class="blink">_</span></h2>
+      <div
+        style="
+          border: 1px solid var(--term-red);
+          color: var(--term-red);
+          padding: 5px;
+          margin-bottom: 15px;
+        "
+      >
+        WARNING: INTERNAL POLICY CHECK
+      </div>
+
+      <p>Согласование отпуска: кто-то точно не поедет.</p>
+
+      <div class="terminal-box" style="font-size: 0.9rem">
+        <p><strong>УСЛОВИЕ:</strong> (HR И (НЕ IT)) ИЛИ (CEO И Кофемашина)</p>
+        <hr style="border-color: #333" />
+        <p>СТАТУСЫ:</p>
+        <ul style="list-style: none; padding: 0">
+          <li>> HR: "Одобрил сразу" (TRUE/1)</li>
+          <li>> IT: "Плановые работы всю неделю" (TRUE/1)</li>
+          <li>> CEO: "На даче без связи" (FALSE/0)</li>
+          <li>> Кофемашина: "Выдает пену богов" (TRUE/1)</li>
+        </ul>
+      </div>
+
+      <label>РЕЗУЛЬТАТ (0 или 1):</label>
+      <input type="tel" id="input-3a" placeholder="?" maxlength="1" />
+      <button onclick="checkStage3A()">EXECUTE</button>
+      <div id="error-3a" class="error-msg"></div>
+    </div>
+
+    <!-- NEW: Stage 3B -->
+    <div id="stage-3b" class="container hidden">
+      <h2>REMOTE CONNECTION <span class="blink">_</span></h2>
+      <div
+        style="
+          border: 1px solid var(--term-red);
+          color: var(--term-red);
+          padding: 5px;
+          margin-bottom: 15px;
+        "
+      >
+        WARNING: PROCUREMENT SANITY CHECK
+      </div>
+
+      <p>Закупка стульев: безопасность против эстетики.</p>
+
+      <div class="terminal-box" style="font-size: 0.9rem">
+        <p>
+          <strong>УСЛОВИЕ:</strong> (Безопасность ИЛИ Маркетинг) И (Финансы ИЛИ
+          НЕ Офис-менеджер)
+        </p>
+        <hr style="border-color: #333" />
+        <p>СТАТУСЫ:</p>
+        <ul style="list-style: none; padding: 0">
+          <li>> Безопасность: "Нашли уязвимость в стуле" (TRUE/1)</li>
+          <li>> Маркетинг: "Занят ребрендингом" (FALSE/0)</li>
+          <li>> Финансы: "Выторговали скидку" (TRUE/1)</li>
+          <li>> Офис-менеджер: "На тренинге по осанке" (TRUE/1)</li>
+        </ul>
+      </div>
+
+      <label>РЕЗУЛЬТАТ (0 или 1):</label>
+      <input type="tel" id="input-3b" placeholder="?" maxlength="1" />
+      <button onclick="checkStage3B()">EXECUTE</button>
+      <div id="error-3b" class="error-msg"></div>
+    </div>
+
     <div id="stage-4" class="container hidden">
       <h1 style="color: var(--term-red)">FILE UNLOCKED</h1>
 
@@ -297,7 +368,6 @@
         } else {
           error.innerText =
             "ACCESS DENIED. TRY AGAIN. Доступ есть только у ведущего разработчика или начальника службы безопасности.";
-          // Визуальная тряска
           document.getElementById("input-1").classList.add("blink");
           setTimeout(
             () => document.getElementById("input-1").classList.remove("blink"),
@@ -326,7 +396,34 @@
 
         // (0 OR 1) AND (NOT 0) => 1 AND 1 => 1
         if (input === "1") {
-          switchStage("stage-3", "stage-4");
+          switchStage("stage-3", "stage-3a");
+        } else {
+          error.innerText = "LOGIC ERROR. SYSTEM LOCKED.";
+        }
+      }
+
+      // NEW: STAGE 3A: LOGIC (0)
+      function checkStage3A() {
+        const input = document.getElementById("input-3a").value.trim();
+        const error = document.getElementById("error-3a");
+
+        // (HR AND NOT IT) OR (CEO AND Coffee) => (1 AND NOT 1) OR (0 AND 1) => 0 OR 0 => 0
+        if (input === "0") {
+          switchStage("stage-3a", "stage-3b");
+        } else {
+          error.innerText = "LOGIC ERROR. SYSTEM LOCKED.";
+        }
+      }
+
+      // NEW: STAGE 3B: LOGIC (1)
+      function checkStage3B() {
+        const input = document.getElementById("input-3b").value.trim();
+        const error = document.getElementById("error-3b");
+
+        // (Security OR Marketing) AND (Finance OR NOT OfficeMgr)
+        // (1 OR 0)=1 AND (1 OR NOT 1)=1 => 1 AND 1 => 1
+        if (input === "1") {
+          switchStage("stage-3b", "stage-4");
         } else {
           error.innerText = "LOGIC ERROR. SYSTEM LOCKED.";
         }
@@ -347,6 +444,17 @@
         .getElementById("input-3")
         .addEventListener("keyup", function (event) {
           if (event.key === "Enter") checkStage3();
+        });
+      // NEW: Enter handlers for 3A/3B
+      document
+        .getElementById("input-3a")
+        .addEventListener("keyup", function (event) {
+          if (event.key === "Enter") checkStage3A();
+        });
+      document
+        .getElementById("input-3b")
+        .addEventListener("keyup", function (event) {
+          if (event.key === "Enter") checkStage3B();
         });
     </script>
   </body>

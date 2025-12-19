@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HR Portal | Blue Screen Inc.</title>
+    <style>
+      :root {
+        --primary: #0056b3;
+        --secondary: #f0f8ff;
+        --accent: #ff4757;
+        --text: #333;
+        --border: #ddd;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--secondary);
+        margin: 0;
+        padding: 20px;
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+      }
+
+      .container {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        border-top: 6px solid var(--primary);
+      }
+
+      h1 {
+        color: var(--primary);
+        font-size: 24px;
+        margin-bottom: 5px;
+      }
+
+      .subtitle {
+        color: #666;
+        font-size: 14px;
+        font-style: italic;
+        margin-bottom: 25px;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      input {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.3s;
+      }
+
+      input:focus {
+        border-color: var(--primary);
+      }
+
+      button {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background-color: #004494;
+      }
+
+      .motivation-box {
+        background-color: #e8f4fd;
+        border: 1px dashed var(--primary);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+
+      .list-header {
+        text-align: left;
+        font-weight: bold;
+        margin-top: 30px;
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      #shareholders-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .employee-card {
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: background 0.2s;
+        position: relative;
+      }
+
+      .employee-card:hover {
+        background-color: #fafafa;
+      }
+
+      .employee-info {
+        text-align: left;
+      }
+
+      .role {
+        font-weight: bold;
+        color: var(--primary);
+        display: block;
+      }
+
+      .status {
+        font-size: 12px;
+        color: #2ecc71;
+      }
+
+      .secret-code {
+        font-family: "Courier New", monospace;
+        background: #333;
+        color: #0f0;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 14px;
+        min-width: 100px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .hidden-text {
+        filter: blur(5px);
+        user-select: none;
+      }
+
+      .visible-text {
+        filter: none;
+      }
+
+      .footer {
+        margin-top: 30px;
+        font-size: 11px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>HR Департамент</h1>
+      <div class="subtitle">"Мы ценим вас. Особенно ваши активы."</div>
+
+      <div class="motivation-box">
+        <strong>Цитата дня:</strong> "Отсутствие жалоб не означает наличие
+        счастья, но нам этого достаточно."
+      </div>
+
+      <div class="input-group">
+        <input
+          type="text"
+          id="code-input"
+          placeholder="Введите код сотрудника для 'добровольной' передачи акций"
+          autocomplete="off"
+        />
+        <button onclick="addVictim()">Подписать</button>
+      </div>
+
+      <div class="list-header">
+        <span>Лояльные сотрудники</span>
+        <span id="counter">0 акций собрано</span>
+      </div>
+
+      <ul id="shareholders-list"></ul>
+
+      <div class="footer">
+        © 2025 Blue Screen Inc. Все права (и ваши души) защищены.<br />
+        Нажимая кнопку, сотрудник подтверждает, что он счастлив.
+      </div>
+    </div>
+
+    <script>
+      // База данных кодов из сценария
+      const employeeDatabase = {
+        BIGBOSS: "Генеральный Директор (CEO)",
+        CTOISANEWBOSS: "Технический Директор (CTO)",
+        SJFHK: "Нач. Службы Безопасности",
+        FOMO: "Ведущий Разработчик",
+        ALLP: "Финансовый Директор (CFO)",
+        HYPE: "Директор по Маркетингу (CMO)",
+        STUDENT: "Стажер (Интерн)",
+        WEAREAFAMILY: "HR Директор (Вы)",
+        // Доп коды если кто-то решит ввести странное
+        QWERTY123: "Админский доступ (Странно...)",
+        AICOPY: "Копия ИИ (Не то...)",
+      };
+
+      let shareCount = 0;
+
+      function addVictim() {
+        const input = document.getElementById("code-input");
+        const list = document.getElementById("shareholders-list");
+        const counter = document.getElementById("counter");
+
+        let code = input.value.trim();
+
+        if (!code) {
+          alert("HR Error: Вы не можете забрать акции у пустоты.");
+          return;
+        }
+
+        // Проверка на дубликаты (опционально, но логично)
+        // Если хочешь разрешить вводить одного человека много раз - убери этот блок
+        const existingItems = document.querySelectorAll(".employee-card");
+        for (let item of existingItems) {
+          if (item.dataset.code === code) {
+            alert("Этот сотрудник уже отдал вам всё, что у него было!");
+            input.value = "";
+            return;
+          }
+        }
+
+        // Определяем роль
+        let role = employeeDatabase[code] || "Неопознанный Сотрудник (Гость)";
+
+        // Создаем элемент списка
+        const li = document.createElement("li");
+        li.className = "employee-card";
+        li.dataset.code = code; // Храним код в data-атрибуте
+
+        li.innerHTML = `
+            <div class="employee-info">
+                <span class="role">${role}</span>
+                <span class="status">✅ Акции успешно присвоены</span>
+            </div>
+            <div class="secret-code">
+                <span class="code-text hidden-text">HIDDEN</span>
+            </div>
+        `;
+
+        // Добавляем обработчик клика
+        li.addEventListener("click", function () {
+          const codeSpan = this.querySelector(".code-text");
+
+          // Если уже показывается, игнорируем клик или сбрасываем (тут просто покажем)
+          if (codeSpan.classList.contains("visible-text")) return;
+
+          // Показываем код
+          codeSpan.textContent = code;
+          codeSpan.classList.remove("hidden-text");
+          codeSpan.classList.add("visible-text");
+          codeSpan.style.color = "#fff"; // Делаем белым для четкости
+
+          // Таймер на 4 секунды
+          setTimeout(() => {
+            codeSpan.textContent = "HIDDEN";
+            codeSpan.classList.remove("visible-text");
+            codeSpan.classList.add("hidden-text");
+            codeSpan.style.color = "#0f0"; // Возвращаем зеленый матричный цвет
+          }, 4000);
+        });
+
+        // Добавляем в начало списка
+        list.prepend(li);
+
+        // Обновляем счетчик и интерфейс
+        shareCount++;
+        counter.textContent = `${shareCount} акций собрано`;
+        input.value = "";
+
+        // Пасхалка для самого HR
+        if (code === "WEAREAFAMILY") {
+          alert(
+            "Поздравляем! Вы только что шантажировали сами себя. Это высший уровень HR-мастерства."
+          );
+        }
+      }
+
+      // Обработка Enter в поле ввода
+      document
+        .getElementById("code-input")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            addVictim();
+          }
+        });
+    </script>
+  </body>
+</html>

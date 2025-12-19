@@ -149,8 +149,8 @@
         margin-top: 20px;
         display: flex;
         gap: 10px;
-        align-items: center;
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
       }
       label {
         font-size: 14px;
@@ -160,13 +160,14 @@
       form#signForm label {
         min-width: 0;
         flex: 0 0 auto;
+        width: 100%;
       }
       .field {
         display: flex;
         gap: 8px;
         align-items: center;
-        flex: 1;
-        min-width: 220px;
+        width: 100%;
+        min-width: 0;
       }
       input[type="text"] {
         flex: 1;
@@ -185,7 +186,7 @@
         box-shadow: 0 6px 18px rgba(15, 98, 254, 0.08);
       }
 
-      button#signBtn {
+      .signBtn {
         background: linear-gradient(180deg, var(--accent), var(--accent-2));
         color: #fff;
         border: 0;
@@ -196,14 +197,37 @@
         box-shadow: 0 8px 20px rgba(15, 98, 254, 0.12);
         transition: transform 0.12s ease, box-shadow 0.12s;
       }
-      button#signBtn:hover {
+      .signBtn:hover {
         transform: translateY(-2px);
       }
-      button#signBtn:active {
+      .signBtn:active {
         transform: translateY(0);
       }
 
-      #result {
+      .signBtn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .resetbar {
+        padding: 8px 22px 16px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .resetBtn {
+        background: transparent;
+        border: 0;
+        padding: 6px 0;
+        color: var(--muted);
+        font-size: 12px;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      .status {
         min-width: 130px;
         font-weight: 700;
         font-size: 15px;
@@ -298,7 +322,7 @@
           padding: 12px 14px;
           font-size: 16px;
         }
-        button#signBtn {
+        .signBtn {
           width: 100%;
           padding: 12px 14px;
           font-size: 16px;
@@ -331,7 +355,7 @@
           flex: 0 0 48px;
         }
         input[type="text"],
-        button#signBtn {
+        .signBtn {
           font-size: 15px;
           padding: 10px 12px;
         }
@@ -465,26 +489,71 @@
           <form
             id="signForm"
             onsubmit="return false;"
-            aria-label="Проверка подписи"
+            aria-label="Проверка подписей руководства"
             style="margin-top: 18px"
           >
-            <label for="bossCode">Код генерального директора:</label>
-
+            <label for="bossCode">Код генерального директора (CEO):</label>
             <div class="field">
               <input
                 id="bossCode"
                 type="text"
                 autocomplete="off"
                 aria-label="Код генерального директора"
-                placeholder="Введите код..."
+                placeholder="Введите код CEO..."
               />
-              <button id="signBtn" type="button">Подписать</button>
-              <div id="result" role="status" aria-live="polite"></div>
+              <button id="ceoSignBtn" class="signBtn" type="button" disabled>
+                Подписать
+              </button>
+              <div
+                id="ceoStatus"
+                class="status"
+                role="status"
+                aria-live="polite"
+              ></div>
+            </div>
+
+            <label for="ctoCode">Код технического директора (CTO):</label>
+            <div class="field">
+              <input
+                id="ctoCode"
+                type="text"
+                autocomplete="off"
+                aria-label="Код технического директора"
+                placeholder="Введите код CTO..."
+              />
+              <button id="ctoSignBtn" class="signBtn" type="button" disabled>
+                Подписать
+              </button>
+              <div
+                id="ctoStatus"
+                class="status"
+                role="status"
+                aria-live="polite"
+              ></div>
+            </div>
+
+            <label for="cfoCode">Код финансового директора (CFO):</label>
+            <div class="field">
+              <input
+                id="cfoCode"
+                type="text"
+                autocomplete="off"
+                aria-label="Код финансового директора"
+                placeholder="Введите код CFO..."
+              />
+              <button id="cfoSignBtn" class="signBtn" type="button" disabled>
+                Подписать
+              </button>
+              <div
+                id="cfoStatus"
+                class="status"
+                role="status"
+                aria-live="polite"
+              ></div>
             </div>
 
             <div class="note" style="width: 100%">
-              Подсказка: код — это слово, которое заставляет нас возвращать
-              премиальные.
+              Подсказка: каждый руководитель подписывает своим личным кодом.
             </div>
           </form>
         </main>
@@ -493,41 +562,116 @@
           <div>Blue Screen Inc. · HR Department</div>
           <div>Версия оффера 1.0</div>
         </footer>
+
+        <div class="resetbar" aria-hidden="false">
+          <button id="resetBtn" class="resetBtn" type="button">
+            Очистить поля
+          </button>
+        </div>
       </div>
     </div>
 
     <script>
       (function () {
-        const CORRECT = "BIGBOSS";
-        const input = document.getElementById("bossCode");
-        const btn = document.getElementById("signBtn");
-        const result = document.getElementById("result");
+        const SIGNERS = [
+          {
+            key: "ceo",
+            correct: "BIGBOSS",
+            inputId: "bossCode",
+            btnId: "ceoSignBtn",
+            statusId: "ceoStatus",
+            storageKey: "offer_signed_ceo",
+          },
+          {
+            key: "cto",
+            correct: "CTOISANEWBOSS",
+            inputId: "ctoCode",
+            btnId: "ctoSignBtn",
+            statusId: "ctoStatus",
+            storageKey: "offer_signed_cto",
+          },
+          {
+            key: "cfo",
+            correct: "ALLP",
+            inputId: "cfoCode",
+            btnId: "cfoSignBtn",
+            statusId: "cfoStatus",
+            storageKey: "offer_signed_cfo",
+          },
+        ];
 
-        function show(text, ok) {
-          result.textContent = text;
-          result.className = ok ? "ok" : "err";
+        function setStatus(statusEl, text, ok) {
+          statusEl.textContent = text;
+          statusEl.className = ok ? "status ok" : "status err";
         }
 
-        function validate() {
-          const val = (input.value || "").trim();
-          if (!val) {
-            show("Введите код", false);
+        function markSigned(signer, inputEl, btnEl, statusEl) {
+          localStorage.setItem(signer.storageKey, "1");
+          inputEl.value = "";
+          inputEl.style.display = "none";
+          btnEl.style.display = "none";
+          setStatus(statusEl, "подписано", true);
+        }
+
+        function isSigned(signer) {
+          return localStorage.getItem(signer.storageKey) === "1";
+        }
+
+        function normalize(val) {
+          return (val || "").trim().toUpperCase();
+        }
+
+        SIGNERS.forEach(function (signer) {
+          const inputEl = document.getElementById(signer.inputId);
+          const btnEl = document.getElementById(signer.btnId);
+          const statusEl = document.getElementById(signer.statusId);
+
+          if (!inputEl || !btnEl || !statusEl) return;
+
+          if (isSigned(signer)) {
+            markSigned(signer, inputEl, btnEl, statusEl);
             return;
           }
-          if (val.toUpperCase() === CORRECT) {
-            show("Одобрено", true);
-          } else {
-            show("неверная подпись!", false);
-          }
-        }
 
-        btn.addEventListener("click", validate);
-        input.addEventListener("keydown", function (e) {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            validate();
+          function refresh() {
+            const ok = normalize(inputEl.value) === signer.correct;
+            btnEl.disabled = !ok;
+            if (statusEl.textContent) {
+              statusEl.textContent = "";
+              statusEl.className = "status";
+            }
           }
+
+          inputEl.addEventListener("input", refresh);
+          inputEl.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (!btnEl.disabled) btnEl.click();
+            }
+          });
+
+          btnEl.addEventListener("click", function () {
+            const ok = normalize(inputEl.value) === signer.correct;
+            if (!ok) {
+              setStatus(statusEl, "неверная подпись!", false);
+              btnEl.disabled = true;
+              return;
+            }
+            markSigned(signer, inputEl, btnEl, statusEl);
+          });
+
+          refresh();
         });
+
+        const resetBtn = document.getElementById("resetBtn");
+        if (resetBtn) {
+          resetBtn.addEventListener("click", function () {
+            SIGNERS.forEach(function (signer) {
+              localStorage.removeItem(signer.storageKey);
+            });
+            window.location.reload();
+          });
+        }
       })();
     </script>
   </body>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Protocol: ZERO | SMM Security Check</title>
+    <style>
+      :root {
+        --bg-color: #0d1117;
+        --text-color: #58a6ff; /* Terminal Blue */
+        --accent-color: #238636; /* Success Green */
+        --error-color: #da3633; /* Error Red */
+        --input-bg: #161b22;
+        --border-color: #30363d;
+      }
+
+      * {
+        box-sizing: border-box;
+        outline: none;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: "Courier New", Courier, monospace;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 500px;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.1);
+        background: rgba(13, 17, 23, 0.95);
+      }
+
+      h1 {
+        font-size: 1.2rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .status-bar {
+        font-size: 0.8rem;
+        margin-bottom: 20px;
+        color: #8b949e;
+      }
+
+      .riddle-box {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 25px;
+        min-height: 120px; /* Чтобы интерфейс не прыгал */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 15px;
+        font-size: 16px; /* 16px предотвращает зум на iPhone */
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        color: #ffffff;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        text-align: center;
+        font-family: inherit;
+      }
+
+      input[type="text"]:focus {
+        border-color: var(--text-color);
+        box-shadow: 0 0 5px rgba(88, 166, 255, 0.5);
+      }
+
+      button {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1rem;
+        background-color: var(--text-color);
+        color: #0d1117;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: background 0.2s;
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      .shake {
+        animation: shake 0.5s;
+        border-color: var(--error-color) !important;
+      }
+
+      @keyframes shake {
+        0% {
+          transform: translate(1px, 1px) rotate(0deg);
+        }
+        10% {
+          transform: translate(-1px, -2px) rotate(-1deg);
+        }
+        20% {
+          transform: translate(-3px, 0px) rotate(1deg);
+        }
+        30% {
+          transform: translate(3px, 2px) rotate(0deg);
+        }
+        40% {
+          transform: translate(1px, -1px) rotate(1deg);
+        }
+        50% {
+          transform: translate(-1px, 2px) rotate(-1deg);
+        }
+        60% {
+          transform: translate(-3px, 1px) rotate(0deg);
+        }
+        70% {
+          transform: translate(3px, 1px) rotate(-1deg);
+        }
+        80% {
+          transform: translate(-1px, -1px) rotate(1deg);
+        }
+        90% {
+          transform: translate(1px, 2px) rotate(0deg);
+        }
+        100% {
+          transform: translate(1px, -2px) rotate(-1deg);
+        }
+      }
+
+      /* Экран победы */
+      #victory-screen {
+        display: none;
+      }
+
+      .password-display {
+        font-size: 2rem;
+        color: var(--text-color);
+        border: 2px dashed var(--text-color);
+        padding: 10px;
+        margin: 20px 0;
+        font-weight: bold;
+        word-break: break-all;
+        background: #000;
+      }
+
+      .warning {
+        color: var(--error-color);
+        font-size: 0.9rem;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="game-screen">
+      <h1>SMM SECURITY CHECK</h1>
+      <div class="status-bar">
+        Уровень верификации: <span id="progress">1/5</span>
+      </div>
+
+      <div class="riddle-box" id="riddle-text">Загрузка вопроса...</div>
+
+      <input
+        type="text"
+        id="answer-input"
+        placeholder="Введите ответ..."
+        autocomplete="off"
+      />
+      <button onclick="checkAnswer()">Подтвердить</button>
+      <div
+        id="feedback"
+        style="
+          height: 20px;
+          margin-top: 10px;
+          font-size: 0.8rem;
+          color: var(--error-color);
+        "
+      ></div>
+    </div>
+
+    <div class="container" id="victory-screen">
+      <h1 style="color: var(--text-color)">ДОСТУП РАЗРЕШЕН</h1>
+      <p>Система опознала в вас циничного маркетолога.</p>
+      <p>Ваш пароль для консоли:</p>
+
+      <div class="password-display">INSTAGRAMM</div>
+
+      <p class="warning">ВНИМАНИЕ: Не забудьте удалить пост от 01.01.2026!</p>
+    </div>
+
+    <script>
+      // Данные загадок
+      const riddles = [
+        {
+          text: "Я — цифровая пластическая хирургия. Со мной Главбух выглядит как модель, а офис в промзоне — как лофт. Я — главная ложь, исчезающая при личной встрече. Что я?",
+          answers: ["фильтр", "filter", "маска", "mask", "maska", "filtr"],
+        },
+        {
+          text: "У меня есть аватарка, но нет души. Я всегда пишу «Огонь!» под фото твоей кошки. Маркетолог покупает меня тысячами, чтобы обмануть директора красивой цифрой. Кто я?",
+          answers: ["бот", "bot", "накрутка", "фейк", "fake"],
+        },
+        {
+          text: "Я похож на решетку, но не тюремную. Я помогаю найти, но если меня слишком много — пост превращается в мусор для инфоцыган. Что я?",
+          answers: ["хэштег", "хештег", "hashtag", "#", "tag", "тег", "тэг"],
+        },
+        {
+          text: "Я живу ровно 24 часа. Я — идеальное хранилище для пьяных обещаний и танцев на столе, за которые утром будет стыдно. Я совершу цифровое самоубийство раньше, чем это увидит Совет Директоров.",
+          answers: [
+            "сториз",
+            "сторис",
+            "stories",
+            "история",
+            "story",
+            "истории",
+          ],
+        },
+        {
+          text: "Я — жестокое божество, которого никто не видел. Я решаю, увидит ли мир твой пост или он утонет в забвении. Я меняю правила раз в неделю, заставляя SMM-щиков рыдать.",
+          answers: ["алгоритм", "algorithm", "умная лента", "лента"],
+        },
+      ];
+
+      let currentLevel = 0;
+
+      const riddleText = document.getElementById("riddle-text");
+      const inputField = document.getElementById("answer-input");
+      const progressDisplay = document.getElementById("progress");
+      const feedback = document.getElementById("feedback");
+      const gameScreen = document.getElementById("game-screen");
+      const victoryScreen = document.getElementById("victory-screen");
+
+      // Инициализация первой загадки
+      function loadRiddle() {
+        riddleText.style.opacity = 0;
+        setTimeout(() => {
+          riddleText.textContent = riddles[currentLevel].text;
+          progressDisplay.textContent = `${currentLevel + 1}/${riddles.length}`;
+          inputField.value = "";
+          feedback.textContent = "";
+          riddleText.style.opacity = 1;
+          inputField.focus();
+        }, 200);
+      }
+
+      // Проверка ответа
+      function checkAnswer() {
+        const userAnswer = inputField.value.trim().toLowerCase();
+        const validAnswers = riddles[currentLevel].answers;
+
+        if (validAnswers.includes(userAnswer)) {
+          // Правильный ответ
+          feedback.textContent = "";
+          currentLevel++;
+
+          if (currentLevel < riddles.length) {
+            loadRiddle();
+          } else {
+            showVictory();
+          }
+        } else {
+          // Неправильный ответ
+          triggerError();
+        }
+      }
+
+      function triggerError() {
+        inputField.classList.add("shake");
+        feedback.textContent =
+          "ОШИБКА: Ответ не соответствует корпоративной логике.";
+        setTimeout(() => {
+          inputField.classList.remove("shake");
+        }, 500);
+      }
+
+      function showVictory() {
+        gameScreen.style.display = "none";
+        victoryScreen.style.display = "block";
+      }
+
+      // Обработка нажатия Enter
+      inputField.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          checkAnswer();
+        }
+      });
+
+      // Запуск
+      loadRiddle();
+    </script>
+  </body>
+</html>

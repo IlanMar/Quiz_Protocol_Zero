@@ -28,11 +28,13 @@
         );
         color: var(--green);
         font-family: "Courier New", Courier, monospace;
+        font-size: 16px;
         text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
         min-height: 100vh;
+        padding: 8px;
         -webkit-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
       }
@@ -70,15 +72,15 @@
       .win98-title {
         background: var(--win98);
         color: #fff;
-        padding: 8px 12px;
+        padding: 12px 14px;
         font-weight: bold;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 16px;
+        font-size: 17px;
       }
       .win98-body {
-        padding: 16px;
+        padding: 18px;
         border-top: 2px solid var(--border);
         background: linear-gradient(
           180deg,
@@ -94,7 +96,8 @@
       }
       .section-title {
         font-weight: bold;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+        font-size: 17px;
       }
       .input-row {
         display: grid;
@@ -104,20 +107,25 @@
       }
       input[type="text"] {
         background: #000;
-        border: 1px solid var(--border);
+        border: 2px solid var(--border);
         color: var(--green);
-        padding: 10px;
+        padding: 14px;
         text-transform: uppercase;
-        font-size: 15px;
+        font-size: 16px;
+        font-family: "Courier New", Courier, monospace;
       }
       button {
         background: #003300;
         color: var(--green);
-        border: 1px solid var(--border);
-        padding: 10px 14px;
+        border: 2px solid var(--border);
+        padding: 14px 16px;
         font-weight: bold;
         cursor: pointer;
-        min-width: 80px;
+        min-width: 100px;
+        min-height: 48px;
+        font-size: 16px;
+        font-family: "Courier New", Courier, monospace;
+        touch-action: manipulation;
       }
       button:hover {
         background: var(--green);
@@ -126,10 +134,10 @@
       .status {
         border: 1px dashed var(--border);
         min-height: 120px;
-        padding: 10px;
+        padding: 12px;
         white-space: pre-wrap;
-        font-size: 15px;
-        line-height: 1.4;
+        font-size: 16px;
+        line-height: 1.5;
       }
       .qr-block {
         display: grid;
@@ -157,24 +165,25 @@
       /* Responsive tweaks */
       @media (max-width: 720px) {
         .win98-title {
-          font-size: 14px;
-          padding: 8px;
+          font-size: 16px;
+          padding: 10px;
         }
         .win98-body {
-          padding: 12px;
+          padding: 16px;
         }
         .panel {
-          padding: 12px;
+          padding: 14px;
         }
         .input-row {
           grid-template-columns: 1fr;
+          gap: 12px;
         }
         input[type="text"],
         button {
           width: 100%;
           box-sizing: border-box;
-          font-size: 16px;
-          padding: 12px;
+          font-size: 17px;
+          padding: 15px;
         }
         .qr-block {
           grid-template-columns: 1fr;
@@ -182,32 +191,41 @@
         .qr-block img {
           width: 100%;
           height: auto;
-          max-width: 240px;
+          max-width: 280px;
           margin: 0 auto;
         }
         .status {
           min-height: 140px;
-          font-size: 15px;
+          font-size: 16px;
+          line-height: 1.6;
         }
       }
 
       @media (max-width: 420px) {
         body {
-          padding: 12px;
+          padding: 8px;
         }
         .win98-title {
-          font-size: 13px;
+          font-size: 15px;
+          padding: 10px;
+        }
+        .win98-body {
+          padding: 14px;
         }
         .section-title {
-          font-size: 14px;
+          font-size: 16px;
         }
         input[type="text"],
         button {
-          padding: 14px;
+          padding: 16px;
           font-size: 17px;
         }
         .status {
-          font-size: 15px;
+          font-size: 16px;
+          line-height: 1.6;
+        }
+        .panel {
+          padding: 14px;
         }
       }
     </style>

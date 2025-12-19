@@ -2,7 +2,10 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>HR Portal | Blue Screen Inc.</title>
     <style>
       :root {
@@ -10,200 +13,237 @@
         --secondary: #f0f8ff;
         --accent: #ff4757;
         --text: #333;
-        --border: #ddd;
+        --border: #ccc;
+        --bg: #f4f7f6;
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent; /* Убирает синюю вспышку при тапе на iOS */
       }
 
       body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: var(--secondary);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background-color: var(--bg);
         margin: 0;
-        padding: 20px;
+        padding: 10px;
         color: var(--text);
         display: flex;
         justify-content: center;
+        min-height: 100vh;
       }
 
       .container {
         background: white;
         width: 100%;
-        max-width: 600px;
-        padding: 30px;
+        max-width: 500px; /* Ограничение ширины для планшетов */
+        padding: 20px 15px;
         border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         text-align: center;
-        border-top: 6px solid var(--primary);
+        border-top: 5px solid var(--primary);
+        display: flex;
+        flex-direction: column;
       }
 
       h1 {
         color: var(--primary);
-        font-size: 24px;
-        margin-bottom: 5px;
+        font-size: 22px;
+        margin: 0 0 5px 0;
       }
 
       .subtitle {
         color: #666;
-        font-size: 14px;
+        font-size: 13px;
         font-style: italic;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
       }
 
+      /* Поле ввода и кнопка адаптированы под пальцы */
       .input-group {
         display: flex;
+        flex-direction: column; /* На мобилках лучше друг под другом */
         gap: 10px;
         margin-bottom: 20px;
       }
 
       input {
-        flex: 1;
-        padding: 12px;
+        width: 100%;
+        padding: 15px;
         border: 2px solid var(--border);
-        border-radius: 6px;
-        font-size: 16px;
+        border-radius: 8px;
+        font-size: 18px; /* Крупный шрифт, чтобы iOS не зумил страницу */
         outline: none;
-        transition: border-color 0.3s;
+        background: #fff;
+        appearance: none; /* Убирает стандартные тени iOS */
       }
 
       input:focus {
         border-color: var(--primary);
       }
 
-      button {
+      button.add-btn {
         background-color: var(--primary);
         color: white;
         border: none;
-        padding: 12px 20px;
-        border-radius: 6px;
+        padding: 15px;
+        border-radius: 8px;
         cursor: pointer;
         font-weight: bold;
-        font-size: 16px;
-        transition: background 0.3s;
+        font-size: 18px;
+        width: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.1s;
       }
 
-      button:hover {
+      button.add-btn:active {
+        transform: scale(0.98);
         background-color: #004494;
       }
 
       .motivation-box {
         background-color: #e8f4fd;
         border: 1px dashed var(--primary);
-        padding: 15px;
+        padding: 12px;
         margin-bottom: 20px;
         border-radius: 8px;
-        font-size: 13px;
+        font-size: 14px;
+        line-height: 1.4;
       }
 
       .list-header {
         text-align: left;
         font-weight: bold;
-        margin-top: 30px;
-        border-bottom: 2px solid var(--border);
+        margin-top: 10px;
+        border-bottom: 2px solid #eee;
         padding-bottom: 10px;
         display: flex;
         justify-content: space-between;
+        font-size: 14px;
       }
 
       #shareholders-list {
         list-style: none;
         padding: 0;
         margin: 0;
+        flex-grow: 1; /* Чтобы список занимал место */
       }
 
       .employee-card {
         background: #fff;
-        border-bottom: 1px solid var(--border);
-        padding: 15px;
+        border-bottom: 1px solid #eee;
+        padding: 15px 5px;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column; /* Для мобильных - вертикально */
+        gap: 10px;
         cursor: pointer;
-        transition: background 0.2s;
         position: relative;
-      }
-
-      .employee-card:hover {
-        background-color: #fafafa;
       }
 
       .employee-info {
         text-align: left;
+        width: 100%;
       }
 
       .role {
         font-weight: bold;
         color: var(--primary);
+        font-size: 16px;
         display: block;
+        margin-bottom: 4px;
       }
 
       .status {
         font-size: 12px;
         color: #2ecc71;
+        background: #eaffea;
+        padding: 2px 6px;
+        border-radius: 4px;
       }
 
+      /* Блок с кодом - большая кнопка для тапа */
       .secret-code {
         font-family: "Courier New", monospace;
         background: #333;
         color: #0f0;
-        padding: 5px 10px;
-        border-radius: 4px;
-        font-size: 14px;
-        min-width: 100px;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 16px;
+        letter-spacing: 2px;
         text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        width: 100%;
+        user-select: none; /* Чтобы текст не выделялся при тапе */
+        transition: background 0.3s;
       }
 
       .hidden-text {
-        filter: blur(5px);
-        user-select: none;
+        color: transparent;
+        text-shadow: 0 0 8px rgba(50, 205, 50, 0.8);
       }
 
       .visible-text {
-        filter: none;
+        color: #fff;
+        background: #c0392b; /* Красный фон, когда код виден */
+        text-shadow: none;
       }
 
       .footer {
         margin-top: 30px;
         font-size: 11px;
-        color: #999;
+        color: #aaa;
+        line-height: 1.5;
+      }
+
+      /* Кнопка сброса (скрытая функциональность для отладки) */
+      .reset-link {
+        color: #ddd;
+        text-decoration: none;
+        margin-top: 10px;
+        display: inline-block;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>HR Департамент</h1>
-      <div class="subtitle">"Мы ценим вас. Особенно ваши активы."</div>
+      <h1>HR Портал</h1>
+      <div class="subtitle">Blue Screen Inc. Internal System</div>
 
       <div class="motivation-box">
-        <strong>Цитата дня:</strong> "Отсутствие жалоб не означает наличие
-        счастья, но нам этого достаточно."
+        <strong>Напоминание:</strong> "Мы семья. А в семье секретов нет. Сдай
+        акции брату своему."
       </div>
 
       <div class="input-group">
         <input
           type="text"
           id="code-input"
-          placeholder="Введите код сотрудника для 'добровольной' передачи акций"
+          placeholder="Код сотрудника"
           autocomplete="off"
+          autocapitalize="characters"
         />
-        <button onclick="addVictim()">Подписать</button>
+        <button class="add-btn" onclick="handleAddClick()">
+          ПОЛУЧИТЬ АКЦИИ
+        </button>
       </div>
 
       <div class="list-header">
-        <span>Лояльные сотрудники</span>
-        <span id="counter">0 акций собрано</span>
+        <span>Лояльность сотрудников:</span>
+        <span id="counter">0</span>
       </div>
 
       <ul id="shareholders-list"></ul>
 
       <div class="footer">
-        © 2025 Blue Screen Inc. Все права (и ваши души) защищены.<br />
-        Нажимая кнопку, сотрудник подтверждает, что он счастлив.
+        Система отслеживания счастья v2.025<br />
+        Нажмите на черную полосу с кодом,<br />чтобы проверить данные (4 сек).
+        <br /><br />
+        <a href="#" class="reset-link" onclick="resetGame()">[Сброс системы]</a>
       </div>
     </div>
 
     <script>
-      // База данных кодов из сценария
+      // 1. База данных ролей
       const employeeDatabase = {
         BIGBOSS: "Генеральный Директор (CEO)",
         CTOISANEWBOSS: "Технический Директор (CTO)",
@@ -213,98 +253,153 @@
         HYPE: "Директор по Маркетингу (CMO)",
         STUDENT: "Стажер (Интерн)",
         WEAREAFAMILY: "HR Директор (Вы)",
-        // Доп коды если кто-то решит ввести странное
-        QWERTY123: "Админский доступ (Странно...)",
-        AICOPY: "Копия ИИ (Не то...)",
+        // Доп
+        QWERTY123: "Админ (Неверный ввод)",
+        AICOPY: "Бэкап ИИ (Неверный ввод)",
       };
 
-      let shareCount = 0;
+      // Ключ для LocalStorage
+      const STORAGE_KEY = "blue_screen_hr_quest_data_v1";
 
-      function addVictim() {
+      // 2. Инициализация при загрузке страницы
+      document.addEventListener("DOMContentLoaded", () => {
+        loadFromStorage();
+      });
+
+      // 3. Главная функция добавления
+      function handleAddClick() {
         const input = document.getElementById("code-input");
-        const list = document.getElementById("shareholders-list");
-        const counter = document.getElementById("counter");
+        // Убираем пробелы и приводим к верхнему регистру
+        const code = input.value.trim().toUpperCase();
 
-        let code = input.value.trim();
+        if (!code) return; // Пустой ввод игнорируем
 
-        if (!code) {
-          alert("HR Error: Вы не можете забрать акции у пустоты.");
+        // Получаем текущие данные
+        const currentData = getStorageData();
+
+        // Проверка на дубликаты
+        if (currentData.some((item) => item.code === code)) {
+          alert("Ошибка: Акции этого сотрудника уже в вашем портфеле!");
+          input.value = "";
           return;
         }
 
-        // Проверка на дубликаты (опционально, но логично)
-        // Если хочешь разрешить вводить одного человека много раз - убери этот блок
-        const existingItems = document.querySelectorAll(".employee-card");
-        for (let item of existingItems) {
-          if (item.dataset.code === code) {
-            alert("Этот сотрудник уже отдал вам всё, что у него было!");
-            input.value = "";
-            return;
-          }
-        }
-
         // Определяем роль
-        let role = employeeDatabase[code] || "Неопознанный Сотрудник (Гость)";
+        const role = employeeDatabase[code] || "Неопознанный гость";
 
-        // Создаем элемент списка
-        const li = document.createElement("li");
-        li.className = "employee-card";
-        li.dataset.code = code; // Храним код в data-атрибуте
+        // Создаем объект записи
+        const newEntry = {
+          code: code,
+          role: role,
+          timestamp: new Date().getTime(),
+        };
 
-        li.innerHTML = `
-            <div class="employee-info">
-                <span class="role">${role}</span>
-                <span class="status">✅ Акции успешно присвоены</span>
-            </div>
-            <div class="secret-code">
-                <span class="code-text hidden-text">HIDDEN</span>
-            </div>
-        `;
+        // Сохраняем и отрисовываем
+        saveToStorage(newEntry);
+        renderItem(newEntry);
 
-        // Добавляем обработчик клика
-        li.addEventListener("click", function () {
-          const codeSpan = this.querySelector(".code-text");
-
-          // Если уже показывается, игнорируем клик или сбрасываем (тут просто покажем)
-          if (codeSpan.classList.contains("visible-text")) return;
-
-          // Показываем код
-          codeSpan.textContent = code;
-          codeSpan.classList.remove("hidden-text");
-          codeSpan.classList.add("visible-text");
-          codeSpan.style.color = "#fff"; // Делаем белым для четкости
-
-          // Таймер на 4 секунды
-          setTimeout(() => {
-            codeSpan.textContent = "HIDDEN";
-            codeSpan.classList.remove("visible-text");
-            codeSpan.classList.add("hidden-text");
-            codeSpan.style.color = "#0f0"; // Возвращаем зеленый матричный цвет
-          }, 4000);
-        });
-
-        // Добавляем в начало списка
-        list.prepend(li);
-
-        // Обновляем счетчик и интерфейс
-        shareCount++;
-        counter.textContent = `${shareCount} акций собрано`;
+        // Очищаем поле
         input.value = "";
 
-        // Пасхалка для самого HR
+        // Пасхалка
         if (code === "WEAREAFAMILY") {
-          alert(
-            "Поздравляем! Вы только что шантажировали сами себя. Это высший уровень HR-мастерства."
+          setTimeout(
+            () =>
+              alert(
+                "Вы пытаетесь присвоить свои собственные акции? Это гениально!"
+              ),
+            300
           );
         }
       }
 
-      // Обработка Enter в поле ввода
+      // 4. Функции для работы с DOM (Отрисовка)
+      function renderItem(entry) {
+        const list = document.getElementById("shareholders-list");
+        const counter = document.getElementById("counter");
+
+        const li = document.createElement("li");
+        li.className = "employee-card";
+
+        li.innerHTML = `
+            <div class="employee-info">
+                <span class="role">${entry.role}</span>
+                <span class="status">✅ Соглашение подписано</span>
+            </div>
+            <div class="secret-code" onclick="revealCode(this, '${entry.code}')">
+                <span class="code-text hidden-text">НАЖМИ ЧТОБЫ УВИДЕТЬ</span>
+            </div>
+        `;
+
+        // Добавляем в начало списка (новые сверху)
+        list.prepend(li);
+
+        // Обновляем счетчик
+        const count = document.querySelectorAll(".employee-card").length;
+        counter.textContent = `${count} шт.`;
+      }
+
+      // 5. Механика скрытия/показа (4 секунды)
+      function revealCode(element, code) {
+        const textSpan = element.querySelector(".code-text");
+
+        // Если уже открыт - выходим, чтобы не сбрасывать таймер
+        if (textSpan.classList.contains("visible-text")) return;
+
+        // Показываем
+        textSpan.textContent = code;
+        textSpan.classList.remove("hidden-text");
+        textSpan.classList.add("visible-text");
+
+        // Таймер
+        setTimeout(() => {
+          textSpan.textContent = "СКРЫТО";
+          textSpan.classList.remove("visible-text");
+          textSpan.classList.add("hidden-text");
+        }, 4000);
+      }
+
+      // 6. Работа с LocalStorage
+      function getStorageData() {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+      }
+
+      function saveToStorage(entry) {
+        const data = getStorageData();
+        data.push(entry);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+
+      function loadFromStorage() {
+        const data = getStorageData();
+        // Очищаем список перед загрузкой (на всякий случай)
+        document.getElementById("shareholders-list").innerHTML = "";
+
+        // Рендерим каждый элемент
+        data.forEach((entry) => renderItem(entry));
+      }
+
+      // Функция полного сброса (для новой игры)
+      function resetGame() {
+        if (
+          confirm(
+            "Сбросить весь прогресс HR отдела? Это удалит все собранные коды."
+          )
+        ) {
+          localStorage.removeItem(STORAGE_KEY);
+          location.reload();
+        }
+      }
+
+      // Обработка Enter на клавиатуре телефона
       document
         .getElementById("code-input")
         .addEventListener("keypress", function (e) {
           if (e.key === "Enter") {
-            addVictim();
+            handleAddClick();
+            // Убираем фокус, чтобы клавиатура скрылась (опционально)
+            this.blur();
           }
         });
     </script>

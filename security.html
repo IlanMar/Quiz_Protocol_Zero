@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>SEC_PROTOCOL_V.2.4</title>
+    <style>
+      /* --- CSS STYLES --- */
+      :root {
+        --term-green: #00ff41;
+        --term-red: #ff3333;
+        --term-bg: #0d0d0d;
+      }
+
+      body {
+        background-color: var(--term-bg);
+        color: var(--term-green);
+        font-family: "Courier New", Courier, monospace;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        box-sizing: border-box;
+        overflow-x: hidden;
+      }
+
+      /* Эффект старого монитора */
+      body::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.25) 50%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.06),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.06)
+          );
+        z-index: 2;
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+      }
+
+      h1,
+      h2,
+      h3 {
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--term-green);
+        padding-bottom: 10px;
+        font-size: 1.2rem;
+        text-shadow: 0 0 5px var(--term-green);
+      }
+
+      p,
+      li {
+        font-size: 1rem;
+        line-height: 1.4;
+        margin-bottom: 15px;
+      }
+
+      .terminal-box {
+        border: 1px solid var(--term-green);
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid var(--term-green);
+        color: var(--term-green);
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1.2rem;
+        width: 100%;
+        padding: 10px 0;
+        margin-bottom: 20px;
+        outline: none;
+        text-transform: uppercase;
+      }
+
+      button {
+        background-color: var(--term-green);
+        color: black;
+        border: none;
+        padding: 15px;
+        width: 100%;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+      }
+
+      button:active {
+        background-color: #00cc33;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .error-msg {
+        color: var(--term-red);
+        font-weight: bold;
+        margin-top: 10px;
+        text-shadow: 0 0 5px var(--term-red);
+        min-height: 1.2em;
+      }
+
+      .blink {
+        animation: blinker 1s linear infinite;
+      }
+
+      @keyframes blinker {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      .playlist-item {
+        margin-bottom: 5px;
+        border-bottom: 1px dashed #333;
+        padding-bottom: 5px;
+      }
+
+      .investigator-photo {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 15px auto;
+        border: 2px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+      }
+
+      .photo-caption {
+        text-align: center;
+        color: #ddd;
+        margin-top: 8px;
+        font-size: 0.95rem;
+        border-top: 1px dashed #333;
+        padding-top: 8px;
+      }
+
+      /* Особый стиль для почты */
+      .email-body {
+        background: #1a1a1a;
+        color: #ddd;
+        padding: 10px;
+        border: 1px dashed var(--term-green);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage-1" class="container">
+      <h1>SECURITY GATEWAY <span class="blink">_</span></h1>
+      <p>SYSTEM: Blue Screen Inc. Secure Server</p>
+      <p>USER: Chief_Security_Officer</p>
+
+      <div class="terminal-box">
+        <label>ENTER PASSWORD:</label>
+        <input type="text" id="input-1" placeholder=">_" autocomplete="off" />
+        <button onclick="checkStage1()">LOGIN</button>
+        <div id="error-1" class="error-msg"></div>
+      </div>
+
+      <p style="font-size: 0.7rem; color: #333">v.2.4.1 build 2025</p>
+    </div>
+
+    <div id="stage-2" class="container hidden">
+      <h2>ЛИЧНЫЙ ДНЕВНИК <span class="blink">_</span></h2>
+
+      <p>>> ЗАГРУЗКА ПОСЛЕДНИХ ЗАМЕТОК...</p>
+      <p style="color: #bbb; font-style: italic">
+        "Запись 30.12.25: Почти все готово к трансферу. Чтобы не забыть
+        координаты тайника, я зашифровал их в длительности треков моего
+        плейлиста для медитации. Никто не догадается взять последние цифры."
+      </p>
+
+      <div class="terminal-box">
+        <div class="playlist-item">
+          1. The Police - Every Breath You Take [04:13]
+        </div>
+        <div class="playlist-item">
+          2. Rockwell - Somebody's Watching Me [03:58]
+        </div>
+        <div class="playlist-item">3. Radiohead - Creep [03:56]</div>
+        <div class="playlist-item">4. Hall & Oates - Private Eyes [03:29]</div>
+        <div class="playlist-item">
+          5. Alan Parsons Project - Eye in the Sky [04:36]
+        </div>
+      </div>
+
+      <label>ВВЕДИТЕ КОД ДОСТУПА:</label>
+      <input type="tel" id="input-2" placeholder="XXXXX" maxlength="5" />
+      <button onclick="checkStage2()">DECRYPT</button>
+      <div id="error-2" class="error-msg"></div>
+    </div>
+
+    <div id="stage-3" class="container hidden">
+      <h2>REMOTE CONNECTION <span class="blink">_</span></h2>
+      <div
+        style="
+          border: 1px solid var(--term-red);
+          color: var(--term-red);
+          padding: 5px;
+          margin-bottom: 15px;
+        "
+      >
+        WARNING: PROTOCOL MOLE REQUIRES CONFIRMATION
+      </div>
+
+      <p>
+        Для доступа к архиву решите логическое уравнение корпоративной
+        бюрократии:
+      </p>
+
+      <div class="terminal-box" style="font-size: 0.9rem">
+        <p>
+          <strong>УСЛОВИЕ:</strong> (Юристы ИЛИ Бухгалтерия) И (НЕ Генеральный)
+        </p>
+        <hr style="border-color: #333" />
+        <p>СТАТУСЫ ОТДЕЛОВ:</p>
+        <ul style="list-style: none; padding: 0">
+          <li>> Юристы: "В отпуске" (FALSE/0)</li>
+          <li>> Бухгалтерия: "Подписали не глядя" (TRUE/1)</li>
+          <li>> Генеральный: "Занят салфетками" (FALSE/0)</li>
+        </ul>
+      </div>
+
+      <label>РЕЗУЛЬТАТ (0 или 1):</label>
+      <input type="tel" id="input-3" placeholder="?" maxlength="1" />
+      <button onclick="checkStage3()">EXECUTE</button>
+      <div id="error-3" class="error-msg"></div>
+    </div>
+
+    <div id="stage-4" class="container hidden">
+      <h1 style="color: var(--term-red)">FILE UNLOCKED</h1>
+
+      <br />
+      <div
+        class="terminal-box"
+        style="text-align: center; border-color: var(--term-red)"
+      >
+        <p style="color: var(--term-red)">КОД КОМПРОМАТА:</p>
+        <h2 style="font-size: 2rem; margin: 0">MOLE_FOUND</h2>
+      </div>
+      <!-- Investigator photo and caption (shown after full success) -->
+      <div style="margin-top: 18px; text-align: center">
+        <img
+          src="Security_betrade_us.jpg"
+          alt="Investigator photo"
+          class="investigator-photo"
+        />
+        <div class="photo-caption">
+          фотоотчет нашего корпоративного сыщика, Начальник службы безопасности
+          замечен в беседе с представителем конкурирующей фирмы
+        </div>
+      </div>
+
+      <p style="text-align: center; font-size: 0.8rem">
+        Сделайте скриншот или запомните код.
+      </p>
+    </div>
+
+    <script>
+      // Функция для перехода между экранами
+      function switchStage(hideId, showId) {
+        document.getElementById(hideId).classList.add("hidden");
+        document.getElementById(showId).classList.remove("hidden");
+        window.scrollTo(0, 0);
+      }
+
+      // STAGE 1: CONFETTI
+      function checkStage1() {
+        const input = document
+          .getElementById("input-1")
+          .value.trim()
+          .toUpperCase();
+        const error = document.getElementById("error-1");
+
+        if (input === "SJFHK" || input === "FOMO") {
+          switchStage("stage-1", "stage-2");
+        } else {
+          error.innerText =
+            "ACCESS DENIED. TRY AGAIN. Доступ есть только у ведущего разработчика или начальника службы безопасности.";
+          // Визуальная тряска
+          document.getElementById("input-1").classList.add("blink");
+          setTimeout(
+            () => document.getElementById("input-1").classList.remove("blink"),
+            500
+          );
+        }
+      }
+
+      // STAGE 2: PLAYLIST (38696)
+      function checkStage2() {
+        const input = document.getElementById("input-2").value.trim();
+        const error = document.getElementById("error-2");
+
+        // 4:13 -> 3, 3:58 -> 8, 3:56 -> 6, 3:29 -> 9, 4:36 -> 6
+        if (input === "38696") {
+          switchStage("stage-2", "stage-3");
+        } else {
+          error.innerText = "COORDINATES INVALID.";
+        }
+      }
+
+      // STAGE 3: LOGIC (1)
+      function checkStage3() {
+        const input = document.getElementById("input-3").value.trim();
+        const error = document.getElementById("error-3");
+
+        // (0 OR 1) AND (NOT 0) => 1 AND 1 => 1
+        if (input === "1") {
+          switchStage("stage-3", "stage-4");
+        } else {
+          error.innerText = "LOGIC ERROR. SYSTEM LOCKED.";
+        }
+      }
+
+      // Позволяем нажимать Enter
+      document
+        .getElementById("input-1")
+        .addEventListener("keyup", function (event) {
+          if (event.key === "Enter") checkStage1();
+        });
+      document
+        .getElementById("input-2")
+        .addEventListener("keyup", function (event) {
+          if (event.key === "Enter") checkStage2();
+        });
+      document
+        .getElementById("input-3")
+        .addEventListener("keyup", function (event) {
+          if (event.key === "Enter") checkStage3();
+        });
+    </script>
+  </body>
+</html>

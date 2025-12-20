@@ -2,7 +2,10 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <style>
       :root {
         --bg: #0b1020;
@@ -31,6 +34,10 @@
         color: var(--text);
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
           sans-serif;
+      }
+
+      body {
+        min-height: 100svh;
       }
 
       .wrap {
@@ -80,9 +87,25 @@
 
       @media (max-width: 600px) {
         .wrap {
-          padding: 8px;
+          padding: calc(8px + env(safe-area-inset-top))
+            calc(8px + env(safe-area-inset-right))
+            calc(8px + env(safe-area-inset-bottom))
+            calc(8px + env(safe-area-inset-left));
           gap: 8px;
         }
+
+        /* Put the game first on phones (less scrolling) */
+        .row {
+          display: flex;
+          flex-direction: column;
+        }
+        .row > section.panel {
+          order: 1;
+        }
+        .row > aside.panel {
+          order: 2;
+        }
+
         header {
           flex-direction: column;
           align-items: flex-start;
@@ -123,6 +146,10 @@
         }
         .log {
           height: 120px;
+        }
+
+        .panel.gameWrap {
+          min-height: 62svh;
         }
         .touch-joy,
         .touch-fire {
@@ -568,7 +595,7 @@
           const rect = canvas.getBoundingClientRect();
           if (!rect.width || !rect.height) return;
           const targetW = Math.round(rect.width * DPR);
-          const targetH = Math.round(rect.width * (560 / 900) * DPR);
+          const targetH = Math.round(rect.height * DPR);
           canvas.width = Math.max(640, targetW);
           canvas.height = Math.max(420, targetH);
           logicalWidth = canvas.width;
@@ -582,6 +609,25 @@
           },
           { passive: true }
         );
+
+        // Mobile browsers often change the visual viewport height as toolbars
+        // show/hide; keep the canvas fitted to avoid stretched rendering.
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener(
+            "resize",
+            () => {
+              fitCanvas();
+            },
+            { passive: true }
+          );
+          window.visualViewport.addEventListener(
+            "scroll",
+            () => {
+              fitCanvas();
+            },
+            { passive: true }
+          );
+        }
 
         const keys = new Set();
         window.addEventListener("keydown", (e) => {

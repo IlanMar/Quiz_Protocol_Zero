@@ -108,12 +108,60 @@
           transform: translateY(105vh);
         }
       }
+
+      /* Milestone congratulations overlay */
+      #milestone-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(153, 185, 152, 0.95);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #000;
+        z-index: 25;
+        text-align: center;
+        padding: 24px;
+        box-sizing: border-box;
+        pointer-events: auto;
+        user-select: none;
+      }
+
+      #milestone-title {
+        font-size: 44px;
+        margin: 0 0 8px 0;
+      }
+
+      #milestone-text {
+        font-size: 28px;
+        max-width: 820px;
+        line-height: 1.1;
+        margin: 0;
+      }
+
+      #milestone-hint {
+        font-size: 22px;
+        opacity: 0.8;
+        margin-top: 12px;
+      }
     </style>
   </head>
   <body>
     <div class="scanlines"></div>
     <div id="ui">
       <span id="playerScore">0</span> : <span id="aiScore">0</span>
+    </div>
+
+    <div id="milestone-screen" role="dialog" aria-modal="true">
+      <h2 id="milestone-title">С наступающим!</h2>
+      <p id="milestone-text"></p>
+      <div id="milestone-hint">Нажми «Продолжить», чтобы вернуться в матч.</div>
+      <button class="btn" id="milestone-continue" type="button">
+        Продолжить
+      </button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -124,8 +172,56 @@
       const playerScoreEl = document.getElementById("playerScore");
       const aiScoreEl = document.getElementById("aiScore");
 
+      const milestoneScreen = document.getElementById("milestone-screen");
+      const milestoneTextEl = document.getElementById("milestone-text");
+      const milestoneContinueBtn =
+        document.getElementById("milestone-continue");
+
       let gameRunning = false;
       let audioCtx = null;
+
+      const milestoneMessages = [
+        "5:0 — это не счёт, это релиз без багов. С наступающим!",
+        "Ты так уверенно отбиваешь, что даже баги боятся подходить к продакшену. С праздником!",
+        "Новогодний патч: +5 к скиллу, −100 к надеждам ИИ на победу. Продолжай!",
+        "Похоже, твой пинг — 0, а у соперника — ‘временная петля’. С наступающим!",
+        "Этот мячик уже готов подписать NDA и перейти на твою сторону. С праздником!",
+        "Если бы дед Мороз видел твой тайминг, он бы попросил тебя настроить куранты. С наступающим!",
+        "Поздравляем! Ты только что провёл аудит соперника: несоответствий — ровно 5.",
+        "Твой удар настолько точный, что QR‑коды сами сканируются. С праздником!",
+        "Тонкий намёк: иногда правильнее ‘перезагрузить’, чем спорить с экраном. С наступающим!",
+        "5 голов — и ни одного синего экрана. Это уже корпоративное чудо. С праздником!",
+      ];
+
+      let milestoneDeck = [];
+      let nextPlayerMilestone = 5;
+
+      function shuffleInPlace(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      function getNextMilestoneMessage() {
+        if (milestoneDeck.length === 0) {
+          milestoneDeck = shuffleInPlace([...milestoneMessages]);
+        }
+        return milestoneDeck.pop();
+      }
+
+      function showMilestoneMessage(message) {
+        milestoneTextEl.textContent = message;
+        milestoneScreen.style.display = "flex";
+        gameRunning = false;
+      }
+
+      function hideMilestoneMessage() {
+        if (milestoneScreen.style.display !== "flex") return;
+        milestoneScreen.style.display = "none";
+        gameRunning = true;
+      }
 
       function playSound(frequency, duration) {
         if (!audioCtx) return;
@@ -149,8 +245,8 @@
       }
 
       // Game constants
-      const PADDLE_WIDTH = 15;
-      const PADDLE_HEIGHT = 100;
+      const PADDLE_WIDTH = 16;
+      const PADDLE_HEIGHT = 110;
       const BALL_SIZE = 12;
       const INITIAL_BALL_SPEED = 5;
       const SPEED_INCREMENT = 0.2;
@@ -176,6 +272,9 @@
         gameRunning = true;
         player.score = 0;
         ai.score = 0;
+        nextPlayerMilestone = 5;
+        milestoneDeck = [];
+        milestoneScreen.style.display = "none";
         playerScoreEl.innerText = "0";
         aiScoreEl.innerText = "0";
         resetBall();
@@ -224,13 +323,18 @@
           playSound(226, 0.1);
         }
 
-        // AI Movement
+        // AI Movement (slightly weakened for human advantage)
         const aiCenter = ai.y + PADDLE_HEIGHT / 2;
-        const aiSpeed = 4.5; // Slightly slower than ball to be beatable
-        if (aiCenter < ball.y - 10) {
-          ai.y += aiSpeed;
-        } else if (aiCenter > ball.y + 10) {
-          ai.y -= aiSpeed;
+        const aiSpeed = 3.2; // reduced so player has a better chance
+        const aiError = Math.random() < 0.06; // small chance to hesitate
+        const aiOffset = (Math.random() - 0.5) * 24; // aim offset to be less precise
+        const aiTarget = ball.y + aiOffset;
+        if (!aiError) {
+          if (aiCenter < aiTarget - 12) {
+            ai.y += aiSpeed;
+          } else if (aiCenter > aiTarget + 12) {
+            ai.y -= aiSpeed;
+          }
         }
 
         // Keep paddles in bounds
@@ -265,7 +369,7 @@
           ball.y + BALL_SIZE >= ai.y &&
           ball.y <= ai.y + PADDLE_HEIGHT
         ) {
-          ball.dx *= -1.1; // Speed up
+          ball.dx *= -1.05; // smaller speedup when AI hits
           ball.x = ai.x - BALL_SIZE;
           playSound(459, 0.1);
           const hitPos =
@@ -284,6 +388,12 @@
           player.score++;
           playerScoreEl.innerText = player.score;
           playSound(490, 0.3);
+
+          if (player.score >= nextPlayerMilestone) {
+            showMilestoneMessage(getNextMilestoneMessage());
+            nextPlayerMilestone += 5;
+          }
+
           resetBall();
         }
       }
@@ -344,6 +454,18 @@
       );
 
       window.addEventListener("resize", resize);
+
+      milestoneContinueBtn.addEventListener("click", hideMilestoneMessage);
+      milestoneScreen.addEventListener("click", (e) => {
+        if (e.target === milestoneScreen) hideMilestoneMessage();
+      });
+      window.addEventListener("keydown", (e) => {
+        if (milestoneScreen.style.display !== "flex") return;
+        if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+          e.preventDefault();
+          hideMilestoneMessage();
+        }
+      });
 
       init();
       gameLoop();

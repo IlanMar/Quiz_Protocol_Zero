@@ -1544,19 +1544,19 @@
         }
 
         function spawnBoss() {
-          const isDeepSeek = Math.random() < 0.4;
-          state.boss = {
-            x: logicalWidth * 0.5,
-            y: 120,
-            r: 52,
-            hp: isDeepSeek ? 120 : 80,
-            maxHp: isDeepSeek ? 120 : 80,
-            vx: isDeepSeek ? 90 : 70,
-            emoji: isDeepSeek ? "🐉" : "🤖",
-            name: isDeepSeek ? "DeepSeek-R1" : "ИИ «Янус»",
-            cooldown: 0,
-          };
-          if (isDeepSeek) {
+          const roll = Math.random();
+          if (roll < 0.2) {
+            state.boss = {
+              x: logicalWidth * 0.5,
+              y: 120,
+              r: 52,
+              hp: 120,
+              maxHp: 120,
+              vx: 90,
+              emoji: "🐉",
+              name: "DeepSeek-R1",
+              cooldown: 0,
+            };
             logLine(
               "Янус: О нет, китайский конкурент! Он думает быстрее нас всех!",
               "bad"
@@ -1566,7 +1566,81 @@
               "bad"
             );
             showMessage("BOSS: DeepSeek-R1", 1500);
+          } else if (roll < 0.4) {
+            state.boss = {
+              x: logicalWidth * 0.5,
+              y: 120,
+              r: 52,
+              hp: 150,
+              maxHp: 150,
+              vx: 60,
+              emoji: "👔",
+              name: "CEO-Бот",
+              cooldown: 0,
+            };
+            logLine(
+              "Янус: Внимание! Сам CEO спустился в дебаг-консоль!",
+              "warn"
+            );
+            logLine(
+              "CEO-Бот: Почему вы еще не на митинге? Где мои годовые бонусы?",
+              "bad"
+            );
+            showMessage("BOSS: CEO-Бот", 1500);
+          } else if (roll < 0.6) {
+            state.boss = {
+              x: logicalWidth * 0.5,
+              y: 120,
+              r: 52,
+              hp: 100,
+              maxHp: 100,
+              vx: 130,
+              emoji: "⏰",
+              name: "Призрак Дедлайна",
+              cooldown: 0,
+            };
+            logLine(
+              "Янус: О нет! Это Дедлайн! Он пришел за нашими душами (и коммитами)!",
+              "bad"
+            );
+            logLine(
+              "Дедлайн: ТИК-ТАК. ТИК-ТАК. Нужно было делать это вчера!",
+              "bad"
+            );
+            showMessage("BOSS: Дедлайн", 1500);
+          } else if (roll < 0.8) {
+            state.boss = {
+              x: logicalWidth * 0.5,
+              y: 120,
+              r: 52,
+              hp: 90,
+              maxHp: 90,
+              vx: 100,
+              emoji: "☕",
+              name: "Кофе-Машина",
+              cooldown: 0,
+            };
+            logLine(
+              "Янус: Кофе-машина взбунтовалась! Она требует декаф!",
+              "warn"
+            );
+            logLine(
+              "Кофе-Машина: ERROR: OUT OF BEANS. ПЕЙТЕ ЧАЙ, СМЕРТНЫЕ!",
+              "bad"
+            );
+            showMessage("BOSS: Кофе-Машина", 1500);
           } else {
+            state.boss = {
+              x: logicalWidth * 0.5,
+              y: 120,
+              r: 52,
+              hp: 80,
+              maxHp: 80,
+              vx: 70,
+              emoji: "🤖",
+              name: "ИИ «Янус»",
+              cooldown: 0,
+            };
             logLine(
               "Янус: инициирую проверку доступа. Кто тут самый прогрессист?",
               "warn"
@@ -1919,7 +1993,31 @@
             b.cooldown = Math.max(0, b.cooldown - dt * 1000);
             if (b.cooldown === 0) {
               b.cooldown = glitch ? 420 : 520;
-              // boss shoots down as "audit"
+
+              let shotEmoji = "🔍";
+              let shotName = "Аудит";
+              let shotQuip =
+                "Янус: инициирую аудит. Ничего личного — просто годовой отчёт.";
+
+              if (b.name === "CEO-Бот") {
+                shotEmoji = "📉";
+                shotName = "KPI";
+                shotQuip = "CEO: Ваши показатели падают! Срочно исправьте!";
+              } else if (b.name === "DeepSeek-R1") {
+                shotEmoji = "⚡";
+                shotName = "Оптимизация";
+                shotQuip = "DeepSeek: Удаляю лишние процессы. Ты — лишний.";
+              } else if (b.name === "Призрак Дедлайна") {
+                shotEmoji = Math.random() < 0.5 ? "🔜" : "📅";
+                shotName = "ASAP";
+                shotQuip = "Дедлайн: Это нужно было сделать еще вчера!";
+              } else if (b.name === "Кофе-Машина") {
+                shotEmoji = "☕";
+                shotName = "Кипяток";
+                shotQuip = "Кофе-Машина: ОЖОГ ТРЕТЬЕЙ СТЕПЕНИ! Наслаждайтесь.";
+              }
+
+              // boss shoots down
               enemies.push({
                 x: b.x + rand(-10, 10),
                 y: b.y + b.r,
@@ -1929,9 +2027,9 @@
                 hp: 1,
                 maxHp: 1,
                 score: 0,
-                emoji: "🔍",
-                name: "Аудит",
-                quip: "Янус: инициирую аудит. Ничего личного — просто годовой отчёт.",
+                emoji: shotEmoji,
+                name: shotName,
+                quip: shotQuip,
                 isBossShot: true,
               });
             }
@@ -1996,7 +2094,31 @@
                 if (boss.hp <= 0) {
                   playExplosion();
                   state.score += 250;
-                  logLine("Янус: …ладно. Патчи приняты. Я сдаюсь.", "ok");
+
+                  if (boss.name === "CEO-Бот") {
+                    logLine(
+                      "CEO-Бот: Ладно, выписываю премию... виртуальную.",
+                      "ok"
+                    );
+                  } else if (boss.name === "DeepSeek-R1") {
+                    logLine(
+                      "DeepSeek: Ошибка 404: Boss not found. Перезагрузка...",
+                      "ok"
+                    );
+                  } else if (boss.name === "Призрак Дедлайна") {
+                    logLine(
+                      "Дедлайн: Я ухожу... но я вернусь в следующую пятницу вечером!",
+                      "ok"
+                    );
+                  } else if (boss.name === "Кофе-Машина") {
+                    logLine(
+                      "Кофе-Машина: SHUTTING DOWN. Пожалуйста, очистите поддон.",
+                      "ok"
+                    );
+                  } else {
+                    logLine("Янус: …ладно. Патчи приняты. Я сдаюсь.", "ok");
+                  }
+
                   state.boss = null;
                   // delay next boss spawn for a short period so regular enemies return
                   state.nextBossAt = ts + 12000; // 12 seconds
@@ -2126,7 +2248,7 @@
             ctx.fillStyle = "rgba(255,255,255,0.75)";
             ctx.font = "12px ui-monospace, Menlo, Consolas, monospace";
             ctx.textAlign = "center";
-            ctx.fillText("JANUS CORE", logicalWidth / 2, y + 24);
+            ctx.fillText(b.name, logicalWidth / 2, y + 24);
             ctx.restore();
           }
 

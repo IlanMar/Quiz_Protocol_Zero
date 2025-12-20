@@ -1285,6 +1285,7 @@
           foundGood: new Set(),
           foundBad: new Set(),
           boss: null,
+          bossIndex: 0,
           // timestamp (ms) after which a new boss may spawn
           nextBossAt: 0,
         };
@@ -1322,6 +1323,7 @@
           state.foundGood = new Set();
           state.foundBad = new Set();
           state.boss = null;
+          state.bossIndex = 0;
           state.nextBossAt = 0;
 
           bullets.length = 0;
@@ -1544,8 +1546,10 @@
         }
 
         function spawnBoss() {
-          const roll = Math.random();
-          if (roll < 0.2) {
+          const type = state.bossIndex % 5;
+          state.bossIndex++;
+
+          if (type === 0) {
             state.boss = {
               x: logicalWidth * 0.5,
               y: 120,
@@ -1566,7 +1570,7 @@
               "bad"
             );
             showMessage("BOSS: DeepSeek-R1", 1500);
-          } else if (roll < 0.4) {
+          } else if (type === 1) {
             state.boss = {
               x: logicalWidth * 0.5,
               y: 120,
@@ -1587,7 +1591,7 @@
               "bad"
             );
             showMessage("BOSS: CEO-Бот", 1500);
-          } else if (roll < 0.6) {
+          } else if (type === 2) {
             state.boss = {
               x: logicalWidth * 0.5,
               y: 120,
@@ -1608,7 +1612,7 @@
               "bad"
             );
             showMessage("BOSS: Дедлайн", 1500);
-          } else if (roll < 0.8) {
+          } else if (type === 3) {
             state.boss = {
               x: logicalWidth * 0.5,
               y: 120,

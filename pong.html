@@ -255,13 +255,20 @@
       let player = { x: 20, y: 0, score: 0, color: "#000000" };
       let ai = { x: 0, y: 0, score: 0, color: "#000000" };
       let ball = { x: 0, y: 0, dx: 0, dy: 0, color: "#000000" };
+      let obstacle = {
+        x: 0,
+        y: 0,
+        dx: 0,
+        dy: 0,
+        radius: 65,
+        color: "#000000",
+      };
 
       function init() {
         resize();
         player.y = canvas.height / 2 - PADDLE_HEIGHT / 2;
         ai.x = canvas.width - PADDLE_WIDTH - 20;
         ai.y = canvas.height / 2 - PADDLE_HEIGHT / 2;
-        resetBall();
         setInterval(createSnow, 300);
 
         if (!audioCtx) {
@@ -278,6 +285,7 @@
         playerScoreEl.innerText = "0";
         aiScoreEl.innerText = "0";
         resetBall();
+        resetObstacle();
       }
 
       function resize() {
@@ -310,6 +318,22 @@
         ball.dy = INITIAL_BALL_SPEED * Math.sin(angle);
       }
 
+      function resetObstacle() {
+        obstacle.x = canvas.width / 2;
+        obstacle.y =
+          Math.random() * (canvas.height - obstacle.radius * 2) +
+          obstacle.radius;
+        // Ensure it's not too close to the center where the ball starts
+        if (Math.abs(obstacle.y - canvas.height / 2) < obstacle.radius + 50) {
+          obstacle.y +=
+            (obstacle.radius + 70) * (obstacle.y < canvas.height / 2 ? -1 : 1);
+        }
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2.5;
+        obstacle.dx = Math.cos(angle) * speed;
+        obstacle.dy = Math.sin(angle) * speed;
+      }
+
       function update() {
         if (!gameRunning) return;
 
@@ -317,10 +341,70 @@
         ball.x += ball.dx;
         ball.y += ball.dy;
 
+        // Move obstacle (chaotic movement)
+        obstacle.x += obstacle.dx;
+        obstacle.y += obstacle.dy;
+
+        // Slightly change obstacle direction randomly for "chaotic" feel
+        if (Math.random() < 0.01) {
+          const angleChange = (Math.random() - 0.5) * 0.2;
+          const speed = Math.sqrt(
+            obstacle.dx * obstacle.dx + obstacle.dy * obstacle.dy
+          );
+          const currentAngle = Math.atan2(obstacle.dy, obstacle.dx);
+          const newAngle = currentAngle + angleChange;
+          obstacle.dx = Math.cos(newAngle) * speed;
+          obstacle.dy = Math.sin(newAngle) * speed;
+        }
+
         // Wall collisions (top/bottom)
         if (ball.y <= 0 || ball.y + BALL_SIZE >= canvas.height) {
           ball.dy *= -1;
           playSound(226, 0.1);
+        }
+
+        // Obstacle wall collisions
+        if (
+          obstacle.x - obstacle.radius <= 0 ||
+          obstacle.x + obstacle.radius >= canvas.width
+        ) {
+          obstacle.dx *= -1;
+        }
+        if (
+          obstacle.y - obstacle.radius <= 0 ||
+          obstacle.y + obstacle.radius >= canvas.height
+        ) {
+          obstacle.dy *= -1;
+        }
+
+        // Collision between ball and obstacle
+        const ballCenterX = ball.x + BALL_SIZE / 2;
+        const ballCenterY = ball.y + BALL_SIZE / 2;
+        const dx = ballCenterX - obstacle.x;
+        const dy = ballCenterY - obstacle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const minDistance = BALL_SIZE / 2 + obstacle.radius;
+
+        if (distance < minDistance) {
+          // Normal vector
+          const nx = dx / distance;
+          const ny = dy / distance;
+
+          // Dot product of velocity and normal
+          const dotProduct = ball.dx * nx + ball.dy * ny;
+
+          if (dotProduct < 0) {
+            // Reflect ball velocity: v_new = v - 2 * (v . n) * n
+            ball.dx = ball.dx - 2 * dotProduct * nx;
+            ball.dy = ball.dy - 2 * dotProduct * ny;
+
+            // Push ball out of obstacle to prevent sticking
+            const overlap = minDistance - distance;
+            ball.x += nx * overlap;
+            ball.y += ny * overlap;
+
+            playSound(600, 0.1);
+          }
         }
 
         // AI Movement (slightly weakened for human advantage)
@@ -415,6 +499,21 @@
         // Draw paddles
         drawPaddle(player.x, player.y, player.color);
         drawPaddle(ai.x, ai.y, ai.color);
+
+        // Draw obstacle
+        ctx.beginPath();
+        ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2);
+        ctx.fillStyle = obstacle.color;
+        ctx.fill();
+        ctx.closePath();
+
+        // Retro detail for obstacle
+        ctx.strokeStyle = "#8ca88b";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(obstacle.x, obstacle.y, obstacle.radius - 5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.closePath();
 
         // Draw ball (Pixelated)
         ctx.fillStyle = ball.color;

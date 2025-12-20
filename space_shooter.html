@@ -825,13 +825,16 @@
           foundGood: new Set(),
           foundBad: new Set(),
           boss: null,
+          // timestamp (ms) after which a new boss may spawn
+          nextBossAt: 0,
         };
 
         const player = {
           x: 0,
           y: 0,
           r: 16,
-          speed: 520,
+          // increased max movement speed
+          speed: 800,
           cooldown: 0,
           fireDelay: 160,
           multishot: 1,
@@ -859,6 +862,7 @@
           state.foundGood = new Set();
           state.foundBad = new Set();
           state.boss = null;
+          state.nextBossAt = 0;
 
           bullets.length = 0;
           enemies.length = 0;
@@ -1050,8 +1054,8 @@
             x: logicalWidth * 0.5,
             y: 120,
             r: 52,
-            hp: 60,
-            maxHp: 60,
+            hp: 80,
+            maxHp: 80,
             vx: 70,
             emoji: "🤖",
             name: "ИИ «Янус»",
@@ -1277,7 +1281,14 @@
               state.spawnTimer -= state.spawnEvery;
               state.wave += 1;
               spawnEnemy();
-              if (!state.boss && state.score >= 450) spawnBoss();
+              // only spawn a boss if no boss exists, score threshold met,
+              // and the boss respawn delay has passed
+              if (
+                !state.boss &&
+                state.score >= 450 &&
+                ts >= (state.nextBossAt || 0)
+              )
+                spawnBoss();
             }
           }
 
@@ -1288,7 +1299,9 @@
             if (e.x < 24 || e.x > logicalWidth - 24) e.vx *= -1;
             if (e.y > logicalHeight + 60) {
               enemies.splice(i, 1);
-              hitPlayer();
+              // Boss projectiles should only damage on direct hit with the ship,
+              // not when they fly past the bottom of the screen.
+              if (!e.isBossShot) hitPlayer();
             }
           }
 
@@ -1367,6 +1380,12 @@
                   state.score += 250;
                   logLine("Янус: …ладно. Патчи приняты. Я сдаюсь.", "ok");
                   state.boss = null;
+                  // delay next boss spawn for a short period so regular enemies return
+                  state.nextBossAt = ts + 12000; // 12 seconds
+                  logLine(
+                    "Янус: следующее сканирование через 12 сек — берегитесь",
+                    "warn"
+                  );
                   updateHud();
                   // drop guaranteed good core if missing
                   const missing = GOOD_CORES.filter(

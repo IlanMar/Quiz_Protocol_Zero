@@ -255,14 +255,8 @@
       let player = { x: 20, y: 0, score: 0, color: "#000000" };
       let ai = { x: 0, y: 0, score: 0, color: "#000000" };
       let ball = { x: 0, y: 0, dx: 0, dy: 0, color: "#000000" };
-      let obstacle = {
-        x: 0,
-        y: 0,
-        dx: 0,
-        dy: 0,
-        radius: 65,
-        color: "#000000",
-      };
+      const NUM_OBSTACLES = 3;
+      let obstacles = [];
 
       function init() {
         resize();
@@ -285,7 +279,7 @@
         playerScoreEl.innerText = "0";
         aiScoreEl.innerText = "0";
         resetBall();
-        resetObstacle();
+        resetObstacles();
       }
 
       function resize() {
@@ -318,20 +312,34 @@
         ball.dy = INITIAL_BALL_SPEED * Math.sin(angle);
       }
 
-      function resetObstacle() {
-        obstacle.x = canvas.width / 2;
-        obstacle.y =
-          Math.random() * (canvas.height - obstacle.radius * 2) +
-          obstacle.radius;
-        // Ensure it's not too close to the center where the ball starts
-        if (Math.abs(obstacle.y - canvas.height / 2) < obstacle.radius + 50) {
-          obstacle.y +=
-            (obstacle.radius + 70) * (obstacle.y < canvas.height / 2 ? -1 : 1);
-        }
-        const angle = Math.random() * Math.PI * 2;
+      function resetObstacles() {
+        obstacles = [];
+        const radius = 65;
         const speed = 2.5;
-        obstacle.dx = Math.cos(angle) * speed;
-        obstacle.dy = Math.sin(angle) * speed;
+        for (let i = 0; i < NUM_OBSTACLES; i++) {
+          // spread obstacles horizontally around center
+          const xOffset =
+            (i - Math.floor(NUM_OBSTACLES / 2)) * (radius * 2 + 40);
+          const x = canvas.width / 2 + xOffset;
+          let y = Math.random() * (canvas.height - radius * 2) + radius;
+
+          // Ensure it's not too close to the center where the ball starts
+          if (Math.abs(y - canvas.height / 2) < radius + 50) {
+            y += (radius + 70) * (y < canvas.height / 2 ? -1 : 1);
+            // clamp
+            y = Math.max(radius, Math.min(canvas.height - radius, y));
+          }
+
+          const angle = Math.random() * Math.PI * 2;
+          obstacles.push({
+            x,
+            y,
+            dx: Math.cos(angle) * speed,
+            dy: Math.sin(angle) * speed,
+            radius,
+            color: "#000000",
+          });
+        }
       }
 
       function update() {
@@ -341,20 +349,20 @@
         ball.x += ball.dx;
         ball.y += ball.dy;
 
-        // Move obstacle (chaotic movement)
-        obstacle.x += obstacle.dx;
-        obstacle.y += obstacle.dy;
+        // Move obstacles (chaotic movement)
+        for (let ob of obstacles) {
+          ob.x += ob.dx;
+          ob.y += ob.dy;
 
-        // Slightly change obstacle direction randomly for "chaotic" feel
-        if (Math.random() < 0.01) {
-          const angleChange = (Math.random() - 0.5) * 0.2;
-          const speed = Math.sqrt(
-            obstacle.dx * obstacle.dx + obstacle.dy * obstacle.dy
-          );
-          const currentAngle = Math.atan2(obstacle.dy, obstacle.dx);
-          const newAngle = currentAngle + angleChange;
-          obstacle.dx = Math.cos(newAngle) * speed;
-          obstacle.dy = Math.sin(newAngle) * speed;
+          // Slightly change obstacle direction randomly for "chaotic" feel
+          if (Math.random() < 0.01) {
+            const angleChange = (Math.random() - 0.5) * 0.2;
+            const speed = Math.sqrt(ob.dx * ob.dx + ob.dy * ob.dy);
+            const currentAngle = Math.atan2(ob.dy, ob.dx);
+            const newAngle = currentAngle + angleChange;
+            ob.dx = Math.cos(newAngle) * speed;
+            ob.dy = Math.sin(newAngle) * speed;
+          }
         }
 
         // Wall collisions (top/bottom)
@@ -363,47 +371,43 @@
           playSound(226, 0.1);
         }
 
-        // Obstacle wall collisions
-        if (
-          obstacle.x - obstacle.radius <= 0 ||
-          obstacle.x + obstacle.radius >= canvas.width
-        ) {
-          obstacle.dx *= -1;
-        }
-        if (
-          obstacle.y - obstacle.radius <= 0 ||
-          obstacle.y + obstacle.radius >= canvas.height
-        ) {
-          obstacle.dy *= -1;
-        }
-
-        // Collision between ball and obstacle
+        // Obstacle wall collisions & ball collisions
         const ballCenterX = ball.x + BALL_SIZE / 2;
         const ballCenterY = ball.y + BALL_SIZE / 2;
-        const dx = ballCenterX - obstacle.x;
-        const dy = ballCenterY - obstacle.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const minDistance = BALL_SIZE / 2 + obstacle.radius;
+        for (let ob of obstacles) {
+          if (ob.x - ob.radius <= 0 || ob.x + ob.radius >= canvas.width) {
+            ob.dx *= -1;
+          }
+          if (ob.y - ob.radius <= 0 || ob.y + ob.radius >= canvas.height) {
+            ob.dy *= -1;
+          }
 
-        if (distance < minDistance) {
-          // Normal vector
-          const nx = dx / distance;
-          const ny = dy / distance;
+          // Collision between ball and this obstacle
+          const dx = ballCenterX - ob.x;
+          const dy = ballCenterY - ob.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const minDistance = BALL_SIZE / 2 + ob.radius;
 
-          // Dot product of velocity and normal
-          const dotProduct = ball.dx * nx + ball.dy * ny;
+          if (distance < minDistance) {
+            // Normal vector
+            const nx = dx / distance;
+            const ny = dy / distance;
 
-          if (dotProduct < 0) {
-            // Reflect ball velocity: v_new = v - 2 * (v . n) * n
-            ball.dx = ball.dx - 2 * dotProduct * nx;
-            ball.dy = ball.dy - 2 * dotProduct * ny;
+            // Dot product of velocity and normal
+            const dotProduct = ball.dx * nx + ball.dy * ny;
 
-            // Push ball out of obstacle to prevent sticking
-            const overlap = minDistance - distance;
-            ball.x += nx * overlap;
-            ball.y += ny * overlap;
+            if (dotProduct < 0) {
+              // Reflect ball velocity: v_new = v - 2 * (v . n) * n
+              ball.dx = ball.dx - 2 * dotProduct * nx;
+              ball.dy = ball.dy - 2 * dotProduct * ny;
 
-            playSound(600, 0.1);
+              // Push ball out of obstacle to prevent sticking
+              const overlap = minDistance - distance;
+              ball.x += nx * overlap;
+              ball.y += ny * overlap;
+
+              playSound(600, 0.1);
+            }
           }
         }
 
@@ -500,20 +504,22 @@
         drawPaddle(player.x, player.y, player.color);
         drawPaddle(ai.x, ai.y, ai.color);
 
-        // Draw obstacle
-        ctx.beginPath();
-        ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2);
-        ctx.fillStyle = obstacle.color;
-        ctx.fill();
-        ctx.closePath();
+        // Draw obstacles
+        for (let ob of obstacles) {
+          ctx.beginPath();
+          ctx.arc(ob.x, ob.y, ob.radius, 0, Math.PI * 2);
+          ctx.fillStyle = ob.color;
+          ctx.fill();
+          ctx.closePath();
 
-        // Retro detail for obstacle
-        ctx.strokeStyle = "#8ca88b";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(obstacle.x, obstacle.y, obstacle.radius - 5, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.closePath();
+          // Retro detail for obstacle
+          ctx.strokeStyle = "#8ca88b";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(ob.x, ob.y, ob.radius - 5, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.closePath();
+        }
 
         // Draw ball (Pixelated)
         ctx.fillStyle = ball.color;

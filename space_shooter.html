@@ -78,6 +78,75 @@
         }
       }
 
+      @media (max-width: 600px) {
+        .wrap {
+          padding: 8px;
+          gap: 8px;
+        }
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+        }
+        h1 {
+          font-size: 15px;
+        }
+        .subtitle,
+        .help {
+          display: none;
+        }
+        .btns {
+          width: 100%;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 4px;
+        }
+        button {
+          padding: 6px 4px;
+          font-size: 11px;
+          text-align: center;
+        }
+        .panel-h {
+          padding: 6px 10px;
+        }
+        .panel-b {
+          padding: 8px;
+        }
+        .hud {
+          gap: 6px;
+        }
+        .stat {
+          padding: 4px 8px;
+        }
+        .stat .v {
+          font-size: 13px;
+        }
+        .log {
+          height: 120px;
+        }
+        .touch-joy,
+        .touch-fire {
+          width: 90px;
+          height: 90px;
+        }
+        .touch-joy .knob {
+          width: 36px;
+          height: 36px;
+          margin-left: -18px;
+          margin-top: -18px;
+        }
+        .touch-fire {
+          font-size: 14px;
+        }
+        .mobile-hide {
+          display: none;
+        }
+        .footer {
+          font-size: 9px;
+          padding: 2px 0;
+        }
+      }
+
       .panel {
         background: var(--panel);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -379,7 +448,10 @@
           </div>
           <div class="panel-b">
             <div>
-              <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7)">
+              <div
+                class="mobile-hide"
+                style="font-size: 12px; color: rgba(255, 255, 255, 0.7)"
+              >
                 Слухи HR / прогресс по ключам
               </div>
               <div class="chips" id="cores"></div>
@@ -417,6 +489,61 @@
           touchFire: document.getElementById("touchFire"),
           touchPause: document.getElementById("touchPause"),
         };
+
+        const audioCtx = new (window.AudioContext ||
+          window.webkitAudioContext)();
+
+        function playNote(freq, duration, gainValue = 0.1) {
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(gainValue, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            0.01,
+            audioCtx.currentTime + duration
+          );
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playShoot() {
+          playNote(880, 0.05, 0.001); // приятный звук, еще тише
+        }
+
+        function playExplosion() {
+          playNote(150, 0.2, 0.15); // низкий взрыв, как хлопушка
+        }
+
+        function playCollect() {
+          // новогодняя мелодия: до-ми-соль
+          playNote(523, 0.15, 0.1);
+          setTimeout(() => playNote(659, 0.15, 0.1), 100);
+          setTimeout(() => playNote(784, 0.15, 0.1), 200);
+        }
+
+        function playBad() {
+          playNote(200, 0.3, 0.12); // подозрительный низкий звук
+        }
+
+        function playHit() {
+          playNote(300, 0.2, 0.1); // удар
+        }
+
+        function playWin() {
+          // радостная мелодия: до-ре-ми-фа-соль
+          const melody = [523, 587, 659, 698, 784];
+          melody.forEach((freq, i) => {
+            setTimeout(() => playNote(freq, 0.2, 0.1), i * 200);
+          });
+        }
+
+        function playGameOver() {
+          playNote(200, 0.3, 0.1);
+          setTimeout(() => playNote(150, 0.3, 0.1), 300);
+        }
 
         const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
         let logicalWidth = canvas.width;
@@ -749,6 +876,7 @@
         }
 
         function start() {
+          if (audioCtx.state === "suspended") audioCtx.resume();
           if (state.running) return;
           state.running = true;
           state.paused = false;
@@ -776,6 +904,7 @@
         }
 
         function gameOver(reason) {
+          playGameOver();
           state.running = false;
           ui.status.textContent = "Завершено";
           logLine(`Янус: ${reason}`, "bad");
@@ -786,6 +915,7 @@
         }
 
         function win() {
+          playWin();
           state.running = false;
           ui.status.textContent = "Успех";
           logLine("Янус: 4 ключа приняты. Перезагрузка…", "ok");
@@ -856,6 +986,7 @@
         }
 
         function fire() {
+          playShoot();
           if (player.cooldown > 0) return;
           player.cooldown = player.fireDelay;
 
@@ -907,6 +1038,12 @@
             }
           }
 
+          if (drop.kind === "ok") {
+            playCollect();
+          } else {
+            playBad();
+          }
+
           if (drop.effect === "shield") {
             player.shield = Math.min(3, player.shield + 1);
             showMessage("Щит +1 (корпоративная броня)");
@@ -933,6 +1070,7 @@
         }
 
         function hitPlayer() {
+          playHit();
           if (player.shield > 0) {
             player.shield -= 1;
             state.shake = Math.max(state.shake, 10);
@@ -1101,6 +1239,7 @@
                 bullets.splice(bi, 1);
                 hit = true;
                 if (e.hp <= 0) {
+                  playExplosion();
                   if (e.score) state.score += e.score;
                   if (!e.isBossShot && Math.random() < 0.22) logLine(e.quip);
                   maybeDrop(e.x, e.y);
@@ -1120,6 +1259,7 @@
                 bullets.splice(bi, 1);
                 state.shake = Math.max(state.shake, 6);
                 if (boss.hp <= 0) {
+                  playExplosion();
                   state.score += 250;
                   logLine("Янус: …ладно. Патчи приняты. Я сдаюсь.", "ok");
                   state.boss = null;
@@ -1393,6 +1533,7 @@
         // Friendly focus hint
         canvas.addEventListener("click", () => {
           canvas.focus?.();
+          if (audioCtx.state === "suspended") audioCtx.resume();
         });
       })();
     </script>

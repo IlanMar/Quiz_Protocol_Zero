@@ -12,6 +12,7 @@
         --danger: #ff5a6a;
         --ok: #54ffa8;
         --warn: #ffd15a;
+        --orange: #ff8a3b;
       }
 
       * {
@@ -332,6 +333,25 @@
         color: rgba(255, 90, 106, 0.95);
       }
 
+      /* Orange toggle button for immortality control */
+      .btn-orange {
+        border-radius: 10px;
+        padding: 6px 10px;
+        font-size: 12px;
+        border: 1px solid rgba(255, 138, 59, 0.22);
+        color: var(--orange);
+        background: rgba(255, 138, 59, 0.06);
+        cursor: pointer;
+      }
+      .btn-orange:hover {
+        background: rgba(255, 138, 59, 0.12);
+      }
+      .btn-orange.active {
+        background: var(--orange);
+        color: #051018;
+        border-color: rgba(0, 0, 0, 0.08);
+      }
+
       .log {
         height: 240px;
         overflow: auto;
@@ -392,6 +412,11 @@
                 Слухи HR / прогресс по ключам
               </div>
               <div class="chips" id="cores"></div>
+              <div style="margin-top: 8px">
+                <button id="toggleImmortality" class="btn-orange" type="button">
+                  Отключить бессмертие
+                </button>
+              </div>
             </div>
           </div>
           <div class="log" id="log"></div>
@@ -457,6 +482,7 @@
           status: document.getElementById("status"),
           log: document.getElementById("log"),
           cores: document.getElementById("cores"),
+          toggleImmortality: document.getElementById("toggleImmortality"),
           btnStart: document.getElementById("btnStart"),
           btnPause: document.getElementById("btnPause"),
           btnRestart: document.getElementById("btnRestart"),
@@ -787,6 +813,8 @@
           last: 0,
           score: 0,
           lives: Infinity,
+          // when true, immortality is disabled and player has finite lives
+          disableImmortality: false,
           wave: 0,
           spawnTimer: 0,
           spawnEvery: 900,
@@ -820,7 +848,7 @@
           state.t = 0;
           state.last = 0;
           state.score = 0;
-          state.lives = Infinity;
+          state.lives = state.disableImmortality ? 5 : Infinity;
           state.wave = 0;
           state.spawnTimer = 0;
           state.spawnEvery = 1400;
@@ -972,7 +1000,7 @@
             "Янус: добро пожаловать в 2026. Пожалуйста, не приносите туда сомнительные ключи и чужие KPI.",
             "ok"
           );
-          showMessage("2026 ONLINE — YOU WIN", 5000);
+          // victory overlay message removed per user request
         }
 
         function spawnEnemy() {
@@ -1239,9 +1267,13 @@
 
           // enemies
           state.spawnTimer += dt * 1000;
+          // When boss is active, make other enemies appear much less often
+          const effectiveSpawnEvery = state.boss
+            ? state.spawnEvery * 4
+            : state.spawnEvery;
           // spawn at most once per frame to avoid burst spawns when lag accumulates
-          if (state.spawnTimer > state.spawnEvery) {
-            state.spawnTimer -= state.spawnEvery;
+          if (state.spawnTimer > effectiveSpawnEvery) {
+            state.spawnTimer -= effectiveSpawnEvery;
             state.wave += 1;
             spawnEnemy();
             if (!state.boss && state.score >= 450) spawnBoss();
@@ -1542,6 +1574,23 @@
         }
         if (ui.btnRestart) {
           ui.btnRestart.addEventListener("click", () => restart());
+        }
+
+        if (ui.toggleImmortality) {
+          ui.toggleImmortality.addEventListener("click", () => {
+            state.disableImmortality = !state.disableImmortality;
+            if (state.disableImmortality) {
+              // give player 5 lives when immortality is disabled
+              state.lives = 5;
+              ui.toggleImmortality.classList.add("active");
+              logLine("Янус: бессмертие ОТКЛЮЧЕНО — жизни: 5", "warn");
+            } else {
+              state.lives = Infinity;
+              ui.toggleImmortality.classList.remove("active");
+              logLine("Янус: бессмертие ВКЛЮЧЕНО — бесконечные жизни", "ok");
+            }
+            updateHud();
+          });
         }
 
         // Touch controls

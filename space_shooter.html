@@ -1266,17 +1266,19 @@
           }
 
           // enemies
-          state.spawnTimer += dt * 1000;
-          // When boss is active, make other enemies appear much less often
-          const effectiveSpawnEvery = state.boss
-            ? state.spawnEvery * 4
-            : state.spawnEvery;
-          // spawn at most once per frame to avoid burst spawns when lag accumulates
-          if (state.spawnTimer > effectiveSpawnEvery) {
-            state.spawnTimer -= effectiveSpawnEvery;
-            state.wave += 1;
-            spawnEnemy();
-            if (!state.boss && state.score >= 450) spawnBoss();
+          // If a boss is present, suspend spawning of regular enemies entirely
+          if (state.boss) {
+            // reset timer while boss fight is active to avoid burst spawns after boss dies
+            state.spawnTimer = 0;
+          } else {
+            state.spawnTimer += dt * 1000;
+            // spawn at most once per frame to avoid burst spawns when lag accumulates
+            if (state.spawnTimer > state.spawnEvery) {
+              state.spawnTimer -= state.spawnEvery;
+              state.wave += 1;
+              spawnEnemy();
+              if (!state.boss && state.score >= 450) spawnBoss();
+            }
           }
 
           for (let i = enemies.length - 1; i >= 0; i--) {

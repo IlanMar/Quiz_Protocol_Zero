@@ -250,6 +250,8 @@
       const BALL_SIZE = 12;
       const INITIAL_BALL_SPEED = 5;
       const SPEED_INCREMENT = 0.2;
+      const AI_BASE_SPEED = 3.2;
+      const AI_SPEED_MULTIPLIER = 1.5; // AI moves at 1.5× higher speed per request
 
       // Game state
       let player = { x: 20, y: 0, score: 0, color: "#000000" };
@@ -413,7 +415,7 @@
 
         // AI Movement (slightly weakened for human advantage)
         const aiCenter = ai.y + PADDLE_HEIGHT / 2;
-        const aiSpeed = 3.2; // reduced so player has a better chance
+        const aiSpeed = AI_BASE_SPEED * AI_SPEED_MULTIPLIER;
         const aiError = Math.random() < 0.06; // small chance to hesitate
         const aiOffset = (Math.random() - 0.5) * 24; // aim offset to be less precise
         const aiTarget = ball.y + aiOffset;

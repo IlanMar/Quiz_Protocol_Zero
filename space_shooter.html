@@ -1288,6 +1288,7 @@
           bossIndex: 0,
           // timestamp (ms) after which a new boss may spawn
           nextBossAt: 0,
+          hasWon: false,
         };
 
         const player = {
@@ -1490,6 +1491,7 @@
 
         function win() {
           // celebrate but do not stop the game loop — do not pause on victory
+          state.hasWon = true;
           playWin();
           ui.status.textContent = "Успех";
           logLine("Янус: 4 ключа приняты. Перезагрузка…", "ok");
@@ -1750,7 +1752,7 @@
           renderCores();
           updateHud();
 
-          if (state.foundGood.size >= 4) win();
+          if (state.foundGood.size >= 4 && !state.hasWon) win();
         }
 
         function hitPlayer() {

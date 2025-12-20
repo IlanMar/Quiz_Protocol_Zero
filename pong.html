@@ -6,19 +6,23 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Новогодний Понг</title>
+    <title>Новогодний Понг 2026</title>
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
+
       body {
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background-color: #0a0a2a;
-        font-family: "Arial", sans-serif;
+        background-color: #99b998; /* Nokia LCD green */
+        font-family: "VT323", monospace;
         touch-action: none;
+        color: #000;
       }
 
       canvas {
         display: block;
+        image-rendering: pixelated;
       }
 
       #ui {
@@ -26,12 +30,12 @@
         top: 20px;
         width: 100%;
         text-align: center;
-        color: white;
-        font-size: 24px;
+        color: #000;
+        font-size: 32px;
         font-weight: bold;
-        text-shadow: 0 0 10px #fff, 0 0 20px #ff0000;
         pointer-events: none;
         user-select: none;
+        z-index: 10;
       }
 
       #start-screen {
@@ -40,41 +44,76 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(153, 185, 152, 0.9);
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        color: white;
-        z-index: 10;
+        color: #000;
+        z-index: 20;
+        text-align: center;
       }
 
       .btn {
-        padding: 15px 30px;
-        font-size: 20px;
-        background: #c41e3a;
-        color: white;
-        border: 2px solid #fff;
+        padding: 10px 25px;
+        font-size: 24px;
+        background: #000;
+        color: #99b998;
+        border: none;
         border-radius: 10px;
         cursor: pointer;
         margin-top: 20px;
-        box-shadow: 0 0 15px rgba(196, 30, 58, 0.6);
+        font-family: "VT323", monospace;
+        box-shadow: 0 4px 0 #333;
       }
 
       .btn:active {
-        transform: scale(0.95);
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #333;
+      }
+
+      /* Scanline effect */
+      .scanlines {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0),
+          rgba(255, 255, 255, 0) 50%,
+          rgba(0, 0, 0, 0.05) 50%,
+          rgba(0, 0, 0, 0.05)
+        );
+        background-size: 100% 4px;
+        pointer-events: none;
+        z-index: 15;
+      }
+
+      /* Snow effect from snake.html */
+      .snowflake {
+        position: absolute;
+        top: -20px;
+        color: #000;
+        font-size: 1em;
+        opacity: 0.2;
+        pointer-events: none;
+        animation: fall linear infinite;
+        z-index: 5;
+      }
+
+      @keyframes fall {
+        to {
+          transform: translateY(105vh);
+        }
       }
     </style>
   </head>
   <body>
+    <div class="scanlines"></div>
     <div id="ui">
       <span id="playerScore">0</span> : <span id="aiScore">0</span>
-    </div>
-
-    <div id="start-screen">
-      <h1>С Новым Годом! 🎄</h1>
-      <p>Управляй своей ракеткой (слева), чтобы победить ИИ!</p>
-      <button class="btn" onclick="startGame()">Начать игру</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -84,7 +123,6 @@
       const ctx = canvas.getContext("2d");
       const playerScoreEl = document.getElementById("playerScore");
       const aiScoreEl = document.getElementById("aiScore");
-      const startScreen = document.getElementById("start-screen");
 
       let gameRunning = false;
       let audioCtx = null;
@@ -118,10 +156,9 @@
       const SPEED_INCREMENT = 0.2;
 
       // Game state
-      let player = { x: 20, y: 0, score: 0, color: "#c41e3a" }; // Red
-      let ai = { x: 0, y: 0, score: 0, color: "#228b22" }; // Green
-      let ball = { x: 0, y: 0, dx: 0, dy: 0, color: "#ffd700" }; // Gold
-      let snowflakes = [];
+      let player = { x: 20, y: 0, score: 0, color: "#000000" };
+      let ai = { x: 0, y: 0, score: 0, color: "#000000" };
+      let ball = { x: 0, y: 0, dx: 0, dy: 0, color: "#000000" };
 
       function init() {
         resize();
@@ -129,7 +166,19 @@
         ai.x = canvas.width - PADDLE_WIDTH - 20;
         ai.y = canvas.height / 2 - PADDLE_HEIGHT / 2;
         resetBall();
-        createSnowflakes();
+        setInterval(createSnow, 300);
+
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } else if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+        gameRunning = true;
+        player.score = 0;
+        ai.score = 0;
+        playerScoreEl.innerText = "0";
+        aiScoreEl.innerText = "0";
+        resetBall();
       }
 
       function resize() {
@@ -138,23 +187,26 @@
         ai.x = canvas.width - PADDLE_WIDTH - 20;
       }
 
-      function createSnowflakes() {
-        snowflakes = [];
-        for (let i = 0; i < 50; i++) {
-          snowflakes.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            radius: Math.random() * 3 + 1,
-            speed: Math.random() * 1 + 0.5,
-          });
-        }
+      // Snow effect from snake.html
+      function createSnow() {
+        const snow = document.createElement("div");
+        snow.innerHTML = "❄";
+        snow.className = "snowflake";
+        snow.style.left = Math.random() * 100 + "vw";
+        snow.style.animationDuration = Math.random() * 3 + 2 + "s";
+        snow.style.fontSize = Math.random() * 10 + 10 + "px";
+        document.body.appendChild(snow);
+
+        setTimeout(() => {
+          snow.remove();
+        }, 5000);
       }
 
       function resetBall() {
         ball.x = canvas.width / 2;
         ball.y = canvas.height / 2;
         const angle = ((Math.random() - 0.5) * Math.PI) / 2; // Random angle between -45 and 45 deg
-        const direction = Math.random() > 0.5 ? 1 : -1;
+        const direction = 1; // Always towards AI
         ball.dx = direction * INITIAL_BALL_SPEED * Math.cos(angle);
         ball.dy = INITIAL_BALL_SPEED * Math.sin(angle);
       }
@@ -169,6 +221,7 @@
         // Wall collisions (top/bottom)
         if (ball.y <= 0 || ball.y + BALL_SIZE >= canvas.height) {
           ball.dy *= -1;
+          playSound(226, 0.1);
         }
 
         // AI Movement
@@ -197,6 +250,7 @@
         ) {
           ball.dx *= -1.1; // Speed up
           ball.x = player.x + PADDLE_WIDTH;
+          playSound(459, 0.1);
           // Add some vertical influence based on where it hit the paddle
           const hitPos =
             (ball.y + BALL_SIZE / 2 - (player.y + PADDLE_HEIGHT / 2)) /
@@ -213,6 +267,7 @@
         ) {
           ball.dx *= -1.1; // Speed up
           ball.x = ai.x - BALL_SIZE;
+          playSound(459, 0.1);
           const hitPos =
             (ball.y + BALL_SIZE / 2 - (ai.y + PADDLE_HEIGHT / 2)) /
             (PADDLE_HEIGHT / 2);
@@ -223,36 +278,24 @@
         if (ball.x < 0) {
           ai.score++;
           aiScoreEl.innerText = ai.score;
+          playSound(150, 0.3);
           resetBall();
         } else if (ball.x > canvas.width) {
           player.score++;
           playerScoreEl.innerText = player.score;
+          playSound(490, 0.3);
           resetBall();
         }
-
-        // Update snowflakes
-        snowflakes.forEach((s) => {
-          s.y += s.speed;
-          if (s.y > canvas.height) s.y = -10;
-        });
       }
 
       function draw() {
         // Clear
-        ctx.fillStyle = "#0a0a2a";
+        ctx.fillStyle = "#8ca88b"; // Slightly darker inner screen
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Draw snowflakes
-        ctx.fillStyle = "white";
-        snowflakes.forEach((s) => {
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-          ctx.fill();
-        });
 
         // Draw center line
         ctx.setLineDash([10, 10]);
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
         ctx.beginPath();
         ctx.moveTo(canvas.width / 2, 0);
         ctx.lineTo(canvas.width / 2, canvas.height);
@@ -260,43 +303,22 @@
         ctx.setLineDash([]);
 
         // Draw paddles
-        // Player (Candy Cane style)
         drawPaddle(player.x, player.y, player.color);
-        // AI
         drawPaddle(ai.x, ai.y, ai.color);
 
-        // Draw ball (Ornament)
+        // Draw ball (Pixelated)
         ctx.fillStyle = ball.color;
-        ctx.beginPath();
-        ctx.arc(
-          ball.x + BALL_SIZE / 2,
-          ball.y + BALL_SIZE / 2,
-          BALL_SIZE / 2,
-          0,
-          Math.PI * 2
-        );
-        ctx.fill();
-        // Shine on ball
-        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-        ctx.beginPath();
-        ctx.arc(
-          ball.x + BALL_SIZE / 3,
-          ball.y + BALL_SIZE / 3,
-          BALL_SIZE / 5,
-          0,
-          Math.PI * 2
-        );
-        ctx.fill();
+        ctx.fillRect(ball.x, ball.y, BALL_SIZE, BALL_SIZE);
       }
 
       function drawPaddle(x, y, color) {
         ctx.fillStyle = color;
         ctx.fillRect(x, y, PADDLE_WIDTH, PADDLE_HEIGHT);
 
-        // White stripes for festive look
-        ctx.fillStyle = "white";
-        for (let i = 0; i < PADDLE_HEIGHT; i += 20) {
-          ctx.fillRect(x, y + i, PADDLE_WIDTH, 5);
+        // Retro detail: small gap in the middle or stripes
+        ctx.fillStyle = "#8ca88b";
+        for (let i = 4; i < PADDLE_HEIGHT; i += 8) {
+          ctx.fillRect(x, y + i, PADDLE_WIDTH, 1);
         }
       }
 
@@ -304,16 +326,6 @@
         update();
         draw();
         requestAnimationFrame(gameLoop);
-      }
-
-      function startGame() {
-        startScreen.style.display = "none";
-        gameRunning = true;
-        player.score = 0;
-        ai.score = 0;
-        playerScoreEl.innerText = "0";
-        aiScoreEl.innerText = "0";
-        resetBall();
       }
 
       // Controls

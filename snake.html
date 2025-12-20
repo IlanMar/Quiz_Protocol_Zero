@@ -174,6 +174,38 @@
       const ctx = canvas.getContext("2d");
       const scoreElement = document.getElementById("score-board");
 
+      // Audio Context for retro sounds
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      function playSound(freq, duration, type = "square") {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioCtx.currentTime + duration
+        );
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + duration);
+      }
+
+      const sounds = {
+        eat: () => playSound(880, 0.1),
+        turn: () => playSound(440, 0.05),
+        gameOver: () => {
+          playSound(220, 0.2);
+          setTimeout(() => playSound(110, 0.3), 200);
+        },
+      };
+
       // Game settings
       const gridSize = 15; // Size of one square
       const tileCount = 20; // 300px / 15px = 20 tiles
@@ -241,6 +273,7 @@
           score++;
           scoreElement.innerText = "Счет: " + score;
           placeFood();
+          sounds.eat();
           // Increase speed slightly every 5 points
           if (score % 5 === 0) {
             clearInterval(gameInterval);
@@ -298,6 +331,7 @@
       function gameOver() {
         clearInterval(gameInterval);
         isGameRunning = false;
+        sounds.gameOver();
 
         // Draw Game Over text on canvas
         ctx.fillStyle = "rgba(140, 168, 139, 0.8)";
@@ -342,24 +376,28 @@
             if (velocityX !== 1) {
               velocityX = -1;
               velocityY = 0;
+              sounds.turn();
             }
             break;
           case 38: // Up
             if (velocityY !== 1) {
               velocityX = 0;
               velocityY = -1;
+              sounds.turn();
             }
             break;
           case 39: // Right
             if (velocityX !== -1) {
               velocityX = 1;
               velocityY = 0;
+              sounds.turn();
             }
             break;
           case 40: // Down
             if (velocityY !== -1) {
               velocityX = 0;
               velocityY = 1;
+              sounds.turn();
             }
             break;
         }
@@ -374,24 +412,28 @@
             if (velocityX !== 1) {
               velocityX = -1;
               velocityY = 0;
+              sounds.turn();
             }
             break;
           case "up":
             if (velocityY !== 1) {
               velocityX = 0;
               velocityY = -1;
+              sounds.turn();
             }
             break;
           case "right":
             if (velocityX !== -1) {
               velocityX = 1;
               velocityY = 0;
+              sounds.turn();
             }
             break;
           case "down":
             if (velocityY !== -1) {
               velocityX = 0;
               velocityY = 1;
+              sounds.turn();
             }
             break;
         }

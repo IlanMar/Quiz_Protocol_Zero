@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Protocol: ZERO — Space Shooter (NY Edition)</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: rgba(255, 255, 255, 0.06);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.7);
+        --danger: #ff5a6a;
+        --ok: #54ffa8;
+        --warn: #ffd15a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: radial-gradient(
+          1200px 700px at 50% 20%,
+          #16224a 0%,
+          var(--bg) 60%,
+          #060a14 100%
+        );
+        color: var(--text);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+          sans-serif;
+      }
+
+      .wrap {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      .subtitle {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .row {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      @media (min-width: 980px) {
+        .row {
+          grid-template-columns: 1fr 340px;
+        }
+        h1 {
+          font-size: 20px;
+        }
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .panel-h {
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .panel-h strong {
+        font-size: 13px;
+        letter-spacing: 0.2px;
+      }
+
+      .panel-b {
+        padding: 12px;
+      }
+
+      .btns {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      button {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        user-select: none;
+      }
+      button:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .hud {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .stat {
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .stat .k {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .stat .v {
+        font-size: 14px;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+
+      canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: transparent;
+        touch-action: none;
+      }
+
+      .gameWrap {
+        position: relative;
+      }
+
+      /* Mobile controls: visible only on touch devices */
+      .touch-ui {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .touch-joy {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        width: 112px;
+        height: 112px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(0, 0, 0, 0.18);
+        pointer-events: auto;
+        touch-action: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .touch-joy .knob {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 46px;
+        height: 46px;
+        margin-left: -23px;
+        margin-top: -23px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        transform: translate(0px, 0px);
+        will-change: transform;
+      }
+
+      .touch-fire {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        width: 112px;
+        height: 112px;
+        border-radius: 999px;
+        pointer-events: auto;
+        touch-action: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+      }
+
+      .touch-pause {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        width: 46px;
+        height: 42px;
+        border-radius: 12px;
+        pointer-events: auto;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      @media (hover: none) and (pointer: coarse) {
+        .touch-ui {
+          display: block;
+        }
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .touch-ui {
+          display: none;
+        }
+      }
+
+      .help {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.35;
+        color: var(--muted);
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .chip {
+        font-size: 12px;
+        padding: 6px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(0, 0, 0, 0.16);
+        color: rgba(255, 255, 255, 0.86);
+        white-space: nowrap;
+      }
+      .chip.ok {
+        border-color: rgba(84, 255, 168, 0.35);
+        color: rgba(84, 255, 168, 0.95);
+      }
+      .chip.bad {
+        border-color: rgba(255, 90, 106, 0.35);
+        color: rgba(255, 90, 106, 0.95);
+      }
+
+      .log {
+        height: 240px;
+        overflow: auto;
+        padding: 10px 12px;
+        font: 12px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(0, 0, 0, 0.25);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .log .t {
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .log .warn {
+        color: var(--warn);
+      }
+      .log .ok {
+        color: var(--ok);
+      }
+      .log .bad {
+        color: var(--danger);
+      }
+
+      .footer {
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 11px;
+        text-align: center;
+        padding: 4px 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>Protocol: ZERO — Space Shooter (New Year Edition)</h1>
+          <p class="subtitle">
+            Blue Screen Inc. • ИИ «Янус» завис • выбей 4 правильных ключа ядра
+            до курантов
+          </p>
+        </div>
+        <div class="btns">
+          <button id="btnStart" type="button">Старт</button>
+          <button id="btnPause" type="button">Пауза (P)</button>
+          <button id="btnRestart" type="button">Рестарт (Enter)</button>
+        </div>
+      </header>
+
+      <div class="row">
+        <section class="panel">
+          <div class="panel-h">
+            <strong>Новогодний космос / Корпоративный прод</strong>
+            <span
+              id="status"
+              style="font-size: 12px; color: rgba(255, 255, 255, 0.7)"
+              >Готово к запуску</span
+            >
+          </div>
+          <div class="panel-b">
+            <div class="hud">
+              <div class="stat">
+                <div class="k">Счет</div>
+                <div class="v" id="score">0</div>
+              </div>
+              <div class="stat">
+                <div class="k">Жизни</div>
+                <div class="v" id="lives">3</div>
+              </div>
+              <div class="stat">
+                <div class="k">Комбо патчей</div>
+                <div class="v" id="multishot">x1</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 12px" class="panel gameWrap">
+              <canvas
+                id="game"
+                width="900"
+                height="560"
+                aria-label="Space Shooter"
+                role="img"
+              ></canvas>
+              <div class="touch-ui" aria-hidden="true">
+                <div id="touchJoy" class="touch-joy">
+                  <div class="knob"></div>
+                </div>
+                <button id="touchFire" class="touch-fire" type="button">
+                  ОГОНЬ
+                </button>
+                <button id="touchPause" class="touch-pause" type="button">
+                  II
+                </button>
+              </div>
+            </div>
+
+            <p class="help" style="margin-top: 10px">
+              Управление: <b>WASD</b>/<b>←→↑↓</b> — движение, <b>Space</b> —
+              огонь. На телефоне: левый джойстик + кнопка <b>ОГОНЬ</b> (и
+              <b>II</b> — пауза). Собери 4
+              <span style="color: rgba(84, 255, 168, 0.95)">хороших</span> ключа
+              ядра и перезагрузи «Януса». Избегай
+              <span style="color: rgba(255, 90, 106, 0.95)">плохих</span> ключей
+              — они глючат прод.
+            </p>
+          </div>
+        </section>
+
+        <aside class="panel">
+          <div class="panel-h">
+            <strong>Консоль ИИ «Янус»</strong>
+            <span style="font-size: 12px; color: rgba(255, 255, 255, 0.65)"
+              >лог/подколы</span
+            >
+          </div>
+          <div class="panel-b">
+            <div>
+              <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7)">
+                Слухи HR / прогресс по ключам
+              </div>
+              <div class="chips" id="cores"></div>
+            </div>
+          </div>
+          <div class="log" id="log"></div>
+        </aside>
+      </div>
+
+      <div class="footer">
+        Protocol: ZERO • 31.12.2025 • «Если среди 4-х ключей 1 неправильный —
+        Янус клинит» (не клини, пожалуйста)
+      </div>
+    </div>
+
+    <script>
+      (() => {
+        "use strict";
+
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d", { alpha: true });
+
+        const ui = {
+          score: document.getElementById("score"),
+          lives: document.getElementById("lives"),
+          multishot: document.getElementById("multishot"),
+          status: document.getElementById("status"),
+          log: document.getElementById("log"),
+          cores: document.getElementById("cores"),
+          btnStart: document.getElementById("btnStart"),
+          btnPause: document.getElementById("btnPause"),
+          btnRestart: document.getElementById("btnRestart"),
+          touchJoy: document.getElementById("touchJoy"),
+          touchJoyKnob: document.querySelector("#touchJoy .knob"),
+          touchFire: document.getElementById("touchFire"),
+          touchPause: document.getElementById("touchPause"),
+        };
+
+        const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        let logicalWidth = canvas.width;
+        let logicalHeight = canvas.height;
+
+        function fitCanvas() {
+          const rect = canvas.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          const targetW = Math.round(rect.width * DPR);
+          const targetH = Math.round(rect.width * (560 / 900) * DPR);
+          canvas.width = Math.max(640, targetW);
+          canvas.height = Math.max(420, targetH);
+          logicalWidth = canvas.width;
+          logicalHeight = canvas.height;
+        }
+
+        window.addEventListener(
+          "resize",
+          () => {
+            fitCanvas();
+          },
+          { passive: true }
+        );
+
+        const keys = new Set();
+        window.addEventListener("keydown", (e) => {
+          if (
+            ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(
+              e.key
+            )
+          )
+            e.preventDefault();
+          if (e.key === "p" || e.key === "P") togglePause();
+          if (e.key === "Enter") restart();
+          keys.add(e.key);
+        });
+        window.addEventListener("keyup", (e) => keys.delete(e.key));
+
+        const touch = {
+          ax: 0,
+          ay: 0,
+          firing: false,
+          joyPointerId: null,
+          firePointerId: null,
+        };
+
+        function isCoarsePointer() {
+          return (
+            (typeof window.matchMedia === "function" &&
+              window.matchMedia("(pointer: coarse)").matches) ||
+            "ontouchstart" in window
+          );
+        }
+
+        function setJoyFromEvent(e) {
+          if (!ui.touchJoy || !ui.touchJoyKnob) return;
+          const rect = ui.touchJoy.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          let dx = e.clientX - cx;
+          let dy = e.clientY - cy;
+
+          const max = Math.max(18, rect.width * 0.32);
+          const d = Math.hypot(dx, dy) || 1;
+          const s = d > max ? max / d : 1;
+          dx *= s;
+          dy *= s;
+
+          ui.touchJoyKnob.style.transform = `translate(${dx.toFixed(
+            1
+          )}px, ${dy.toFixed(1)}px)`;
+          touch.ax = clamp(dx / max, -1, 1);
+          touch.ay = clamp(dy / max, -1, 1);
+        }
+
+        function resetJoy() {
+          touch.ax = 0;
+          touch.ay = 0;
+          touch.joyPointerId = null;
+          if (ui.touchJoyKnob)
+            ui.touchJoyKnob.style.transform = "translate(0px, 0px)";
+        }
+
+        function rand(min, max) {
+          return min + Math.random() * (max - min);
+        }
+        function clamp(v, min, max) {
+          return Math.max(min, Math.min(max, v));
+        }
+        function nowStamp() {
+          const d = new Date();
+          const hh = String(d.getHours()).padStart(2, "0");
+          const mm = String(d.getMinutes()).padStart(2, "0");
+          const ss = String(d.getSeconds()).padStart(2, "0");
+          return `${hh}:${mm}:${ss}`;
+        }
+
+        function logLine(text, cls = "") {
+          const div = document.createElement("div");
+          div.innerHTML = `<span class="t">[${nowStamp()}]</span> ${text}`;
+          if (cls) div.className = cls;
+          ui.log.appendChild(div);
+          ui.log.scrollTop = ui.log.scrollHeight;
+        }
+
+        // NOTE: No explicit quest codes here (anti-spoiler).
+        // We keep unique IDs internally, but show only rumors/hints.
+        const GOOD_CORES = [
+          {
+            id: "good-1",
+            effect: "shield",
+            rumor:
+              "HR-шепчет: один ключ видели у человека с доступом к 'главной папке'.",
+          },
+          {
+            id: "good-2",
+            effect: "multishot",
+            rumor: "Слух: техдир любит 'патчи' — возможно, ключ рядом с ним.",
+          },
+          {
+            id: "good-3",
+            effect: "firerate",
+            rumor: "Слух: у гостя-журналиста в кармане шуршит что-то важное.",
+          },
+          {
+            id: "good-4",
+            effect: "clear",
+            rumor:
+              "HR-заметка: в логах есть след к ключу. Кому-то очень нужно, чтобы вы туда не смотрели.",
+          },
+        ];
+        const BAD_CORES = [
+          {
+            id: "bad-1",
+            effect: "glitch",
+            rumor:
+              "Слух: есть 'ключ-приманка' от финансовых ребят. Выглядит красиво, работает плохо.",
+          },
+          {
+            id: "bad-2",
+            effect: "glitch",
+            rumor:
+              "Слух: маркетинг мог подкинуть что-то шумное. Не всё, что блестит — ключ.",
+          },
+        ];
+
+        const ENEMIES = [
+          {
+            name: "Тикет из Jira",
+            emoji: "🎫",
+            hp: 1,
+            score: 10,
+            quip: "Янус: тикет прилетел. Конечно, 'срочно'.",
+          },
+          {
+            name: "Баг в проде",
+            emoji: "🐞",
+            hp: 1,
+            score: 12,
+            quip: "Янус: баг воспроизвёлся только у CEO. Как удобно.",
+          },
+          {
+            name: "Финансовый лог",
+            emoji: "🧾",
+            hp: 2,
+            score: 18,
+            quip: "Янус: финансовый лог растёт. Никто не знает почему. Конечно, никто.",
+          },
+          {
+            name: "CGMiner",
+            emoji: "⛏️",
+            hp: 2,
+            score: 20,
+            quip: "Янус: кто-то майнит. Но 'это нагрузочное тестирование'.",
+          },
+          {
+            name: "HR-анкета",
+            emoji: "📄",
+            hp: 1,
+            score: 14,
+            quip: "Янус: HR просит ваши личные коды. Мы же семья.",
+          },
+          {
+            name: "Фейк-анонс",
+            emoji: "📣",
+            hp: 1,
+            score: 14,
+            quip: "Янус: релиз 1 января. Исходники будут... позже.",
+          },
+          {
+            name: "Камера 2025",
+            emoji: "📹",
+            hp: 2,
+            score: 18,
+            quip: "Янус: доступ к видеоархиву недоступен. Совпадение?",
+          },
+        ];
+
+        const state = {
+          running: false,
+          paused: false,
+          t: 0,
+          last: 0,
+          score: 0,
+          lives: 3,
+          wave: 0,
+          spawnTimer: 0,
+          spawnEvery: 900,
+          shake: 0,
+          glitchUntil: 0,
+          messageUntil: 0,
+          message: "",
+          foundGood: new Set(),
+          foundBad: new Set(),
+          boss: null,
+        };
+
+        const player = {
+          x: 0,
+          y: 0,
+          r: 16,
+          speed: 380,
+          cooldown: 0,
+          fireDelay: 160,
+          multishot: 1,
+          shield: 0,
+        };
+
+        const bullets = [];
+        const enemies = [];
+        const drops = [];
+        const snow = [];
+        const stars = [];
+
+        function resetWorld() {
+          state.t = 0;
+          state.last = 0;
+          state.score = 0;
+          state.lives = 3;
+          state.wave = 0;
+          state.spawnTimer = 0;
+          state.spawnEvery = 900;
+          state.shake = 0;
+          state.glitchUntil = 0;
+          state.messageUntil = 0;
+          state.message = "";
+          state.foundGood = new Set();
+          state.foundBad = new Set();
+          state.boss = null;
+
+          bullets.length = 0;
+          enemies.length = 0;
+          drops.length = 0;
+
+          player.x = logicalWidth * 0.5;
+          player.y = logicalHeight - 56;
+          player.cooldown = 0;
+          player.fireDelay = 160;
+          player.multishot = 1;
+          player.shield = 0;
+
+          snow.length = 0;
+          stars.length = 0;
+          for (let i = 0; i < 70; i++) {
+            stars.push({
+              x: Math.random() * logicalWidth,
+              y: Math.random() * logicalHeight,
+              r: rand(0.6, 1.8),
+              a: rand(0.25, 0.9),
+            });
+          }
+          for (let i = 0; i < 110; i++) {
+            snow.push({
+              x: Math.random() * logicalWidth,
+              y: Math.random() * logicalHeight,
+              r: rand(0.8, 2.6),
+              v: rand(24, 90),
+              drift: rand(-18, 18),
+            });
+          }
+
+          ui.status.textContent = "Готово к запуску";
+          resetJoy();
+          touch.firing = false;
+          renderCores();
+          updateHud();
+          ui.log.innerHTML = "";
+          logLine("Янус: добро пожаловать в прод. Он, как и всегда, горит.");
+          logLine("Задача: собрать 4 хороших ключа ядра и перезагрузить 2026.");
+          logLine(
+            "Подсказка: плохие коды существуют. Да, как и плохие дедлайны.",
+            "warn"
+          );
+        }
+
+        function updateHud() {
+          ui.score.textContent = String(state.score);
+          ui.lives.textContent = String(state.lives);
+          ui.multishot.textContent = `x${player.multishot}`;
+        }
+
+        function renderCores() {
+          ui.cores.innerHTML = "";
+
+          const good = state.foundGood.size;
+          const bad = state.foundBad.size;
+
+          const a = document.createElement("span");
+          a.className = "chip ok";
+          a.textContent = `✅ Ключи: ${good}/4`;
+          a.title = "Их нужно 4, но без названий (анти-спойлер).";
+          ui.cores.appendChild(a);
+
+          const b = document.createElement("span");
+          b.className = "chip bad";
+          b.textContent = `⚠️ Приманки: ${bad}`;
+          b.title = "Плохие находки усиливают глюк. Как слухи.";
+          ui.cores.appendChild(b);
+
+          const r = document.createElement("span");
+          r.className = "chip";
+          r.textContent = "HR: 'Мы же семья'";
+          r.title = "Слухи обновляются при подборе ключей.";
+          ui.cores.appendChild(r);
+        }
+
+        function showMessage(text, ms = 1200) {
+          state.message = text;
+          state.messageUntil = performance.now() + ms;
+        }
+
+        function start() {
+          if (state.running) return;
+          state.running = true;
+          state.paused = false;
+          ui.status.textContent = "В работе";
+          logLine(
+            "Янус: запуск боевого контура. Пожалуйста, не нажимайте красную кнопку 'удалить логи'.",
+            "warn"
+          );
+          requestAnimationFrame(loop);
+        }
+
+        function togglePause() {
+          if (!state.running) return;
+          state.paused = !state.paused;
+          ui.status.textContent = state.paused ? "Пауза" : "В работе";
+          if (!state.paused) requestAnimationFrame(loop);
+        }
+
+        function restart() {
+          resetWorld();
+          state.running = true;
+          state.paused = false;
+          ui.status.textContent = "В работе";
+          requestAnimationFrame(loop);
+        }
+
+        function gameOver(reason) {
+          state.running = false;
+          ui.status.textContent = "Завершено";
+          logLine(`Янус: ${reason}`, "bad");
+          logLine(
+            "Совет: перезапусти (Enter). И да, это тоже корпоративный процесс."
+          );
+          showMessage("GAME OVER — Enter", 4000);
+        }
+
+        function win() {
+          state.running = false;
+          ui.status.textContent = "Успех";
+          logLine("Янус: 4 ключа приняты. Перезагрузка…", "ok");
+          logLine(
+            "Янус: добро пожаловать в 2026. Пожалуйста, не приносите туда сомнительные ключи и чужие KPI.",
+            "ok"
+          );
+          showMessage("2026 ONLINE — YOU WIN", 5000);
+        }
+
+        function spawnEnemy() {
+          const base = ENEMIES[Math.floor(Math.random() * ENEMIES.length)];
+          const size = rand(20, 30);
+          const e = {
+            x: rand(30, logicalWidth - 30),
+            y: -40,
+            r: size,
+            vy: rand(65, 120) + state.wave * 4,
+            vx: rand(-18, 18),
+            hp: base.hp + (state.wave > 10 ? 1 : 0),
+            maxHp: base.hp + (state.wave > 10 ? 1 : 0),
+            score: base.score,
+            emoji: base.emoji,
+            name: base.name,
+            quip: base.quip,
+          };
+          enemies.push(e);
+        }
+
+        function maybeDrop(x, y) {
+          const roll = Math.random();
+          if (roll > 0.18) return;
+
+          const pickBad = Math.random() < 0.28;
+          const pool = pickBad ? BAD_CORES : GOOD_CORES;
+          const core = pool[Math.floor(Math.random() * pool.length)];
+
+          drops.push({
+            x,
+            y,
+            r: 14,
+            vy: rand(80, 140),
+            kind: pickBad ? "bad" : "ok",
+            code: pickBad ? "⚠️ Сомнительный ключ" : "🔑 Ключ ядра",
+            effect: core.effect,
+            label: core.rumor,
+            emoji: pickBad ? "⚠️" : "🔑",
+          });
+        }
+
+        function spawnBoss() {
+          state.boss = {
+            x: logicalWidth * 0.5,
+            y: 120,
+            r: 52,
+            hp: 60,
+            maxHp: 60,
+            vx: 70,
+            emoji: "🤖",
+            name: "ИИ «Янус»",
+            cooldown: 0,
+          };
+          logLine(
+            "Янус: инициирую проверку доступа. Кто тут самый прогрессист?",
+            "warn"
+          );
+          showMessage("BOSS: Янус", 1500);
+        }
+
+        function fire() {
+          if (player.cooldown > 0) return;
+          player.cooldown = player.fireDelay;
+
+          const spread =
+            player.multishot === 1
+              ? [0]
+              : player.multishot === 2
+              ? [-0.18, 0.18]
+              : [-0.22, 0, 0.22];
+          for (const a of spread) {
+            bullets.push({
+              x: player.x,
+              y: player.y - player.r - 6,
+              r: 4,
+              vy: -560,
+              vx: Math.sin(a) * 220,
+              dmg: 1,
+              emoji: "❄️",
+            });
+          }
+        }
+
+        function applyCore(drop) {
+          if (drop.kind === "ok") {
+            if (state.foundGood.has(drop.effect + ":" + drop.label)) {
+              logLine(
+                "Янус: ключ уже зарегистрирован. Дубликат, как у HR-табличек.",
+                "ok"
+              );
+            } else {
+              state.foundGood.add(drop.effect + ":" + drop.label);
+              logLine(
+                `Янус: принят ключ ядра. <span class="ok">Слух HR:</span> ${drop.label}`,
+                "ok"
+              );
+            }
+          } else {
+            if (state.foundBad.has(drop.effect + ":" + drop.label)) {
+              logLine(
+                "Янус: снова подозрительный ключ. Вы точно не из финансов?",
+                "bad"
+              );
+            } else {
+              state.foundBad.add(drop.effect + ":" + drop.label);
+              logLine(
+                `Янус: обнаружен <span class="bad">подозрительный ключ</span>. <span class="bad">Слух HR:</span> ${drop.label}`,
+                "bad"
+              );
+            }
+          }
+
+          if (drop.effect === "shield") {
+            player.shield = Math.min(3, player.shield + 1);
+            showMessage("Щит +1 (корпоративная броня)");
+          } else if (drop.effect === "multishot") {
+            player.multishot = Math.min(3, player.multishot + 1);
+            showMessage("Патчи пошли веером!");
+          } else if (drop.effect === "firerate") {
+            player.fireDelay = Math.max(80, player.fireDelay - 18);
+            showMessage("CI/CD ускорен (на словах)");
+          } else if (drop.effect === "clear") {
+            const removed = Math.min(enemies.length, 6);
+            enemies.splice(0, removed);
+            showMessage("Логи очищены (почти законно)");
+          } else if (drop.effect === "glitch") {
+            state.glitchUntil = performance.now() + 2200;
+            state.shake = Math.max(state.shake, 8);
+            showMessage("ГЛЮК: прод шатает", 1200);
+          }
+
+          renderCores();
+          updateHud();
+
+          if (state.foundGood.size >= 4) win();
+        }
+
+        function hitPlayer() {
+          if (player.shield > 0) {
+            player.shield -= 1;
+            state.shake = Math.max(state.shake, 10);
+            logLine("Янус: щит принял удар. Не расслабляйся.", "warn");
+            showMessage("Щит спас!", 800);
+            return;
+          }
+          state.lives -= 1;
+          updateHud();
+          state.shake = Math.max(state.shake, 14);
+          showMessage("Минус жизнь. Как KPI.", 1100);
+          if (state.lives <= 0) gameOver("ресурсы закончились. Бюджет тоже.");
+        }
+
+        function dist(a, b) {
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          return Math.hypot(dx, dy);
+        }
+
+        function loop(ts) {
+          if (!state.running || state.paused) return;
+          if (!state.last) state.last = ts;
+          const dt = Math.min(0.033, (ts - state.last) / 1000);
+          state.last = ts;
+          state.t += dt;
+
+          update(dt, ts);
+          render(ts);
+
+          requestAnimationFrame(loop);
+        }
+
+        function update(dt, ts) {
+          // difficulty
+          state.spawnEvery = clamp(900 - state.score * 0.9, 280, 900);
+
+          // player
+          let ax = 0;
+          let ay = 0;
+          const glitch = ts < state.glitchUntil;
+
+          const left = keys.has("ArrowLeft") || keys.has("a") || keys.has("A");
+          const right =
+            keys.has("ArrowRight") || keys.has("d") || keys.has("D");
+          const up = keys.has("ArrowUp") || keys.has("w") || keys.has("W");
+          const down = keys.has("ArrowDown") || keys.has("s") || keys.has("S");
+
+          if (left) ax -= 1;
+          if (right) ax += 1;
+          if (up) ay -= 1;
+          if (down) ay += 1;
+
+          // touch input (mobile)
+          ax += touch.ax;
+          ay += touch.ay;
+
+          if (glitch) {
+            ax *= -1;
+            if (Math.random() < 0.03) ay *= -1;
+          }
+
+          const len = Math.hypot(ax, ay) || 1;
+          ax /= len;
+          ay /= len;
+          player.x += ax * player.speed * dt;
+          player.y += ay * player.speed * dt;
+          player.x = clamp(player.x, 22, logicalWidth - 22);
+          player.y = clamp(player.y, 48, logicalHeight - 28);
+
+          if (player.cooldown > 0)
+            player.cooldown = Math.max(0, player.cooldown - dt * 1000);
+
+          const wantsFire = keys.has(" ") || touch.firing;
+          if (wantsFire) fire();
+
+          // snow
+          for (const s of snow) {
+            s.y += s.v * dt;
+            s.x += s.drift * dt;
+            if (s.y > logicalHeight + 10) {
+              s.y = -10;
+              s.x = Math.random() * logicalWidth;
+            }
+            if (s.x < -20) s.x = logicalWidth + 20;
+            if (s.x > logicalWidth + 20) s.x = -20;
+          }
+
+          // bullets
+          for (let i = bullets.length - 1; i >= 0; i--) {
+            const b = bullets[i];
+            b.y += b.vy * dt;
+            b.x += b.vx * dt;
+            if (b.y < -20 || b.x < -40 || b.x > logicalWidth + 40)
+              bullets.splice(i, 1);
+          }
+
+          // enemies
+          state.spawnTimer += dt * 1000;
+          while (state.spawnTimer > state.spawnEvery) {
+            state.spawnTimer -= state.spawnEvery;
+            state.wave += 1;
+            spawnEnemy();
+            if (!state.boss && state.score >= 450) spawnBoss();
+          }
+
+          for (let i = enemies.length - 1; i >= 0; i--) {
+            const e = enemies[i];
+            e.y += e.vy * dt;
+            e.x += e.vx * dt;
+            if (e.x < 24 || e.x > logicalWidth - 24) e.vx *= -1;
+            if (e.y > logicalHeight + 60) {
+              enemies.splice(i, 1);
+              hitPlayer();
+            }
+          }
+
+          // boss
+          if (state.boss) {
+            const b = state.boss;
+            b.x += b.vx * dt;
+            if (b.x < 70 || b.x > logicalWidth - 70) b.vx *= -1;
+            b.cooldown = Math.max(0, b.cooldown - dt * 1000);
+            if (b.cooldown === 0) {
+              b.cooldown = glitch ? 420 : 520;
+              // boss shoots down as "audit"
+              enemies.push({
+                x: b.x + rand(-10, 10),
+                y: b.y + b.r,
+                r: 16,
+                vy: 220,
+                vx: rand(-40, 40),
+                hp: 1,
+                maxHp: 1,
+                score: 0,
+                emoji: "🔍",
+                name: "Аудит",
+                quip: "Янус: инициирую аудит. Ничего личного — просто годовой отчёт.",
+                isBossShot: true,
+              });
+            }
+          }
+
+          // drops
+          for (let i = drops.length - 1; i >= 0; i--) {
+            const d = drops[i];
+            d.y += d.vy * dt;
+            if (d.y > logicalHeight + 40) {
+              drops.splice(i, 1);
+              continue;
+            }
+            if (dist(d, player) < d.r + player.r + 4) {
+              drops.splice(i, 1);
+              applyCore(d);
+            }
+          }
+
+          // collisions: bullets vs enemies
+          for (let bi = bullets.length - 1; bi >= 0; bi--) {
+            const b = bullets[bi];
+            let hit = false;
+            for (let ei = enemies.length - 1; ei >= 0; ei--) {
+              const e = enemies[ei];
+              if (dist(b, e) < b.r + e.r * 0.7) {
+                e.hp -= b.dmg;
+                bullets.splice(bi, 1);
+                hit = true;
+                if (e.hp <= 0) {
+                  if (e.score) state.score += e.score;
+                  if (!e.isBossShot && Math.random() < 0.22) logLine(e.quip);
+                  maybeDrop(e.x, e.y);
+                  enemies.splice(ei, 1);
+                  updateHud();
+                }
+                break;
+              }
+            }
+            if (hit) continue;
+
+            // bullets vs boss
+            if (state.boss) {
+              const boss = state.boss;
+              if (dist(b, boss) < b.r + boss.r * 0.85) {
+                boss.hp -= 1;
+                bullets.splice(bi, 1);
+                state.shake = Math.max(state.shake, 6);
+                if (boss.hp <= 0) {
+                  state.score += 250;
+                  logLine("Янус: …ладно. Патчи приняты. Я сдаюсь.", "ok");
+                  state.boss = null;
+                  updateHud();
+                  // drop guaranteed good core if missing
+                  const missing = GOOD_CORES.filter(
+                    (c) => !state.foundGood.has(c.code)
+                  );
+                  if (missing.length) {
+                    const c =
+                      missing[Math.floor(Math.random() * missing.length)];
+                    drops.push({
+                      x: player.x,
+                      y: 120,
+                      r: 14,
+                      vy: 120,
+                      kind: "ok",
+                      code: c.code,
+                      effect: c.effect,
+                      label: c.label,
+                      emoji: "🔑",
+                    });
+                  }
+                }
+              }
+            }
+          }
+
+          // collisions: enemies vs player
+          for (let i = enemies.length - 1; i >= 0; i--) {
+            const e = enemies[i];
+            if (dist(e, player) < e.r * 0.7 + player.r + 2) {
+              enemies.splice(i, 1);
+              hitPlayer();
+            }
+          }
+
+          if (state.shake > 0) state.shake = Math.max(0, state.shake - dt * 20);
+        }
+
+        function render(ts) {
+          const shake = state.shake;
+          const ox = shake ? rand(-shake, shake) : 0;
+          const oy = shake ? rand(-shake, shake) : 0;
+
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+          ctx.translate(ox, oy);
+
+          // stars
+          ctx.save();
+          ctx.fillStyle = "rgba(255,255,255,0.9)";
+          for (const s of stars) {
+            ctx.globalAlpha = s.a;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+
+          // snow
+          ctx.save();
+          ctx.fillStyle = "rgba(255,255,255,0.85)";
+          ctx.globalAlpha = 0.72;
+          for (const s of snow) {
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+
+          // bullets
+          ctx.save();
+          ctx.font = "18px system-ui, Segoe UI Emoji, Apple Color Emoji";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          for (const b of bullets) {
+            ctx.fillText(b.emoji, b.x, b.y);
+          }
+          ctx.restore();
+
+          // enemies
+          ctx.save();
+          ctx.font = "28px system-ui, Segoe UI Emoji, Apple Color Emoji";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          for (const e of enemies) {
+            ctx.fillText(e.emoji, e.x, e.y);
+            // tiny hp bar for tanky ones
+            if (e.maxHp > 1) {
+              const w = 44;
+              const h = 5;
+              const x = e.x - w / 2;
+              const y = e.y + 20;
+              ctx.globalAlpha = 0.8;
+              ctx.fillStyle = "rgba(0,0,0,0.45)";
+              ctx.fillRect(x, y, w, h);
+              ctx.fillStyle = "rgba(255,255,255,0.75)";
+              ctx.fillRect(x, y, w * (e.hp / e.maxHp), h);
+              ctx.fillStyle = "rgba(255,255,255,1)";
+              ctx.globalAlpha = 1;
+            }
+          }
+          ctx.restore();
+
+          // boss
+          if (state.boss) {
+            const b = state.boss;
+            ctx.save();
+            ctx.font = "64px system-ui, Segoe UI Emoji, Apple Color Emoji";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(b.emoji, b.x, b.y);
+            // boss hp
+            const w = Math.min(520, logicalWidth - 80);
+            const h = 10;
+            const x = (logicalWidth - w) / 2;
+            const y = 22;
+            ctx.fillStyle = "rgba(0,0,0,0.35)";
+            ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = "rgba(84,255,168,0.85)";
+            ctx.fillRect(x, y, w * (b.hp / b.maxHp), h);
+            ctx.fillStyle = "rgba(255,255,255,0.75)";
+            ctx.font = "12px ui-monospace, Menlo, Consolas, monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("JANUS CORE", logicalWidth / 2, y + 24);
+            ctx.restore();
+          }
+
+          // drops
+          ctx.save();
+          ctx.font = "18px system-ui, Segoe UI Emoji, Apple Color Emoji";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          for (const d of drops) {
+            ctx.globalAlpha = 0.95;
+            ctx.fillText(d.emoji, d.x, d.y);
+            ctx.globalAlpha = 0.85;
+            ctx.font = "12px ui-monospace, Menlo, Consolas, monospace";
+            ctx.fillStyle =
+              d.kind === "ok"
+                ? "rgba(84,255,168,0.92)"
+                : "rgba(255,90,106,0.92)";
+            ctx.fillText(d.code, d.x, d.y + 18);
+            ctx.font = "18px system-ui, Segoe UI Emoji, Apple Color Emoji";
+            ctx.fillStyle = "rgba(255,255,255,0.95)";
+          }
+          ctx.restore();
+
+          // player
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.font = "34px system-ui, Segoe UI Emoji, Apple Color Emoji";
+          ctx.fillText("🎅", player.x, player.y);
+          ctx.font = "14px ui-monospace, Menlo, Consolas, monospace";
+          ctx.fillStyle = "rgba(255,255,255,0.75)";
+          ctx.fillText("DEV-SLEIGH", player.x, player.y + 26);
+
+          if (player.shield > 0) {
+            ctx.globalAlpha = 0.55;
+            ctx.strokeStyle = "rgba(84,255,168,0.9)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.r + 10, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = "rgba(84,255,168,0.95)";
+            ctx.font = "12px ui-monospace, Menlo, Consolas, monospace";
+            ctx.fillText(`SHIELD:${player.shield}`, player.x, player.y - 30);
+          }
+          ctx.restore();
+
+          // top overlay
+          const glitch = ts < state.glitchUntil;
+          if (glitch) {
+            ctx.save();
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = "rgba(255,90,106,1)";
+            ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+            ctx.globalAlpha = 0.12;
+            ctx.fillStyle = "rgba(84,255,168,1)";
+            for (let i = 0; i < 10; i++) {
+              ctx.fillRect(0, rand(0, logicalHeight), logicalWidth, rand(2, 6));
+            }
+            ctx.restore();
+          }
+
+          if (state.messageUntil > ts) {
+            ctx.save();
+            ctx.globalAlpha = 0.92;
+            ctx.fillStyle = "rgba(0,0,0,0.42)";
+            ctx.fillRect(0, logicalHeight - 68, logicalWidth, 68);
+            ctx.fillStyle = "rgba(255,255,255,0.92)";
+            ctx.font = "16px system-ui, Segoe UI, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(state.message, logicalWidth / 2, logicalHeight - 34);
+            ctx.restore();
+          }
+        }
+
+        ui.btnStart.addEventListener("click", () => {
+          if (!state.running) start();
+        });
+        ui.btnPause.addEventListener("click", () => togglePause());
+        ui.btnRestart.addEventListener("click", () => restart());
+
+        // Touch controls
+        if (ui.touchJoy) {
+          ui.touchJoy.addEventListener("pointerdown", (e) => {
+            e.preventDefault();
+            if (touch.joyPointerId !== null) return;
+            touch.joyPointerId = e.pointerId;
+            ui.touchJoy.setPointerCapture(e.pointerId);
+            setJoyFromEvent(e);
+            if (!state.running) start();
+          });
+          ui.touchJoy.addEventListener("pointermove", (e) => {
+            if (e.pointerId !== touch.joyPointerId) return;
+            e.preventDefault();
+            setJoyFromEvent(e);
+          });
+          const endJoy = (e) => {
+            if (e.pointerId !== touch.joyPointerId) return;
+            e.preventDefault();
+            resetJoy();
+          };
+          ui.touchJoy.addEventListener("pointerup", endJoy);
+          ui.touchJoy.addEventListener("pointercancel", endJoy);
+          ui.touchJoy.addEventListener("lostpointercapture", () => resetJoy());
+        }
+
+        if (ui.touchFire) {
+          ui.touchFire.addEventListener("pointerdown", (e) => {
+            e.preventDefault();
+            if (touch.firePointerId !== null) return;
+            touch.firePointerId = e.pointerId;
+            ui.touchFire.setPointerCapture(e.pointerId);
+            touch.firing = true;
+            if (!state.running) start();
+          });
+          const endFire = (e) => {
+            if (e.pointerId !== touch.firePointerId) return;
+            e.preventDefault();
+            touch.firePointerId = null;
+            touch.firing = false;
+          };
+          ui.touchFire.addEventListener("pointerup", endFire);
+          ui.touchFire.addEventListener("pointercancel", endFire);
+          ui.touchFire.addEventListener("lostpointercapture", () => {
+            touch.firePointerId = null;
+            touch.firing = false;
+          });
+        }
+
+        if (ui.touchPause) {
+          ui.touchPause.addEventListener("click", () => togglePause());
+        }
+
+        // init
+        fitCanvas();
+        resetWorld();
+        showMessage(
+          isCoarsePointer()
+            ? "Тапни ОГОНЬ/джойстик — старт"
+            : "Нажми Старт. Янус наблюдает.",
+          1400
+        );
+
+        // Friendly focus hint
+        canvas.addEventListener("click", () => {
+          canvas.focus?.();
+        });
+      })();
+    </script>
+  </body>
+</html>

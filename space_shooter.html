@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Protocol: ZERO — Space Shooter (NY Edition)</title>
     <style>
       :root {
         --bg: #0b1020;
@@ -71,7 +70,7 @@
 
       @media (min-width: 980px) {
         .row {
-          grid-template-columns: 1fr 340px;
+          grid-template-columns: 1fr;
         }
         h1 {
           font-size: 20px;
@@ -1055,7 +1054,7 @@
               r: 4,
               vy: -560,
               vx: Math.sin(a) * 220,
-              dmg: 1,
+              dmg: 3,
               emoji: "❄️",
             });
           }
@@ -1323,12 +1322,12 @@
 
             // bullets vs boss
             if (state.boss) {
-              const boss = state.boss;
-              if (dist(b, boss) < b.r + boss.r * 0.85) {
-                boss.hp -= 1;
-                bullets.splice(bi, 1);
-                state.shake = Math.max(state.shake, 6);
-                if (boss.hp <= 0) {
+                const boss = state.boss;
+                if (dist(b, boss) < b.r + boss.r * 0.85) {
+                  boss.hp -= b.dmg;
+                  bullets.splice(bi, 1);
+                  state.shake = Math.max(state.shake, 6);
+                  if (boss.hp <= 0) {
                   playExplosion();
                   state.score += 250;
                   logLine("Янус: …ладно. Патчи приняты. Я сдаюсь.", "ok");

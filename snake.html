@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Змейка 2026</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
+
+      body {
+        background-color: #99b998; /* Nokia LCD green */
+        color: #000;
+        font-family: "VT323", monospace;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+        touch-action: none; /* Prevent scrolling on mobile */
+        user-select: none;
+      }
+
+      h1 {
+        margin: 10px 0;
+        font-size: 2rem;
+        text-align: center;
+        text-transform: uppercase;
+        z-index: 10;
+        text-shadow: 2px 2px 0px #8ca88b;
+      }
+
+      #game-wrapper {
+        position: relative;
+        padding: 10px;
+        background-color: #99b998;
+        border: 4px solid #000;
+        border-radius: 10px;
+        box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+      }
+
+      #game-container {
+        position: relative;
+        border: 2px solid #000;
+        background-color: #8ca88b; /* Slightly darker inner screen */
+      }
+
+      canvas {
+        display: block;
+        image-rendering: pixelated;
+      }
+
+      .controls {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 70px 70px 70px;
+        grid-template-rows: 60px 60px;
+        gap: 10px;
+        z-index: 10;
+      }
+
+      .btn {
+        width: 70px;
+        height: 60px;
+        background-color: #000;
+        border-radius: 15px; /* Nokia keypad shape */
+        border: none;
+        color: #99b998;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        font-family: "VT323", monospace;
+        box-shadow: 0 4px 0 #333;
+        transition: transform 0.1s, box-shadow 0.1s;
+      }
+
+      .btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #333;
+        background-color: #222;
+      }
+
+      .btn-up {
+        grid-column: 2;
+        grid-row: 1;
+      }
+      .btn-left {
+        grid-column: 1;
+        grid-row: 2;
+      }
+      .btn-down {
+        grid-column: 2;
+        grid-row: 2;
+      }
+      .btn-right {
+        grid-column: 3;
+        grid-row: 2;
+      }
+
+      #score-board {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      /* Snow effect */
+      .snowflake {
+        position: absolute;
+        top: -20px;
+        color: #000;
+        font-size: 1em;
+        opacity: 0.2;
+        pointer-events: none;
+        animation: fall linear infinite;
+        z-index: 1;
+      }
+
+      @keyframes fall {
+        to {
+          transform: translateY(105vh);
+        }
+      }
+
+      /* Scanline effect for retro feel */
+      .scanlines {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0),
+          rgba(255, 255, 255, 0) 50%,
+          rgba(0, 0, 0, 0.05) 50%,
+          rgba(0, 0, 0, 0.05)
+        );
+        background-size: 100% 4px;
+        pointer-events: none;
+        z-index: 5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scanlines"></div>
+
+    <h1>С Новым 2026 годом</h1>
+    <div id="score-board">Счет: 0</div>
+
+    <div id="game-wrapper">
+      <div id="game-container">
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-up" id="up">▲</button>
+      <button class="btn btn-left" id="left">◀</button>
+      <button class="btn btn-down" id="down">▼</button>
+      <button class="btn btn-right" id="right">▶</button>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const scoreElement = document.getElementById("score-board");
+
+      // Game settings
+      const gridSize = 15; // Size of one square
+      const tileCount = 20; // 300px / 15px = 20 tiles
+      let speed = 7; // Game speed
+
+      let score = 0;
+      let velocityX = 0;
+      let velocityY = 0;
+      let snake = [{ x: 10, y: 10 }];
+      let food = { x: 15, y: 15 };
+      let gameInterval;
+      let isGameRunning = false;
+
+      // Nokia colors
+      const colorSnake = "#000000";
+      const colorFood = "#000000";
+      const colorBg = "#8ca88b";
+
+      function startGame() {
+        if (isGameRunning) return;
+        isGameRunning = true;
+        score = 0;
+        velocityX = 0;
+        velocityY = 0;
+        snake = [{ x: 10, y: 10 }];
+        placeFood();
+        scoreElement.innerText = "Счет: " + score;
+        if (gameInterval) clearInterval(gameInterval);
+        gameInterval = setInterval(updateGame, 1000 / speed);
+      }
+
+      function updateGame() {
+        // Move snake
+        const head = { x: snake[0].x + velocityX, y: snake[0].y + velocityY };
+
+        // Only move if velocity is set
+        if (velocityX === 0 && velocityY === 0) {
+          drawGame();
+          return;
+        }
+
+        // Wall collision
+        if (
+          head.x < 0 ||
+          head.x >= tileCount ||
+          head.y < 0 ||
+          head.y >= tileCount
+        ) {
+          gameOver();
+          return;
+        }
+
+        // Self collision
+        for (let i = 0; i < snake.length; i++) {
+          if (head.x === snake[i].x && head.y === snake[i].y) {
+            gameOver();
+            return;
+          }
+        }
+
+        snake.unshift(head);
+
+        // Eat food
+        if (head.x === food.x && head.y === food.y) {
+          score++;
+          scoreElement.innerText = "Счет: " + score;
+          placeFood();
+          // Increase speed slightly every 5 points
+          if (score % 5 === 0) {
+            clearInterval(gameInterval);
+            speed += 0.5;
+            gameInterval = setInterval(updateGame, 1000 / speed);
+          }
+        } else {
+          snake.pop();
+        }
+
+        drawGame();
+      }
+
+      function drawGame() {
+        // Clear screen
+        ctx.fillStyle = colorBg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Snake
+        ctx.fillStyle = colorSnake;
+        for (let i = 0; i < snake.length; i++) {
+          // Draw pixelated blocks with a tiny gap
+          ctx.fillRect(
+            snake[i].x * gridSize,
+            snake[i].y * gridSize,
+            gridSize - 1,
+            gridSize - 1
+          );
+        }
+
+        // Draw Food (Gift Box style)
+        const fx = food.x * gridSize;
+        const fy = food.y * gridSize;
+        ctx.fillStyle = colorFood;
+
+        // Draw box outline
+        ctx.fillRect(fx, fy, gridSize - 1, gridSize - 1);
+
+        // Draw "ribbon" (clear parts)
+        ctx.clearRect(fx + 4, fy, 2, gridSize - 1); // Vertical ribbon
+        ctx.clearRect(fx, fy + 4, gridSize - 1, 2); // Horizontal ribbon
+      }
+
+      function placeFood() {
+        food.x = Math.floor(Math.random() * tileCount);
+        food.y = Math.floor(Math.random() * tileCount);
+        // Check if food spawns on snake
+        for (let part of snake) {
+          if (part.x === food.x && part.y === food.y) {
+            placeFood();
+          }
+        }
+      }
+
+      function gameOver() {
+        clearInterval(gameInterval);
+        isGameRunning = false;
+
+        // Draw Game Over text on canvas
+        ctx.fillStyle = "rgba(140, 168, 139, 0.8)";
+        ctx.fillRect(50, 100, 200, 100);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(50, 100, 200, 100);
+
+        ctx.fillStyle = "#000";
+        ctx.font = "30px VT323";
+        ctx.textAlign = "center";
+        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
+        ctx.font = "20px VT323";
+        ctx.fillText(
+          "Нажми для рестарта",
+          canvas.width / 2,
+          canvas.height / 2 + 20
+        );
+
+        // Allow restart on click/tap
+        canvas.onclick = () => {
+          canvas.onclick = null;
+          speed = 7;
+          startGame();
+        };
+      }
+
+      // Input handling
+      document.addEventListener("keydown", keyDownEvent);
+
+      function keyDownEvent(e) {
+        // Prevent default scrolling for arrow keys
+        if ([37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+          e.preventDefault();
+        }
+
+        if (!isGameRunning && e.keyCode >= 37 && e.keyCode <= 40) {
+          startGame();
+        }
+
+        switch (e.keyCode) {
+          case 37: // Left
+            if (velocityX !== 1) {
+              velocityX = -1;
+              velocityY = 0;
+            }
+            break;
+          case 38: // Up
+            if (velocityY !== 1) {
+              velocityX = 0;
+              velocityY = -1;
+            }
+            break;
+          case 39: // Right
+            if (velocityX !== -1) {
+              velocityX = 1;
+              velocityY = 0;
+            }
+            break;
+          case 40: // Down
+            if (velocityY !== -1) {
+              velocityX = 0;
+              velocityY = 1;
+            }
+            break;
+        }
+      }
+
+      // Touch controls
+      function handleInput(direction) {
+        if (!isGameRunning) startGame();
+
+        switch (direction) {
+          case "left":
+            if (velocityX !== 1) {
+              velocityX = -1;
+              velocityY = 0;
+            }
+            break;
+          case "up":
+            if (velocityY !== 1) {
+              velocityX = 0;
+              velocityY = -1;
+            }
+            break;
+          case "right":
+            if (velocityX !== -1) {
+              velocityX = 1;
+              velocityY = 0;
+            }
+            break;
+          case "down":
+            if (velocityY !== -1) {
+              velocityX = 0;
+              velocityY = 1;
+            }
+            break;
+        }
+      }
+
+      // Add touch listeners with preventDefault to stop zooming/scrolling
+      const addTouch = (id, dir) => {
+        const el = document.getElementById(id);
+        el.addEventListener(
+          "touchstart",
+          (e) => {
+            e.preventDefault();
+            handleInput(dir);
+            el.classList.add("active");
+          },
+          { passive: false }
+        );
+
+        el.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          el.classList.remove("active");
+        });
+
+        // Mouse fallback
+        el.addEventListener("mousedown", (e) => {
+          handleInput(dir);
+        });
+      };
+
+      addTouch("left", "left");
+      addTouch("up", "up");
+      addTouch("right", "right");
+      addTouch("down", "down");
+
+      // Start immediately
+      startGame();
+
+      // Snow effect
+      function createSnow() {
+        const snow = document.createElement("div");
+        snow.innerHTML = "❄";
+        snow.className = "snowflake";
+        snow.style.left = Math.random() * 100 + "vw";
+        snow.style.animationDuration = Math.random() * 3 + 2 + "s";
+        snow.style.fontSize = Math.random() * 10 + 10 + "px";
+        document.body.appendChild(snow);
+
+        // Remove after animation
+        setTimeout(() => {
+          snow.remove();
+        }, 5000);
+      }
+
+      // Create snow periodically
+      setInterval(createSnow, 300);
+    </script>
+  </body>
+</html>

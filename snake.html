@@ -194,6 +194,27 @@
         padding: 10px 24px;
         border-radius: 12px;
       }
+
+      /* Milestone text overlay */
+      #milestone-text-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: rgba(72, 72, 72, 0.9);
+        font-size: 1.6rem;
+        line-height: 1.05;
+        font-weight: 400;
+        text-align: center;
+        z-index: 20;
+        display: none;
+        max-width: 80%;
+        box-sizing: border-box;
+        pointer-events: none;
+        text-shadow: 0.6px 0 0 rgba(0, 0, 0, 0.55),
+          -0.6px 0 0 rgba(0, 0, 0, 0.55), 0 0.6px 0 rgba(0, 0, 0, 0.55),
+          0 -0.6px 0 rgba(0, 0, 0, 0.55);
+      }
     </style>
   </head>
   <body>
@@ -206,6 +227,7 @@
       <div id="game-container">
         <canvas id="gameCanvas" width="300" height="300"></canvas>
       </div>
+      <div id="milestone-text-overlay"></div>
     </div>
 
     <div class="controls">
@@ -233,6 +255,10 @@
       const milestoneTextEl = document.getElementById("milestone-text");
       const milestoneContinueBtn =
         document.getElementById("milestone-continue");
+
+      const milestoneTextOverlay = document.getElementById(
+        "milestone-text-overlay"
+      );
 
       // Audio Context for retro sounds
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -278,24 +304,41 @@
       let food = { x: 15, y: 15 };
       let gameInterval;
       let isGameRunning = false;
-      let isMilestoneOpen = false;
 
       const milestoneMessages = [
-        "Янус моргнул и вроде бы не завис. Не расслабляйся: в 2026 пускают только без багов.",
-        "где-то в логах тихо исчезла строка… Не трогал `fin_log`? Я просто спрашиваю.",
-        "скорость растёт, как стресс перед дедлайном. Главное — не уйти в ‘вечный 2025’.",
-        "твой курсор точнее, чем корпоративные обещания. Похоже, ключи ядра уже рядом.",
-        "такой контроль, что даже `CGMiner` делает вид, что он калькулятор. С наступающим!",
-        "слухи шепчут, что HR уже заводит папку ‘герой корпоратива’, и ни разу не покушается на ваши акции.",
-        "если кто спросит про спец-ключ, сделай умное лицо и молчи.",
-        "поздравляю! ты обыграл ИИ Янус в его же игру, и плевать что он сейчас завис в вечной рекурсии, ты все равно можешь считать себя победителем. гордится собой.",
-        "ещё чуть-чуть, и маркетинг перестанет просить пароль от соцсетей. Почти чудо.",
-        "поздравляем! Ты только что обошёл временную петлю на чистом скилле. Теперь осталось ввести правильные 4 ключа.",
+        "ИИ Янус обещал оптимизацию… но ты оптимизировал его планы своим скиллом. +10 к авторитету.",
+        "Корпоративная магия: пока все обсуждают KPI, ты реально растёшь — в длину.",
+        "Это не ‘баг’, это ‘фича’: змейка просто репетирует релизный стресс.",
+        "HR уже смотрит на тебя с уважением: ты единственный, кто не просит ‘ещё одну попытку’.",
+        "Если тебя спросят ‘как дела?’, отвечай как ИИ: ‘в процессе обучения… на твоих ошибках’.",
+        "Ты набрал 10 очков — самое время вспомнить иврит: ‘сабаба’ означает ‘всё под контролем’ (почти).",
+        "Тыквенная алия начинается с малого: сначала переезжает змейка, потом — твой сон.",
+        "Эмиграция в Израиль — это как поворот змейки: главное не разворачиваться на 180° прямо в себя.",
+        "В офисе сказали ‘без токсичности’ — поэтому змейка ест только подарки и не спорит в чатике.",
+        "Новый уровень корпоративного дзена: ты молча делаешь результат, пока остальные ищут ‘кто сломал прод’.",
+        "ИИ Янус: ‘Я автоматизирую всё’. Ты: ‘Ок, автоматизируй очередь в Мисрад аПним’. Янус завис.",
+        "Новый репатриант-режим: ты уже знаешь три слова — ‘сабаба’, ‘эх’ и ‘где моя теудат зеут?’",
+        "Жалоба №1: ‘Почему всё через приложение?’ Ответ №1: ‘Потому что так сказал ИИ’. Жалоба №2: ‘Приложение не работает’.",
+        "Ульпан как дебаг: сначала не понимаешь ничего, потом вдруг понимаешь… что это была шутка преподавателя.",
+        "Купат холим: квест ‘записаться’ сложнее, чем победить босса. Но ты уже тренируешься на змейке.",
+        "Битуах Леуми: интерфейс как у Nokia, но без кнопки ‘Назад’.",
+        "В банке спросили ‘ма тахлес?’ — и ты понял: это не про продукт, это про жизнь.",
+        "Первый месяц в Израиле: ты не потерялся — ты просто ‘роутинг’ оптимизируешь.",
+        "ИИ предложил ‘перевести всё на облако’. Ты такой: ‘Сначала переведи меня на нормальную связь в автобусе’.",
+        "Репатриантская боль: ‘почему доставка с 8 до 20?’ Потому что это не доставка — это лотерея.",
+        "Тель-Авив: ‘маленькая квартира’. Москва: ‘маленькая квартира’. Разница: тут ещё и вид на стройку.",
+        "Шекели считаются как очки: быстро, нервно и всегда кажется, что где-то спрятался лишний нолик.",
+        "Твой личный ИИ-ассистент сегодня: ‘Рекомендую воду’. Израильский апдейт: ‘очень рекомендую воду’.",
+        "Секрет адаптации: не спорь с навигатором. Он тоже новый репатриант и тоже путается.",
+        "Когда слышишь ‘яхад’, не пугайся: это не новая Jira-доска, это просто ‘вместе’.",
+        "Типичный баг алии: ‘все говорят быстро’. Фикс: говори ‘махер махер’ — и всё ускорится (кроме бюрократии).",
+        "Если Янус попросит ‘дать доступ’, отвечай как в Израиле: ‘Только после подтверждения по SMS… который не приходит’.",
       ];
 
       let milestoneDeck = [];
       let nextScoreMilestone = 10;
       let shownMilestoneCount = 0;
+      let milestoneHideTimeoutId = null;
 
       function shuffleInPlace(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
@@ -312,34 +355,17 @@
         return milestoneDeck.pop();
       }
 
-      function pauseGame() {
-        if (gameInterval) clearInterval(gameInterval);
-        gameInterval = null;
-        isGameRunning = false;
-      }
-
-      function resumeGame() {
-        if (isMilestoneOpen) return;
-        if (gameInterval) clearInterval(gameInterval);
-        gameInterval = setInterval(updateGame, 1000 / speed);
-        isGameRunning = true;
-      }
-
       function showMilestoneMessage(message) {
-        milestoneTextEl.textContent = message;
-        milestoneScreen.style.display = "flex";
-        isMilestoneOpen = true;
-        pauseGame();
+        milestoneTextOverlay.textContent = message;
+        milestoneTextOverlay.style.display = "block";
+        if (milestoneHideTimeoutId) {
+          clearTimeout(milestoneHideTimeoutId);
+        }
+        milestoneHideTimeoutId = setTimeout(() => {
+          milestoneTextOverlay.style.display = "none";
+          milestoneHideTimeoutId = null;
+        }, 6000);
       }
-
-      function hideMilestoneMessage() {
-        if (!isMilestoneOpen) return;
-        milestoneScreen.style.display = "none";
-        isMilestoneOpen = false;
-        resumeGame();
-      }
-
-      // Nokia colors
       const colorSnake = "#000000";
       const colorFood = "#000000";
       const colorBg = "#8ca88b";
@@ -354,10 +380,9 @@
         placeFood();
         scoreElement.innerText = "Счет: " + score;
         nextScoreMilestone = 10;
-        milestoneDeck = [];
         shownMilestoneCount = 0;
-        isMilestoneOpen = false;
-        milestoneScreen.style.display = "none";
+        milestoneDeck = [];
+        milestoneTextOverlay.style.display = "none";
         if (gameInterval) clearInterval(gameInterval);
         gameInterval = setInterval(updateGame, 1000 / speed);
       }
@@ -407,7 +432,6 @@
             showMilestoneMessage(getNextMilestoneMessage());
             nextScoreMilestone += 10;
             shownMilestoneCount++;
-            return;
           }
 
           // Increase speed slightly every 5 points
@@ -468,8 +492,7 @@
         clearInterval(gameInterval);
         isGameRunning = false;
         sounds.gameOver();
-        isMilestoneOpen = false;
-        milestoneScreen.style.display = "none";
+        milestoneTextOverlay.style.display = "none";
 
         // Draw Game Over text on canvas
         ctx.fillStyle = "rgba(140, 168, 139, 0.8)";
@@ -503,14 +526,6 @@
         // Prevent default scrolling for arrow keys
         if ([37, 38, 39, 40].indexOf(e.keyCode) > -1) {
           e.preventDefault();
-        }
-
-        if (isMilestoneOpen) {
-          if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
-            e.preventDefault();
-            hideMilestoneMessage();
-          }
-          return;
         }
 
         if (!isGameRunning && e.keyCode >= 37 && e.keyCode <= 40) {
@@ -551,7 +566,6 @@
 
       // Touch controls
       function handleInput(direction) {
-        if (isMilestoneOpen) return;
         if (!isGameRunning) startGame();
 
         switch (direction) {
@@ -620,11 +634,9 @@
         if (audioCtx && audioCtx.state === "suspended") {
           audioCtx.resume();
         }
-        hideMilestoneMessage();
+        // No need to hide since not used for milestones
       });
-      milestoneScreen.addEventListener("click", (e) => {
-        if (e.target === milestoneScreen) hideMilestoneMessage();
-      });
+      // Remove milestone screen click listener since not used
 
       // Start immediately
       startGame();

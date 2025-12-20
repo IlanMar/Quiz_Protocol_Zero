@@ -356,19 +356,6 @@
         letter-spacing: 0.4px;
       }
 
-      .touch-pause {
-        position: absolute;
-        right: 12px;
-        top: 12px;
-        width: 46px;
-        height: 42px;
-        border-radius: 12px;
-        pointer-events: auto;
-        touch-action: manipulation;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-      }
-
       @media (hover: none) and (pointer: coarse) {
         .touch-ui {
           display: block;
@@ -517,11 +504,6 @@
                 aria-label="Space Shooter"
                 role="img"
               ></canvas>
-              <div class="touch-ui" aria-hidden="true">
-                <button id="touchPause" class="touch-pause" type="button">
-                  II
-                </button>
-              </div>
             </div>
 
             <p class="help" style="margin-top: 10px">
@@ -559,9 +541,7 @@
           cores: document.getElementById("cores"),
           toggleImmortality: document.getElementById("toggleImmortality"),
           btnStart: document.getElementById("btnStart"),
-          btnPause: document.getElementById("btnPause"),
           btnRestart: document.getElementById("btnRestart"),
-          touchPause: document.getElementById("touchPause"),
         };
 
         const audioCtx = new (window.AudioContext ||
@@ -670,7 +650,6 @@
             )
           )
             e.preventDefault();
-          if (e.key === "p" || e.key === "P") togglePause();
           if (e.key === "Enter") restart();
           keys.add(e.key);
         });
@@ -1290,7 +1269,6 @@
 
         const state = {
           running: false,
-          paused: false,
           t: 0,
           last: 0,
           score: 0,
@@ -1474,7 +1452,6 @@
           if (audioCtx.state === "suspended") audioCtx.resume();
           if (state.running) return;
           state.running = true;
-          state.paused = false;
           ui.status.textContent = "В работе";
           logLine(
             "Янус: запуск боевого контура. Пожалуйста, не нажимайте красную кнопку 'удалить логи'.",
@@ -1486,17 +1463,9 @@
           requestAnimationFrame(loop);
         }
 
-        function togglePause() {
-          if (!state.running) return;
-          state.paused = !state.paused;
-          ui.status.textContent = state.paused ? "Пауза" : "В работе";
-          if (!state.paused) requestAnimationFrame(loop);
-        }
-
         function restart() {
           resetWorld();
           state.running = true;
-          state.paused = false;
           ui.status.textContent = "В работе";
           requestAnimationFrame(loop);
         }
@@ -1733,7 +1702,7 @@
         }
 
         function loop(ts) {
-          if (!state.running || state.paused) return;
+          if (!state.running) return;
           if (!state.last) state.last = ts;
           const dt = Math.min(0.033, (ts - state.last) / 1000);
           state.last = ts;
@@ -2239,9 +2208,6 @@
             if (!state.running) start();
           });
         }
-        if (ui.btnPause) {
-          ui.btnPause.addEventListener("click", () => togglePause());
-        }
         if (ui.btnRestart) {
           ui.btnRestart.addEventListener("click", () => restart());
         }
@@ -2269,10 +2235,6 @@
         canvas.addEventListener("pointerup", endTouch);
         canvas.addEventListener("pointercancel", endTouch);
         canvas.addEventListener("lostpointercapture", () => resetTouch());
-
-        if (ui.touchPause) {
-          ui.touchPause.addEventListener("click", () => togglePause());
-        }
 
         // init
         fitCanvas();

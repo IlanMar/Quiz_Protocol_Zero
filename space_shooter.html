@@ -412,11 +412,7 @@
                 Слухи HR / прогресс по ключам
               </div>
               <div class="chips" id="cores"></div>
-              <div style="margin-top: 8px">
-                <button id="toggleImmortality" class="btn-orange" type="button">
-                  Отключить бессмертие
-                </button>
-              </div>
+              <!-- immortality button is rendered into the chips row by JS -->
             </div>
           </div>
           <div class="log" id="log"></div>
@@ -944,6 +940,43 @@
           r.textContent = "HR: 'Мы же семья'";
           r.title = "Слухи из кофе-поинта. Обновляются при подборе ключей.";
           ui.cores.appendChild(r);
+
+          // ensure immortality toggle is shown in the same row as chips
+          let btn = document.getElementById("toggleImmortality");
+          if (!btn) {
+            btn = document.createElement("button");
+            btn.id = "toggleImmortality";
+            btn.type = "button";
+            btn.className = "btn-orange";
+            btn.textContent = state.disableImmortality
+              ? "Включить бессмертие"
+              : "Отключить бессмертие";
+            ui.cores.appendChild(btn);
+            ui.toggleImmortality = btn;
+            btn.addEventListener("click", () => {
+              state.disableImmortality = !state.disableImmortality;
+              if (state.disableImmortality) {
+                state.lives = 5;
+                btn.classList.add("active");
+                logLine("Янус: бессмертие ОТКЛЮЧЕНО — жизни: 5", "warn");
+              } else {
+                state.lives = Infinity;
+                btn.classList.remove("active");
+                logLine("Янус: бессмертие ВКЛЮЧЕНО — бесконечные жизни", "ok");
+              }
+              updateHud();
+              // keep the button visible in chips row
+              if (btn.parentNode !== ui.cores) ui.cores.appendChild(btn);
+            });
+          } else {
+            // update text / state and ensure it's inside the chips container
+            btn.textContent = state.disableImmortality
+              ? "Включить бессмертие"
+              : "Отключить бессмертие";
+            if (state.disableImmortality) btn.classList.add("active");
+            else btn.classList.remove("active");
+            if (btn.parentNode !== ui.cores) ui.cores.appendChild(btn);
+          }
         }
 
         function showMessage(text, ms = 1200) {
@@ -995,8 +1028,8 @@
         }
 
         function win() {
+          // celebrate but do not stop the game loop — do not pause on victory
           playWin();
-          state.running = false;
           ui.status.textContent = "Успех";
           logLine("Янус: 4 ключа приняты. Перезагрузка…", "ok");
           logLine("Янус: деплой прошел успешно. Но никто не знает, как.", "ok");
@@ -1004,7 +1037,8 @@
             "Янус: добро пожаловать в 2026. Пожалуйста, не приносите туда сомнительные ключи и чужие KPI.",
             "ok"
           );
-          // victory overlay message removed per user request
+          showMessage("Успех — ключи собраны", 2200);
+          // keep `state.running` true so the game continues
         }
 
         function spawnEnemy() {
@@ -1595,23 +1629,6 @@
         }
         if (ui.btnRestart) {
           ui.btnRestart.addEventListener("click", () => restart());
-        }
-
-        if (ui.toggleImmortality) {
-          ui.toggleImmortality.addEventListener("click", () => {
-            state.disableImmortality = !state.disableImmortality;
-            if (state.disableImmortality) {
-              // give player 5 lives when immortality is disabled
-              state.lives = 5;
-              ui.toggleImmortality.classList.add("active");
-              logLine("Янус: бессмертие ОТКЛЮЧЕНО — жизни: 5", "warn");
-            } else {
-              state.lives = Infinity;
-              ui.toggleImmortality.classList.remove("active");
-              logLine("Янус: бессмертие ВКЛЮЧЕНО — бесконечные жизни", "ok");
-            }
-            updateHud();
-          });
         }
 
         // Touch controls

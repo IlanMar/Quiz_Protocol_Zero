@@ -373,17 +373,13 @@
             дедлайна (курантов)
           </p>
         </div>
-        <div class="btns">
-          <button id="btnStart" type="button">Старт</button>
-          <button id="btnPause" type="button">Пауза (P)</button>
-          <button id="btnRestart" type="button">Рестарт (Enter)</button>
-        </div>
+        <!-- Controls removed: Start / Pause / Restart -->
       </header>
 
       <div class="row">
         <section class="panel">
           <div class="panel-h">
-            <strong>Новогодний космос / Корпоративный прод</strong>
+            <strong></strong>
             <span
               id="status"
               style="font-size: 12px; color: rgba(255, 255, 255, 0.7)"
@@ -391,20 +387,7 @@
             >
           </div>
           <div class="panel-b">
-            <div class="hud">
-              <div class="stat">
-                <div class="k">Счет</div>
-                <div class="v" id="score">0</div>
-              </div>
-              <div class="stat">
-                <div class="k">Жизни</div>
-                <div class="v" id="lives">3</div>
-              </div>
-              <div class="stat">
-                <div class="k">Комбо патчей</div>
-                <div class="v" id="multishot">x1</div>
-              </div>
-            </div>
+            <!-- HUD removed: score, lives, multishot were intentionally removed -->
 
             <div style="margin-top: 12px" class="panel gameWrap">
               <canvas
@@ -501,7 +484,8 @@
         }
 
         function playShoot() {
-          playNote(880, 0.05, 0.0001); // приятный звук, еще тише
+          // Silent: shooting produces no sound
+          return;
         }
 
         function playExplosion() {
@@ -803,7 +787,7 @@
           t: 0,
           last: 0,
           score: 0,
-          lives: 3,
+          lives: Infinity,
           wave: 0,
           spawnTimer: 0,
           spawnEvery: 900,
@@ -837,7 +821,7 @@
           state.t = 0;
           state.last = 0;
           state.score = 0;
-          state.lives = 3;
+          state.lives = Infinity;
           state.wave = 0;
           state.spawnTimer = 0;
           state.spawnEvery = 1400;
@@ -898,9 +882,11 @@
         }
 
         function updateHud() {
-          ui.score.textContent = String(state.score);
-          ui.lives.textContent = String(state.lives);
-          ui.multishot.textContent = `x${player.multishot}`;
+          if (ui.score) ui.score.textContent = String(state.score);
+          if (ui.lives)
+            ui.lives.textContent =
+              state.lives === Infinity ? "∞" : String(state.lives);
+          if (ui.multishot) ui.multishot.textContent = `x${player.multishot}`;
         }
 
         function renderCores() {
@@ -1546,11 +1532,17 @@
           }
         }
 
-        ui.btnStart.addEventListener("click", () => {
-          if (!state.running) start();
-        });
-        ui.btnPause.addEventListener("click", () => togglePause());
-        ui.btnRestart.addEventListener("click", () => restart());
+        if (ui.btnStart) {
+          ui.btnStart.addEventListener("click", () => {
+            if (!state.running) start();
+          });
+        }
+        if (ui.btnPause) {
+          ui.btnPause.addEventListener("click", () => togglePause());
+        }
+        if (ui.btnRestart) {
+          ui.btnRestart.addEventListener("click", () => restart());
+        }
 
         // Touch controls
         canvas.addEventListener("pointerdown", (e) => {

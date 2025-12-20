@@ -148,6 +148,52 @@
         pointer-events: none;
         z-index: 5;
       }
+
+      /* Milestone congratulations overlay */
+      #milestone-screen {
+        position: fixed;
+        inset: 0;
+        background: rgba(153, 185, 152, 0.95);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #000;
+        z-index: 50;
+        text-align: center;
+        padding: 24px;
+        box-sizing: border-box;
+        pointer-events: auto;
+        user-select: none;
+      }
+
+      #milestone-title {
+        margin: 0 0 8px 0;
+        font-size: 2.2rem;
+        text-transform: uppercase;
+        text-shadow: 2px 2px 0px #8ca88b;
+      }
+
+      #milestone-text {
+        margin: 0;
+        font-size: 1.6rem;
+        max-width: 820px;
+        line-height: 1.1;
+      }
+
+      #milestone-hint {
+        margin-top: 12px;
+        font-size: 1.2rem;
+        opacity: 0.8;
+      }
+
+      #milestone-continue {
+        margin-top: 18px;
+        width: auto;
+        height: auto;
+        padding: 10px 24px;
+        border-radius: 12px;
+      }
     </style>
   </head>
   <body>
@@ -169,10 +215,24 @@
       <button class="btn btn-right" id="right">▶</button>
     </div>
 
+    <div id="milestone-screen" role="dialog" aria-modal="true">
+      <h2 id="milestone-title">С наступающим!</h2>
+      <p id="milestone-text"></p>
+      <div id="milestone-hint">Нажми «Продолжить», чтобы продолжить игру.</div>
+      <button class="btn" id="milestone-continue" type="button">
+        Продолжить
+      </button>
+    </div>
+
     <script>
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
       const scoreElement = document.getElementById("score-board");
+
+      const milestoneScreen = document.getElementById("milestone-screen");
+      const milestoneTextEl = document.getElementById("milestone-text");
+      const milestoneContinueBtn =
+        document.getElementById("milestone-continue");
 
       // Audio Context for retro sounds
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -218,6 +278,66 @@
       let food = { x: 15, y: 15 };
       let gameInterval;
       let isGameRunning = false;
+      let isMilestoneOpen = false;
+
+      const milestoneMessages = [
+        "Янус моргнул и вроде бы не завис. Не расслабляйся: в 2026 пускают только без багов.",
+        "где-то в логах тихо исчезла строка… Не трогал `fin_log`? Я просто спрашиваю.",
+        "скорость растёт, как стресс перед дедлайном. Главное — не уйти в ‘вечный 2025’.",
+        "твой курсор точнее, чем корпоративные обещания. Похоже, ключи ядра уже рядом.",
+        "такой контроль, что даже `CGMiner` делает вид, что он калькулятор. С наступающим!",
+        "слухи шепчут, что HR уже заводит папку ‘герой корпоратива’, и ни разу не покушается на ваши акции.",
+        "если кто спросит про спец-ключ, сделай умное лицо и молчи.",
+        "поздравляю! ты обыграл ИИ Янус в его же игру, и плевать что он сейчас завис в вечной рекурсии, ты все равно можешь считать себя победителем. гордится собой.",
+        "ещё чуть-чуть, и маркетинг перестанет просить пароль от соцсетей. Почти чудо.",
+        "поздравляем! Ты только что обошёл временную петлю на чистом скилле. Теперь осталось ввести правильные 4 ключа.",
+      ];
+
+      let milestoneDeck = [];
+      let nextScoreMilestone = 10;
+      let shownMilestoneCount = 0;
+
+      function shuffleInPlace(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      function getNextMilestoneMessage() {
+        if (milestoneDeck.length === 0) {
+          milestoneDeck = shuffleInPlace([...milestoneMessages]);
+        }
+        return milestoneDeck.pop();
+      }
+
+      function pauseGame() {
+        if (gameInterval) clearInterval(gameInterval);
+        gameInterval = null;
+        isGameRunning = false;
+      }
+
+      function resumeGame() {
+        if (isMilestoneOpen) return;
+        if (gameInterval) clearInterval(gameInterval);
+        gameInterval = setInterval(updateGame, 1000 / speed);
+        isGameRunning = true;
+      }
+
+      function showMilestoneMessage(message) {
+        milestoneTextEl.textContent = message;
+        milestoneScreen.style.display = "flex";
+        isMilestoneOpen = true;
+        pauseGame();
+      }
+
+      function hideMilestoneMessage() {
+        if (!isMilestoneOpen) return;
+        milestoneScreen.style.display = "none";
+        isMilestoneOpen = false;
+        resumeGame();
+      }
 
       // Nokia colors
       const colorSnake = "#000000";
@@ -233,6 +353,11 @@
         snake = [{ x: 10, y: 10 }];
         placeFood();
         scoreElement.innerText = "Счет: " + score;
+        nextScoreMilestone = 10;
+        milestoneDeck = [];
+        shownMilestoneCount = 0;
+        isMilestoneOpen = false;
+        milestoneScreen.style.display = "none";
         if (gameInterval) clearInterval(gameInterval);
         gameInterval = setInterval(updateGame, 1000 / speed);
       }
@@ -274,6 +399,17 @@
           scoreElement.innerText = "Счет: " + score;
           placeFood();
           sounds.eat();
+
+          if (
+            shownMilestoneCount < milestoneMessages.length &&
+            score >= nextScoreMilestone
+          ) {
+            showMilestoneMessage(getNextMilestoneMessage());
+            nextScoreMilestone += 10;
+            shownMilestoneCount++;
+            return;
+          }
+
           // Increase speed slightly every 5 points
           if (score % 5 === 0) {
             clearInterval(gameInterval);
@@ -332,6 +468,8 @@
         clearInterval(gameInterval);
         isGameRunning = false;
         sounds.gameOver();
+        isMilestoneOpen = false;
+        milestoneScreen.style.display = "none";
 
         // Draw Game Over text on canvas
         ctx.fillStyle = "rgba(140, 168, 139, 0.8)";
@@ -365,6 +503,14 @@
         // Prevent default scrolling for arrow keys
         if ([37, 38, 39, 40].indexOf(e.keyCode) > -1) {
           e.preventDefault();
+        }
+
+        if (isMilestoneOpen) {
+          if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+            e.preventDefault();
+            hideMilestoneMessage();
+          }
+          return;
         }
 
         if (!isGameRunning && e.keyCode >= 37 && e.keyCode <= 40) {
@@ -405,6 +551,7 @@
 
       // Touch controls
       function handleInput(direction) {
+        if (isMilestoneOpen) return;
         if (!isGameRunning) startGame();
 
         switch (direction) {
@@ -467,6 +614,17 @@
       addTouch("up", "up");
       addTouch("right", "right");
       addTouch("down", "down");
+
+      milestoneContinueBtn.addEventListener("click", () => {
+        // Make sure audio is allowed after a user gesture
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+        hideMilestoneMessage();
+      });
+      milestoneScreen.addEventListener("click", (e) => {
+        if (e.target === milestoneScreen) hideMilestoneMessage();
+      });
 
       // Start immediately
       startGame();

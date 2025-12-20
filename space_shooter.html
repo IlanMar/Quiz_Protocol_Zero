@@ -86,35 +86,80 @@
       }
 
       @media (max-width: 600px) {
-        .wrap {
-          padding: calc(8px + env(safe-area-inset-top))
-            calc(8px + env(safe-area-inset-right))
-            calc(8px + env(safe-area-inset-bottom))
-            calc(8px + env(safe-area-inset-left));
-          gap: 8px;
+        body {
+          overflow: hidden;
         }
-
-        /* Put the game first on phones (less scrolling) */
-        .row {
+        .wrap {
+          padding: 0;
+          gap: 0;
+          height: 100svh;
+          max-width: none;
           display: flex;
           flex-direction: column;
         }
-        .row > section.panel {
-          order: 1;
-        }
-        .row > aside.panel {
-          order: 2;
-        }
 
         header {
+          display: none;
+        }
+
+        /* Logs on top (40%), Game on bottom (60%) */
+        .row {
+          display: flex;
           flex-direction: column;
-          align-items: flex-start;
-          gap: 8px;
+          height: 100%;
+          gap: 0;
+          flex: 1;
         }
-        h1 {
-          font-size: 15px;
+        .row > aside.panel {
+          order: 1;
+          height: 40svh;
+          border: none;
+          border-radius: 0;
+          display: flex;
+          flex-direction: column;
+          background: rgba(0, 0, 0, 0.25);
         }
-        .subtitle,
+        .row > section.panel {
+          order: 2;
+          height: 60svh;
+          border: none;
+          border-radius: 0;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .panel-h {
+          padding: 4px 10px;
+          flex-shrink: 0;
+        }
+        .panel-b {
+          padding: 4px 8px;
+          flex-shrink: 0;
+        }
+        .row > section.panel .panel-b {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+        .log {
+          flex: 1;
+          height: auto !important;
+        }
+
+        .panel.gameWrap {
+          flex: 1;
+          height: 100% !important;
+          min-height: 0 !important;
+          margin-top: 0 !important;
+          display: flex;
+          flex-direction: column;
+        }
+
+        canvas {
+          flex: 1;
+          height: 100% !important;
+        }
+
         .help {
           display: none;
         }
@@ -129,12 +174,6 @@
           font-size: 11px;
           text-align: center;
         }
-        .panel-h {
-          padding: 6px 10px;
-        }
-        .panel-b {
-          padding: 8px;
-        }
         .hud {
           gap: 6px;
         }
@@ -144,13 +183,7 @@
         .stat .v {
           font-size: 13px;
         }
-        .log {
-          height: 120px;
-        }
 
-        .panel.gameWrap {
-          min-height: 62svh;
-        }
         .touch-joy,
         .touch-fire {
           width: 90px;

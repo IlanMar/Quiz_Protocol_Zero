@@ -631,19 +631,24 @@
         }
 
         // 4. ЦЕПОЧКА ВЕДУЩИЙ РАЗРАБОТЧИК
-        // Логика: SJFHK -> UNINSTALLCGMINER
+        // Логика: SJFHK -> SENIORMINER -> UNINSTALLCGMINER
         else if (input === normalize("uninstallCGMiner")) {
-          if (state.devStage === 1) {
+          if (state.devStage === 2) {
             state.flags.cgMinerDeleted = true;
             addLog("СИСТЕМА: СТОРОННЕЕ ПО 'CGMiner' УДАЛЕНО ИЗ СИСТЕМЫ.");
             response = "ДЕИНСТАЛЛЯЦИЯ ЗАВЕРШЕНА. СЛЕДЫ МАЙНИНГА СТЕРТЫ.";
+          } else if (state.devStage === 1) {
+            response =
+              "ОШИБКА: ТРЕБУЕТСЯ ПОДТВЕРЖДЕНИЕ СТАРШЕГО МАЙНЕРА (SENIORMINER).";
+          } else {
+            response = "ОШИБКА: НЕДОСТАТОЧНО ПРАВ ДЛЯ ВЫПОЛНЕНИЯ ОПЕРАЦИИ.";
           }
         }
 
         // Личный код Разработчика + доступ к резервной копии ИИ
         else if (input === "FOMO") {
           state.flags.fomoEntered = true;
-          response = "ДОСТУП ПОДТВЕРЖДЕН (DEV). ДОСТУПНА КОМАНДА AICOPY.";
+          response = "ДОСТУП ПОДТВЕРЖДЕН (DEV).";
         }
 
         // Команда копирования ИИ (доступна после FOMO)
@@ -724,15 +729,19 @@
 
         // Доп. команда: обнаружен майнер среди разработчиков
         else if (input === "SENIORMINER") {
-          // По задаче: сначала пользователь должен ввести FOMO, потом SENIORMINER
-          if (!state.flags.fomoEntered) {
+          // Теперь требует, чтобы перед UNINSTALLCGMINER был введен SENIORMINER
+          if (state.devStage === 1) {
+            state.devStage = 2;
+            addLog("ПОДТВЕРЖДЕНО: СТАРШИЙ МАЙНЕР ИДЕНТИФИЦИРОВАН.");
             response =
-              "ОШИБКА: НЕДОСТАТОЧНО ДАННЫХ. Введите личный код ведущего разработчика.";
-          } else if (!state.flags.cgMinerDeleted) {
-            addLog("ОБНАРУЖЕНО: Ведущий разработчик майнит на сервере Януса!");
-            response = "Ведущий разработчик майнит на сервере Януса!";
-          } else {
+              "SENIORMINER ПРИНЯТ. ТЕПЕРЬ ВВЕДИТЕ UNINSTALLCGMINER ДЛЯ УДАЛЕНИЯ.";
+          } else if (state.devStage === 0) {
+            response = "ОШИБКА: НЕДОСТАТОЧНО ПРАВ. ВВЕДИТЕ КОД СБ.";
+          } else if (state.flags.cgMinerDeleted) {
             response = "ИНФОРМАЦИЯ УСТАРЕЛА: МАЙНЕР УЖЕ УДАЛЕН.";
+          } else {
+            response =
+              "ОБНАРУЖЕНО: Ведущий разработчик майнит на сервере Януса!";
           }
         }
 

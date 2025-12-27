@@ -328,30 +328,27 @@
 
       // Начальное состояние
       const INITIAL_STATE = {
-        logs: [], // Массив строк для нижнего окна
-        enteredCores: [], // Уникальные введенные коды ядер
+        logs: [],
+        enteredCores: [],
 
-        // Прогресс цепочек персонажей (0 - ничего, 1 - введен первый код, 2 - второй и т.д.)
         ceoStage: 0,
         ctoStage: 0,
         devStage: 0,
         cfoStage: 0,
 
-        // Флаги событий (чтобы приложение "запомнило")
         flags: {
           finLogDeleted: false,
           ceoKicked: false,
           cgMinerDeleted: false,
+
+          // NEW: взаимоисключающий флаг "скомпрометировали майнера"
+          minerCompromised: false,
+
           bonusStolen: false,
-          // Ожидаем ввод кода компромата после VOTE_KICK_CEO
           awaitingCompromat: false,
-          // Ожидаем подтверждение компромата CFO и Журналиста
           awaitingCfoDropConfirm: false,
-          // Разработчик идентифицирован (введен личный код FOMO)
           fomoEntered: false,
-          // ИИ скопирован
           aiCopied: false,
-          // Пост в соцсетях удален
           instagrammFixed: false,
         },
       };
@@ -631,17 +628,39 @@
         }
 
         // 4. ЦЕПОЧКА ВЕДУЩИЙ РАЗРАБОТЧИК
-        // Логика: SJFHK -> SENIORMINER -> UNINSTALLCGMINER
+        // Правило (исправлено): либо удалить майнер, либо скомпрометировать — взаимоисключающе.
+        // Логика доступа: SJFHK даёт права devStage=1.
+
+        // Удаление майнера (ТЕПЕРЬ не требует SENIORMINER)
         else if (input === normalize("uninstallCGMiner")) {
-          if (state.devStage === 2) {
+          if (state.devStage === 0) {
+            response = "ОШИБКА: НЕДОСТАТОЧНО ПРАВ. ВВЕДИТЕ КОД СБ (SJFHK).";
+          } else if (state.flags.minerCompromised) {
+            response =
+              "ОШИБКА: МАЙНЕР СКОМПРОМЕТИРОВАН. УДАЛЕНИЕ ЗАБЛОКИРОВАНО.";
+          } else if (state.flags.cgMinerDeleted) {
+            response = "ОПЕРАЦИЯ УЖЕ ВЫПОЛНЕНА: CGMiner УДАЛЕН.";
+          } else {
             state.flags.cgMinerDeleted = true;
             addLog("СИСТЕМА: СТОРОННЕЕ ПО 'CGMiner' УДАЛЕНО ИЗ СИСТЕМЫ.");
             response = "ДЕИНСТАЛЛЯЦИЯ ЗАВЕРШЕНА. СЛЕДЫ МАЙНИНГА СТЕРТЫ.";
-          } else if (state.devStage === 1) {
+          }
+        }
+
+        // Компромат на майнера (ТЕПЕРЬ блокирует удаление)
+        else if (input === "SENIORMINER") {
+          if (state.devStage === 0) {
+            response = "ОШИБКА: НЕДОСТАТОЧНО ПРАВ. ВВЕДИТЕ КОД СБ (SJFHK).";
+          } else if (state.flags.cgMinerDeleted) {
             response =
-              "ОШИБКА: ТРЕБУЕТСЯ ПОДТВЕРЖДЕНИЕ СТАРШЕГО МАЙНЕРА (SENIORMINER).";
+              "ОШИБКА: МАЙНЕР УЖЕ УДАЛЕН. КОМПРОМЕТИРОВАНИЕ НЕВОЗМОЖНО.";
+          } else if (state.flags.minerCompromised) {
+            response = "КОМПРОМАТ УЖЕ ЗАФИКСИРОВАН.";
           } else {
-            response = "ОШИБКА: НЕДОСТАТОЧНО ПРАВ ДЛЯ ВЫПОЛНЕНИЯ ОПЕРАЦИИ.";
+            state.flags.minerCompromised = true;
+            addLog("ОБНАРУЖЕНО: Ведущий разработчик майнит на сервере Януса!");
+            response =
+              "КОМПРОМАТ ЗАФИКСИРОВАН (SENIORMINER). УДАЛЕНИЕ CGMiner ТЕПЕРЬ ЗАБЛОКИРОВАНО.";
           }
         }
 
@@ -732,7 +751,7 @@
           // Теперь требует, чтобы перед UNINSTALLCGMINER был введен SENIORMINER
           if (state.devStage === 1) {
             state.devStage = 2;
-            addLog("ПОДТВЕРЖДЕНО: СТАРШИЙ МАЙНЕР ИДЕНТИФИЦИРОВАН.");
+            addLog("ОБНАРУЖЕНО: Ведущий разработчик майнит на сервере Януса!");
             response =
               "SENIORMINER ПРИНЯТ. ТЕПЕРЬ ВВЕДИТЕ UNINSTALLCGMINER ДЛЯ УДАЛЕНИЯ.";
           } else if (state.devStage === 0) {
@@ -740,6 +759,7 @@
           } else if (state.flags.cgMinerDeleted) {
             response = "ИНФОРМАЦИЯ УСТАРЕЛА: МАЙНЕР УЖЕ УДАЛЕН.";
           } else {
+            state.devStage = 2;
             response =
               "ОБНАРУЖЕНО: Ведущий разработчик майнит на сервере Януса!";
           }

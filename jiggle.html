@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shadow Ledger v.0.0.1</title>
+    <title>Shadow Ledger v.0.0.2</title>
     <style>
       body {
         background-color: #0d2b1d; /* Темно-зеленый (цвет денег в тени) */
@@ -135,6 +135,7 @@
       <h1>$$$ PRIVATE ASSETS $$$</h1>
       <div class="status">ENCRYPTION: AES-256 | TAX_LEVEL: 0%</div>
 
+      <!-- ЭТАП 1: КЛЮЧ -->
       <div id="stage-1" class="content-box">
         <p><strong>[СИСТЕМА ЗАЩИТЫ БОНУСОВ]</strong></p>
         <p>Доступ к скрытым счетам заблокирован.</p>
@@ -152,9 +153,10 @@
         </p>
       </div>
 
+      <!-- ЭТАП 2: ОФШОР -->
       <div id="stage-2" class="content-box hidden">
-        <p><strong>[ПРОВЕРКА ФИНАНСОВОЙ ГРАМОТНОСТИ]</strong></p>
-        <p>Чтобы увидеть код счета, решите загадку:</p>
+        <p><strong>[УРОВЕНЬ 1: ГЕОГРАФИЯ КАПИТАЛА]</strong></p>
+        <p>Чтобы продвинуться дальше, решите загадку:</p>
         <p
           style="
             font-style: italic;
@@ -182,9 +184,155 @@
         </p>
       </div>
 
+      <!-- ЭТАП 3: ПРАЧЕЧНАЯ (НОВЫЙ) -->
       <div id="stage-3" class="content-box hidden">
+        <p><strong>[УРОВЕНЬ 2: ГИГИЕНА ФИНАНСОВ]</strong></p>
+        <p>Деньги любят чистоту. Следующая загадка:</p>
+        <p
+          style="
+            font-style: italic;
+            color: #8ee4af;
+            border-left: 3px solid #8ee4af;
+            padding-left: 15px;
+          "
+        >
+          "Я кручусь верчусь, но я не карусель.<br />
+          Я делаю грязное чистым, но я не мыло.<br />
+          В быту я стираю носки, а в бизнесе — следы преступлений.<br />
+          Куда несут 'грязный' кэш?"
+        </p>
+
+        <input
+          type="text"
+          id="input-laundry"
+          placeholder="ОТВЕТ..."
+          autocomplete="off"
+        />
+        <button onclick="checkLaundry()">ЗАПУСТИТЬ ОТЖИМ</button>
+        <p class="error-msg" id="error-laundry">
+          ОШИБКА. ДЕНЬГИ ВСЕ ЕЩЕ ГРЯЗНЫЕ.
+        </p>
+      </div>
+
+      <!-- ЭТАП 4: ПАРАШЮТ (НОВЫЙ) -->
+      <div id="stage-4" class="content-box hidden">
+        <p><strong>[УРОВЕНЬ 3: АВАРИЙНЫЙ ВЫХОД]</strong></p>
+        <p>Последний рубеж защиты:</p>
+        <p
+          style="
+            font-style: italic;
+            color: #8ee4af;
+            border-left: 3px solid #8ee4af;
+            padding-left: 15px;
+          "
+        >
+          "Я — единственное средство спасения, которое работает лучше всего,
+          когда компания падает в пропасть.<br />
+          Чем хуже идут дела у фирмы, тем мягче я раскрываюсь для директора.<br />
+          Он сделан из золота, но тканью не является.<br />
+          Что это?"
+        </p>
+
+        <input
+          type="text"
+          id="input-parachute"
+          placeholder="ОТВЕТ..."
+          autocomplete="off"
+        />
+        <button onclick="checkParachute()">ПРЫГНУТЬ</button>
+        <p class="error-msg" id="error-parachute">
+          ВЫ РАЗБИЛИСЬ ОБ АСФАЛЬТ РЕАЛЬНОСТИ.
+        </p>
+      </div>
+
+      <!-- ЭТАП 5: БОНУС (НОВЫЙ) -->
+      <div id="stage-5" class="content-box hidden">
+        <p><strong>[УРОВЕНЬ 4: СЕКРЕТЫ ИНВЕСТИЦИЙ]</strong></p>
+        <p>Вы на верном пути! Решите еще одну загадку:</p>
+        <p
+          style="
+            font-style: italic;
+            color: #8ee4af;
+            border-left: 3px solid #8ee4af;
+            padding-left: 15px;
+          "
+        >
+          "Я — желаемый приз для многих, но получаюсь только у избранных.<br />
+          Меня прячут в конвертах, но я не письмо.<br />
+          Я могу быть наличными, но не всегда видимыми.<br />
+          Что я?"
+        </p>
+
+        <input
+          type="text"
+          id="input-bonus"
+          placeholder="ОТВЕТ..."
+          autocomplete="off"
+        />
+        <button onclick="checkBonus()">ПОЛУЧИТЬ БОНУС</button>
+        <p class="error-msg" id="error-bonus">УПС! ЭТОТ БОНУС НЕ ДЛЯ ВАС.</p>
+      </div>
+
+      <!-- ЭТАП 6: ШАМПАНСКОЕ (НОВЫЙ) -->
+      <div id="stage-6" class="content-box hidden">
+        <p><strong>[УРОВЕНЬ 5: ПРАЗДНИК ЖИЗНИ]</strong></p>
+        <p>Остался последний шаг! Разгадайте финальную загадку:</p>
+        <p
+          style="
+            font-style: italic;
+            color: #8ee4af;
+            border-left: 3px solid #8ee4af;
+            padding-left: 15px;
+          "
+        >
+          "Я — искристая река, текущая в бокалах.<br />
+          Я приношу радость и смех, но меня нужно пить с умом.<br />
+          Я — символ праздника, но не каждый день меня встретишь.<br />
+          Что я?"
+        </p>
+
+        <input
+          type="text"
+          id="input-champagne"
+          placeholder="ОТВЕТ..."
+          autocomplete="off"
+        />
+        <button onclick="checkChampagne()">ЗАВЕРШИТЬ ПРАЗДНИК</button>
+        <p class="error-msg" id="error-champagne">ЭТА ШТУКА НЕ ДЛЯ НОВИЧКОВ.</p>
+      </div>
+
+      <!-- ЭТАП 7: АУДИТ (НОВЫЙ) -->
+      <div id="stage-7" class="content-box hidden">
+        <p><strong>[УРОВЕНЬ 6: ФИНАНСОВЫЙ КОНТРОЛЬ]</strong></p>
+        <p>Вы почти у цели! Последняя загадка:</p>
+        <p
+          style="
+            font-style: italic;
+            color: #8ee4af;
+            border-left: 3px solid #8ee4af;
+            padding-left: 15px;
+          "
+        >
+          "Я прихожу без стука и всегда с проверкой.<br />
+          Я могу сделать вас беднее, но не забираю деньги.<br />
+          Я — тень вашего бизнеса, следящая за каждым шагом.<br />
+          Кто я?"
+        </p>
+
+        <input
+          type="text"
+          id="input-audit"
+          placeholder="ОТВЕТ..."
+          autocomplete="off"
+        />
+        <button onclick="checkAudit()">ПРОЙТИ АУДИТ</button>
+        <p class="error-msg" id="error-audit">НАЛОГОВАЯ УЖЕ В ПУТИ!</p>
+      </div>
+
+      <!-- ФИНАЛ -->
+      <div id="stage-final" class="content-box hidden">
         <p style="text-align: center"><strong>ДОСТУП РАЗРЕШЕН</strong></p>
-        <p style="text-align: center">Налоговая беспомощьно разводит руками</p>
+        <p style="text-align: center">Налоговая беспомощно разводит руками</p>
         <p style="text-align: center">Ваш секретный код доступа к счетам:</p>
 
         <div class="jiggle-text">jigglejiggle</div>
@@ -234,6 +382,108 @@
         }
       }
 
+      // Этап 3: Проверка загадки (ПРАЧЕЧНАЯ)
+      function checkLaundry() {
+        const val = clean(document.getElementById("input-laundry").value);
+        const answers = [
+          "ПРАЧЕЧНАЯ",
+          "LAUNDRY",
+          "ОТМЫВАНИЕ",
+          "СТИРКА",
+          "ХИМЧИСТКА",
+        ];
+
+        if (answers.includes(val)) {
+          document.getElementById("stage-3").classList.add("hidden");
+          document.getElementById("stage-4").classList.remove("hidden");
+        } else {
+          showError("error-laundry");
+        }
+      }
+
+      // Этап 4: Проверка загадки (ПАРАШЮТ)
+      function checkParachute() {
+        const val = clean(document.getElementById("input-parachute").value);
+        const answers = [
+          "ПАРАШЮТ",
+          "PARACHUTE",
+          "ЗОЛОТОЙПАРАШЮТ",
+          "GOLDENPARACHUTE",
+        ];
+
+        if (answers.includes(val)) {
+          document.getElementById("stage-4").classList.add("hidden");
+          // ИЗМЕНЕНО: Переход на этап 5 вместо финала
+          document.getElementById("stage-5").classList.remove("hidden");
+        } else {
+          showError("error-parachute");
+        }
+      }
+
+      // Этап 5: Проверка загадки (БОНУС)
+      function checkBonus() {
+        const val = clean(document.getElementById("input-bonus").value);
+        const answers = [
+          "БОНУС",
+          "BONUS",
+          "ПРЕМИЯ",
+          "КОНВЕРТ",
+          "НАЛИЧКА",
+          "CASH",
+          "КЭШ",
+          "13ЗАРПЛАТА",
+        ];
+
+        if (answers.includes(val)) {
+          document.getElementById("stage-5").classList.add("hidden");
+          document.getElementById("stage-6").classList.remove("hidden");
+        } else {
+          showError("error-bonus");
+        }
+      }
+
+      // Этап 6: Проверка загадки (ШАМПАНСКОЕ)
+      function checkChampagne() {
+        const val = clean(document.getElementById("input-champagne").value);
+        const answers = [
+          "ШАМПАНСКОЕ",
+          "CHAMPAGNE",
+          "АЛКОГОЛЬ",
+          "ALCOHOL",
+          "ВИНО",
+          "WINE",
+          "КОРПОРАТИВ",
+        ];
+
+        if (answers.includes(val)) {
+          document.getElementById("stage-6").classList.add("hidden");
+          document.getElementById("stage-7").classList.remove("hidden");
+        } else {
+          showError("error-champagne");
+        }
+      }
+
+      // Этап 7: Проверка загадки (АУДИТ)
+      function checkAudit() {
+        const val = clean(document.getElementById("input-audit").value);
+        const answers = [
+          "АУДИТ",
+          "AUDIT",
+          "НАЛОГОВАЯ",
+          "TAX",
+          "ИНСПЕКТОР",
+          "ФНС",
+          "ПРОКУРОР",
+        ];
+
+        if (answers.includes(val)) {
+          document.getElementById("stage-7").classList.add("hidden");
+          document.getElementById("stage-final").classList.remove("hidden");
+        } else {
+          showError("error-audit");
+        }
+      }
+
       // Показ ошибки с анимацией
       function showError(id) {
         const el = document.getElementById(id);
@@ -263,6 +513,27 @@
         .getElementById("input-riddle")
         .addEventListener("keypress", function (e) {
           if (e.key === "Enter") checkRiddle();
+        });
+      document
+        .getElementById("input-laundry")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkLaundry();
+        });
+      document
+        .getElementById("input-parachute")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkParachute();
+        });
+      // Добавляем слушатели Enter для новых полей
+      document
+        .getElementById("input-bonus")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkBonus();
+        });
+      document
+        .getElementById("input-champagne")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") checkChampagne();
         });
     </script>
   </body>

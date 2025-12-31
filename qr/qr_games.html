@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>QR — Игры</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+          "Helvetica Neue", Arial;
+        margin: 40px;
+        background: #fff;
+        color: #111;
+      }
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 36px;
+        justify-content: center;
+        align-items: flex-start;
+      }
+      figure {
+        width: 300px;
+        text-align: center;
+        margin: 0;
+      }
+      img {
+        width: 100%;
+        height: auto;
+        border: 8px solid #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        background: #fff;
+      }
+      figcaption {
+        margin-top: 12px;
+        font-size: 18px;
+        color: #222;
+      }
+      .note {
+        max-width: 700px;
+        margin: 28px auto 0;
+        color: #444;
+        font-size: 14px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="text-align: center">QR-коды — игры</h1>
+
+    <div class="grid">
+      <figure>
+        <img src="snake.png" alt="snake QR" />
+        <figcaption>snake</figcaption>
+      </figure>
+
+      <figure>
+        <img src="space_shooter.png" alt="space shooter QR" />
+        <figcaption>space shooter</figcaption>
+      </figure>
+
+      <figure>
+        <img src="pong.png" alt="pong QR" />
+        <figcaption>pong</figcaption>
+      </figure>
+    </div>
+
+    <p class="note">
+      Положите файлы изображений в эту же папку `qr` с именами
+      <strong>snake.png</strong>, <strong>space_shooter.png</strong> и
+      <strong>pong.png</strong>. Если хотите, я могу встроить изображения прямо
+      в HTML в виде base64 — пришлите, пожалуйста, файлы или дайте знать.
+    </p>
+  </body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Protocol: ZERO — Директор по Маркетингу (CMO)</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+      }
+
+      .card {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 300px; /* A4 width is roughly 210mm. 300px is good for screen, for print we adjust */
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .role-title {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+      }
+
+      .section-title {
+        font-weight: bold;
+        margin-top: 10px;
+        color: #e74c3c;
+        text-transform: uppercase;
+        font-size: 0.9em;
+      }
+
+      .content {
+        font-size: 0.95em;
+        margin-bottom: 5px;
+        line-height: 1.4;
+      }
+
+      .inventory-list {
+        margin: 5px 0;
+        padding-left: 20px;
+        font-size: 0.9em;
+      }
+
+      .qr-container {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .qr-item {
+        text-align: center;
+      }
+
+      .qr-item img {
+        width: 120px;
+        height: 120px;
+        border: 1px solid #ddd;
+      }
+
+      .qr-label {
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+        }
+        .cards-container {
+          display: block;
+        }
+        .card {
+          width: 100%;
+          max-width: 100%;
+          border: 1px solid #000;
+          box-shadow: none;
+          page-break-inside: avoid;
+          margin-bottom: 20px;
+        }
+        .qr-container {
+          flex-direction: row;
+          justify-content: space-around;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cards-container">
+      <div class="card">
+        <div class="role-title">Директор по Маркетингу (CMO)</div>
+
+        <div class="section-title">Публично</div>
+        <div class="content">
+          Звезда вечеринки, ведет инстаграм-трансляцию. Любит яркие и эпатажные
+          образы. Искренне считает, что он кому-то интересен.
+        </div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">
+          Общая: остаться в 2025 (не перезагружать «Янус»), пока не решишь
+          проблему. Личная: удалить фейковый анонс.
+        </div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">
+          Пару месяцев назад вы запостили анонс продукта, которого не
+          существует. Если наступит 2026 — анонс выйдет и будет скандал. Вам
+          нужно время.
+        </div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Личный код: <b>HYPE</b></li>
+          <li>QR-код на Код ядра (Плохой!)</li>
+          <li>QR-код на соцсеть компании (пост-анонс)</li>
+        </ul>
+
+        <div class="section-title">Как выполнить личную цель</div>
+        <ol class="inventory-list">
+          <li>Найди пароль от соцсетей.</li>
+          <li>
+            На консоли «Янус» введи <b>пароль соцсетей</b>, чтобы «удалить
+            пост».
+          </li>
+          <li>
+            До этого момента выгодно тормозить финал (перезагрузку) переговорами
+            и паникой «бренд горит!».
+          </li>
+        </ol>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_gamma.jpg" alt="QR CMO" />
+            <div class="qr-label">
+              <a href="gamma.html">Код ядра</a>
+            </div>
+          </div>
+          <div class="qr-item">
+            <img
+              src="QR_CMO_new_product_annonce.jpg"
+              alt="QR CMO Announcement"
+            />
+            <div class="qr-label">
+              <a href="CMO_new_product_annonce.html">Соцсеть (пост-анонс)</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

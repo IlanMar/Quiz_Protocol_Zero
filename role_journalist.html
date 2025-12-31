@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Protocol: ZERO — Журналист</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+      }
+
+      .card {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 300px; /* A4 width is roughly 210mm. 300px is good for screen, for print we adjust */
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .role-title {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+      }
+
+      .section-title {
+        font-weight: bold;
+        margin-top: 10px;
+        color: #e74c3c;
+        text-transform: uppercase;
+        font-size: 0.9em;
+      }
+
+      .content {
+        font-size: 0.95em;
+        margin-bottom: 5px;
+        line-height: 1.4;
+      }
+
+      .inventory-list {
+        margin: 5px 0;
+        padding-left: 20px;
+        font-size: 0.9em;
+      }
+
+      .qr-container {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .qr-item {
+        text-align: center;
+      }
+
+      .qr-item img {
+        width: 120px;
+        height: 120px;
+        border: 1px solid #ddd;
+      }
+
+      .qr-label {
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      @media print {
+        body {
+          background: none;
+          padding: 0;
+        }
+        .cards-container {
+          display: block;
+        }
+        .card {
+          width: 100%;
+          max-width: 100%;
+          border: 1px solid #000;
+          box-shadow: none;
+          page-break-inside: avoid;
+          margin-bottom: 20px;
+        }
+        .qr-container {
+          flex-direction: row;
+          justify-content: space-around;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cards-container">
+      <div class="card">
+        <div class="role-title">Журналист</div>
+
+        <div class="section-title">Публично</div>
+        <div class="content">
+          Пишет статью о «Вечеринке будущего». Экстраверт каких еще поискать. Не
+          знает значение фразы «Личные границы».
+        </div>
+
+        <div class="section-title">Цель</div>
+        <div class="content">
+          Личная: сбор грязи (год не важен). Чем неловче история — тем лучше
+          заголовок.
+        </div>
+
+        <div class="section-title">Секрет</div>
+        <div class="content">
+          Ищет сенсацию, чтобы разрушить репутацию компании. Роман с CFO.
+          Подозревает, что CFO хочет прикарманить бонусы (и да, это тоже в
+          статью). Так же повесила флэшку на ёлку(а что за флешка? безпонятия).
+        </div>
+
+        <div class="section-title">Инвентарь</div>
+        <ul class="inventory-list">
+          <li>Знает личный код CFO</li>
+          <li>QR-код на Код ядра</li>
+        </ul>
+
+        <div class="section-title">Как выполнить личную цель</div>
+        <ol class="inventory-list">
+          <li>Сканируй QR и сохрани код ядра.</li>
+          <li>
+            Выведывай и записывай секреты CEO, CTO, Начальника СБ и Маркетолога
+            через разговоры и сделки. (просто выясни кто и чем провинился)
+          </li>
+          <li>
+            Твоя сила — обмен: обещания молчания, публикации, «не вводить в
+            консоль» и т.п.
+          </li>
+        </ol>
+
+        <div class="qr-container">
+          <div class="qr-item">
+            <img src="QR_beta.jpg" alt="QR Beta 350" />
+            <div class="qr-label">
+              <a href="quiz_seventh_element.html">Код Ядра </a>
+            </div>
+          </div>
+          <div class="qr-item">
+            <img src="QR_security.jpg" alt="QR Security" />
+            <div class="qr-label"><a href="security.html">Терминал СБ</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

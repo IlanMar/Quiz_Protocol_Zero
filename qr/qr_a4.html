@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR — A4 sheet</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        -webkit-print-color-adjust: exact;
+      }
+      .sheet {
+        width: 210mm;
+        height: 297mm;
+        box-sizing: border-box;
+        padding: 6mm;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: 1fr;
+        gap: 6mm;
+      }
+      .cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4mm;
+        box-sizing: border-box;
+        background: #fff;
+      }
+      .cell img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+      @media print {
+        body,
+        .sheet {
+          margin: 0;
+          box-shadow: none;
+        }
+        .cell {
+          border: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sheet">
+      <div class="cell"><img src="role_ceo.png" alt="role_ceo" /></div>
+      <div class="cell"><img src="role_cfo.png" alt="role_cfo" /></div>
+      <div class="cell"><img src="role_cmo.png" alt="role_cmo" /></div>
+      <div class="cell"><img src="role_cto.png" alt="role_cto" /></div>
+      <div class="cell"><img src="role_hr.png" alt="role_hr" /></div>
+      <div class="cell"><img src="role_intern.png" alt="role_intern" /></div>
+      <div class="cell">
+        <img src="role_journalist.png" alt="role_journalist" />
+      </div>
+      <div class="cell">
+        <img src="role_lead_developer.png" alt="role_lead_developer" />
+      </div>
+      <div class="cell">
+        <img src="role_security.png" alt="role_security" />
+      </div>
+    </div>
+  </body>
+</html>

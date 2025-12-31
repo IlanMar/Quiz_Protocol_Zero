@@ -2,85 +2,78 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>QR — Игры</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR — Games</title>
     <style>
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      html,
       body {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
-          "Helvetica Neue", Arial;
-        margin: 40px;
-        background: #fff;
-        color: #111;
-      }
-      .grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 36px;
-        justify-content: center;
-        align-items: flex-start;
-      }
-      figure {
-        width: 300px;
-        text-align: center;
+        height: 100%;
         margin: 0;
       }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .sheet {
+        width: 210mm;
+        height: 297mm;
+        box-sizing: border-box;
+        padding: 6mm;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10mm;
+        align-content: start;
+      }
+
+      figure {
+        margin: 0;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        justify-items: center;
+        gap: 4mm;
+      }
+
       img {
         width: 100%;
+        max-width: 70mm;
         height: auto;
-        border: 8px solid #fff;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        background: #fff;
+        display: block;
       }
+
       figcaption {
-        margin-top: 12px;
         font-size: 18px;
-        color: #222;
-      }
-      .note {
-        max-width: 700px;
-        margin: 28px auto 0;
-        color: #444;
-        font-size: 14px;
+        line-height: 1.2;
         text-align: center;
+      }
+
+      @media print {
+        body,
+        .sheet {
+          margin: 0;
+          box-shadow: none;
+        }
       }
     </style>
   </head>
   <body>
-    <h1 style="text-align: center">QR-коды — игры</h1>
-
-    <div class="grid">
+    <div class="sheet">
       <figure>
-        <a href="./snake.png" target="_blank" rel="noopener noreferrer">
-          <img src="./snake.png" alt="snake QR" />
-        </a>
-        <figcaption>snake</figcaption>
-      </figure>
-
-      <figure>
-        <a href="./space_shooter.png" target="_blank" rel="noopener noreferrer">
-          <img src="./space_shooter.png" alt="space shooter QR" />
-        </a>
-        <figcaption>space shooter</figcaption>
-      </figure>
-
-      <figure>
-        <a href="./pong.png" target="_blank" rel="noopener noreferrer">
-          <img src="./pong.png" alt="pong QR" />
-        </a>
+        <img src="../QR_pong.jpg" alt="QR pong" />
         <figcaption>pong</figcaption>
       </figure>
+      <figure>
+        <img src="../QR_snake.jpg" alt="QR snake" />
+        <figcaption>snake</figcaption>
+      </figure>
+      <figure>
+        <img src="../QR_space_shooter.jpg" alt="QR space shooter" />
+        <figcaption>space shooter</figcaption>
+      </figure>
     </div>
-
-    <p class="note">
-      Эта страница будет размещаться на GitHub Pages; убедитесь, что файлы
-      изображений добавлены в репозиторий в папку <strong>qr</strong> с точными
-      именами (регистрозависимость файловой системы GitHub Pages). Рекомендуется
-      использовать имена в нижнем регистре: <strong>snake.png</strong>,
-      <strong>space_shooter.png</strong> и <strong>pong.png</strong>.
-      <br /><br />
-      Я добавил ссылку на каждое изображение — клик откроет QR в новой вкладке.
-      Если вы хотите, чтобы изображения были в одном файле без внешних PNG, могу
-      встроить их как base64 — сообщите, и я обновлю страницу.
-    </p>
   </body>
 </html>

@@ -2,6 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Precision Time</title>
     <style>
       body {
@@ -11,37 +15,49 @@
         align-items: center;
         height: 100vh;
         margin: 0;
-        background-color: #1a1a1a;
+        background-color: #111;
         font-family: "Courier New", monospace;
         color: #0f0;
         overflow: hidden;
+        /* Prevent double-tap zoom on mobile */
+        touch-action: manipulation;
       }
+
       #zone-display {
-        font-size: 1.5rem;
-        margin-bottom: 10px;
-        color: #888;
+        font-size: clamp(0.8rem, 4vw, 1.5rem); /* Scales with screen */
+        margin-bottom: 2vh;
+        color: #666;
         font-weight: bold;
         text-transform: uppercase;
         letter-spacing: 2px;
+        text-align: center;
+        padding: 0 10px;
       }
+
       #clock {
-        font-size: 8rem;
-        text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        /* This is the magic: Minimum 3rem, Ideal 16vw, Maximum 8rem */
+        font-size: clamp(3rem, 16vw, 8rem);
+        text-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
         font-variant-numeric: tabular-nums;
         cursor: default;
         line-height: 1;
+        user-select: none; /* Prevents text selection on touch */
+        white-space: nowrap; /* Prevents wrapping on very small screens */
       }
+
       #latency-display {
-        margin-top: 15px;
-        font-size: 1rem;
-        color: #555;
-        opacity: 0; /* Hidden until sync completes */
+        margin-top: 3vh;
+        font-size: clamp(0.7rem, 3vw, 1rem);
+        color: #444;
+        opacity: 0;
         transition: opacity 0.5s ease;
+        font-family: sans-serif;
+        letter-spacing: 1px;
       }
     </style>
   </head>
   <body>
-    <div id="zone-display"></div>
+    <div id="zone-display">INITIALIZING...</div>
 
     <div id="clock">00:00:00</div>
 
@@ -74,9 +90,9 @@
         const now = new Date(Date.now() + timeSkew);
         CLOCK_EL.textContent = timeFormatter.format(now);
 
-        // Update exactly at the next second boundary for smoothness
+        // Update exactly at the next second boundary for UI smoothness
         const msUntilNextSecond = 1000 - now.getMilliseconds();
-        setTimeout(tick, msUntilNextSecond);
+        setTimeout(tick, msUntilNextSecond + 10);
       }
       tick();
 
@@ -95,25 +111,27 @@
           parse: (d) => new Date(d.datetime),
         },
         {
+          // RESTORED: AiSense API
           url: "https://aisenseapi.com/services/v1/datetime",
           parse: (d) => new Date(d.datetime),
         },
       ];
 
       async function syncTime() {
-        // Fetch function that returns latency and skew, or null on error
         const fetchOne = async (ep) => {
           try {
             const t0 = Date.now();
+            // Cache: 'no-store' forces a fresh network request
             const res = await fetch(ep.url, {
               mode: "cors",
-              cache: "no-store", // <--- This disables the cache
+              cache: "no-store",
             });
             if (!res.ok) throw new Error();
             const json = await res.json();
             const t1 = Date.now();
 
-            const latency = (t1 - t0) / 2;
+            const roundTrip = t1 - t0;
+            const latency = roundTrip / 2;
             const serverTime = ep.parse(json).getTime() + latency;
             const skew = serverTime - Date.now();
 
@@ -123,30 +141,30 @@
           }
         };
 
-        // Run all requests in parallel
         const results = await Promise.all(endpoints.map(fetchOne));
 
-        // Filter out errors and sort by lowest latency (fastest first)
         const valid = results
           .filter((r) => r !== null)
           .sort((a, b) => a.latency - b.latency);
 
         if (valid.length > 0) {
-          const best = valid[0]; // The fastest response
-
-          // Apply the skew from the fastest source
+          const best = valid[0];
           timeSkew = best.skew;
 
-          // Update UI
-          LATENCY_EL.textContent = `LATENCY: ${Math.round(best.latency)}ms`;
+          const latencyMs = Math.round(best.latency);
+          LATENCY_EL.textContent = `PRECISION: ±${latencyMs}ms`;
+          LATENCY_EL.style.color = latencyMs < 100 ? "#0a0" : "#aa0";
           LATENCY_EL.style.opacity = 1;
         } else {
-          // If all fail, hide the latency line or show error
-          LATENCY_EL.style.opacity = 0;
+          LATENCY_EL.textContent = "SYNC FAILED (USING LOCAL)";
+          LATENCY_EL.style.color = "#a00";
+          LATENCY_EL.style.opacity = 1;
         }
       }
 
       syncTime();
+      // Re-sync every 5 minutes
+      setInterval(syncTime, 300000);
     </script>
   </body>
 </html>

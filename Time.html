@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tel Aviv Clock</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f0f0f0;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      #clock {
+        font-size: 5rem;
+        font-weight: 700;
+        color: #333;
+        background: #fff;
+        padding: 20px 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+        text-align: center;
+      }
+      .tz {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 8px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div id="clock">Loading...</div>
+      <div class="tz">Tel Aviv (Asia/Jerusalem)</div>
+    </div>
+
+    <script>
+      (function () {
+        const el = document.getElementById("clock");
+        let utcMs = null;
+        let intervalId = null;
+
+        const fmt = new Intl.DateTimeFormat("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+          timeZone: "Asia/Jerusalem",
+        });
+
+        function render() {
+          const d = new Date(utcMs);
+          el.textContent = fmt.format(d);
+          utcMs += 1000;
+        }
+
+        async function init() {
+          try {
+            const res = await fetch(
+              "https://worldtimeapi.org/api/timezone/Asia/Jerusalem",
+            );
+            if (!res.ok) throw new Error("Network");
+            const data = await res.json();
+            utcMs = new Date(data.utc_datetime).getTime();
+          } catch (e) {
+            // Fallback to local instant (still format using Jerusalem timezone)
+            utcMs = Date.now();
+          }
+
+          // Ensure only one interval is created
+          if (intervalId === null) {
+            render();
+            intervalId = setInterval(render, 1000);
+          }
+        }
+
+        document.addEventListener("DOMContentLoaded", init);
+      })();
+    </script>
+  </body>
+</html>

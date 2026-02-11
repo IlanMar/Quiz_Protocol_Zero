@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Tel Aviv Clock - 3 Distinct Requests</title>
+    <title>Tel Aviv Clock - Optimized</title>
     <style>
       body {
         display: flex;
@@ -12,148 +12,112 @@
         height: 100vh;
         margin: 0;
         background-color: #1a1a1a;
-        font-family: "Courier New", Courier, monospace;
+        font-family: "Courier New", monospace;
         color: #0f0;
+        overflow: hidden; /* Prevents scrollbars */
       }
       #clock {
-        font-size: 6rem;
+        font-size: 6rem; /* Large and clear */
         text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-        margin-bottom: 20px;
+        font-variant-numeric: tabular-nums; /* Prevents jitter when numbers change */
+        cursor: default;
       }
       #status {
-        font-size: 1rem;
-        color: #888;
-        text-align: center;
-      }
-      .highlight {
-        color: #fff;
-        font-weight: bold;
-      }
-      ul {
-        list-style: none;
-        padding: 0;
-        margin-top: 20px;
-        font-size: 0.9rem;
-      }
-      li {
-        margin-bottom: 5px;
-        padding: 5px 10px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.05);
+        margin-top: 10px;
+        font-size: 0.8rem;
+        color: #555;
+        opacity: 0; /* Hidden by default, fades in on sync */
+        transition: opacity 1s ease;
       }
     </style>
   </head>
   <body>
     <div id="clock">00:00:00</div>
-    <div id="status">Syncing 3 distinct sources...</div>
-    <ul id="results"></ul>
+    <div id="status">Syncing precision...</div>
 
     <script>
-      const clockElement = document.getElementById("clock");
-      const statusElement = document.getElementById("status");
-      const resultsElement = document.getElementById("results");
-      let currentTime = null;
+      // --- Configuration ---
+      const TARGET_ZONE = "Asia/Jerusalem";
+      const CLOCK_EL = document.getElementById("clock");
+      const STATUS_EL = document.getElementById("status");
 
-      const proxy = "https://corsproxy.io/?";
+      // 1. Pre-calculate formatter (Major performance boost over toLocaleTimeString)
+      const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+        timeZone: TARGET_ZONE,
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
 
-      // Three distinct services with unique keys
-      const services = [
-        {
-          name: "TimeAPI.io",
-          url: "https://timeapi.io/api/Time/current/zone?timeZone=Asia/Jerusalem",
-          parse: (json) => new Date(json.dateTime),
-        },
-        {
-          name: "WorldTime-Primary",
-          url: "https://worldtimeapi.org/api/timezone/Asia/Jerusalem?source=primary",
-          parse: (json) => new Date(json.datetime),
-        },
-        {
-          name: "WorldTime-Backup",
-          url: "https://worldtimeapi.org/api/timezone/Asia/Jerusalem?source=backup",
-          parse: (json) => new Date(json.datetime),
-        },
-      ];
+      // 2. State: 'skew' is the difference between server time and local time
+      let timeSkew = 0;
 
-      function logResult(serviceName, duration, success, timeStr = "") {
-        const li = document.createElement("li");
-        li.style.color = success ? "#0f0" : "#f66";
-        li.innerHTML = `<strong>${serviceName}:</strong> ${success ? timeStr : "Failed"} <span style="color:#666">(${Math.round(duration)}ms)</span>`;
-        resultsElement.appendChild(li);
+      // --- Core Clock Logic ---
+      function tick() {
+        // Calculate current time: Local System Time + Network Correction
+        const now = new Date(Date.now() + timeSkew);
+        CLOCK_EL.textContent = timeFormatter.format(now);
+
+        // Schedule next tick specifically at the start of the next second
+        // This is much more efficient than a blind setInterval(1000)
+        const msUntilNextSecond = 1000 - now.getMilliseconds();
+        setTimeout(tick, msUntilNextSecond);
       }
 
-      const fetchTime = async (service) => {
-        const start = performance.now();
+      // Start immediately with local time (0ms latency perception)
+      tick();
 
-        // Ensure every URL is globally unique to prevent browser deduping
-        const uniqueUrl = `${service.url}&ts=${Date.now()}&rand=${Math.random()}`;
+      // --- Network Sync Logic ---
+      const syncTime = async () => {
+        const controller = new AbortController();
+        const signal = controller.signal;
 
-        // Proxy the WorldTimeAPI requests
-        const finalUrl = service.name.includes("WorldTime")
-          ? proxy + encodeURIComponent(uniqueUrl)
-          : uniqueUrl;
+        // Minified Fetch Wrapper
+        const get = (url, parseFn) =>
+          fetch(url, { signal, mode: "cors" })
+            .then((res) => (res.ok ? res.json() : Promise.reject()))
+            .then((data) => parseFn(data));
 
+        const nowTs = Date.now();
+
+        // Race Sources
         try {
-          const response = await fetch(finalUrl, {
-            cache: "no-store",
-            mode: "cors",
-          });
+          const serverDate = await Promise.any([
+            get(
+              `https://timeapi.io/api/Time/current/zone?timeZone=${TARGET_ZONE}`,
+              (d) => new Date(d.dateTime),
+            ),
+            get(
+              `https://worldtimeapi.org/api/timezone/${TARGET_ZONE}`,
+              (d) => new Date(d.datetime),
+            ),
+            // Added a 3rd robust source just in case
+            get(
+              `https://api.in-adi.com/time?timezone=${TARGET_ZONE}`,
+              (d) => new Date(d.datetime),
+            ),
+          ]);
 
-          const duration = performance.now() - start;
-          if (!response.ok) throw new Error();
+          // Calculate latency compensation (approximate) and skew
+          const latency = (Date.now() - nowTs) / 2;
+          const preciseTime = serverDate.getTime() + latency;
 
-          const data = await response.json();
-          const time = service.parse(data);
+          // Update global skew
+          timeSkew = preciseTime - Date.now();
 
-          const adjustedTime = new Date(time.getTime() + duration / 2);
-          const timeStr = adjustedTime.toLocaleTimeString("en-GB", {
-            timeZone: "Asia/Jerusalem",
-            hour12: false,
-          });
-
-          logResult(service.name, duration, true, timeStr);
-          return { adjustedTime, service, duration };
-        } catch (err) {
-          const duration = performance.now() - start;
-          logResult(service.name, duration, false);
-          throw err;
+          // Update UI status
+          STATUS_EL.textContent = `Synced: Precision ±${Math.round(latency)}ms`;
+          STATUS_EL.style.opacity = 1;
+          controller.abort(); // Cancel losing requests to save bandwidth
+        } catch (e) {
+          STATUS_EL.textContent = "Sync failed. Using local time.";
+          STATUS_EL.style.opacity = 1;
         }
       };
 
-      async function init() {
-        // Fire all 3 at once
-        const promises = services.map((s) => fetchTime(s));
-
-        try {
-          // Promise.any grabs the first one that wins the race
-          const fastest = await Promise.any(promises);
-          currentTime = fastest.adjustedTime;
-          statusElement.innerHTML = `Winner: <span class="highlight">${fastest.service.name}</span> (${Math.round(fastest.duration)}ms)`;
-
-          updateDisplay();
-          setInterval(tick, 1000);
-        } catch (err) {
-          statusElement.innerText = "All sources failed.";
-        }
-      }
-
-      function tick() {
-        if (currentTime) {
-          currentTime.setSeconds(currentTime.getSeconds() + 1);
-          updateDisplay();
-        }
-      }
-
-      function updateDisplay() {
-        if (currentTime) {
-          clockElement.innerText = currentTime.toLocaleTimeString("en-GB", {
-            timeZone: "Asia/Jerusalem",
-            hour12: false,
-          });
-        }
-      }
-
-      init();
+      // Trigger sync
+      syncTime();
     </script>
   </body>
 </html>

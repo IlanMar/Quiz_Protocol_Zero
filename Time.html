@@ -19,12 +19,11 @@
         font-family: "Courier New", monospace;
         color: #0f0;
         overflow: hidden;
-        /* Prevent double-tap zoom on mobile */
         touch-action: manipulation;
       }
 
       #zone-display {
-        font-size: clamp(0.8rem, 4vw, 1.5rem); /* Scales with screen */
+        font-size: clamp(0.8rem, 4vw, 1.5rem);
         margin-bottom: 2vh;
         color: #666;
         font-weight: bold;
@@ -35,14 +34,13 @@
       }
 
       #clock {
-        /* This is the magic: Minimum 3rem, Ideal 16vw, Maximum 8rem */
         font-size: clamp(3rem, 16vw, 8rem);
         text-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
         font-variant-numeric: tabular-nums;
         cursor: default;
         line-height: 1;
-        user-select: none; /* Prevents text selection on touch */
-        white-space: nowrap; /* Prevents wrapping on very small screens */
+        user-select: none;
+        white-space: nowrap;
       }
 
       #latency-display {
@@ -64,17 +62,14 @@
     <div id="latency-display">Syncing...</div>
 
     <script>
-      // --- Configuration ---
       const USER_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
       const ZONE_EL = document.getElementById("zone-display");
       const CLOCK_EL = document.getElementById("clock");
       const LATENCY_EL = document.getElementById("latency-display");
 
-      // Set Zone Immediately
       ZONE_EL.textContent = USER_ZONE;
 
-      // Formatter
       const timeFormatter = new Intl.DateTimeFormat("en-GB", {
         timeZone: USER_ZONE,
         hour12: false,
@@ -85,18 +80,15 @@
 
       let timeSkew = 0;
 
-      // --- Clock Loop ---
       function tick() {
         const now = new Date(Date.now() + timeSkew);
         CLOCK_EL.textContent = timeFormatter.format(now);
 
-        // Update exactly at the next second boundary for UI smoothness
         const msUntilNextSecond = 1000 - now.getMilliseconds();
         setTimeout(tick, msUntilNextSecond + 10);
       }
       tick();
 
-      // --- Network Sync ---
       const endpoints = [
         {
           url: `https://timeapi.io/api/Time/current/zone?timeZone=${USER_ZONE}`,
@@ -111,7 +103,6 @@
           parse: (d) => new Date(d.datetime),
         },
         {
-          // RESTORED: AiSense API
           url: "https://aisenseapi.com/services/v1/datetime",
           parse: (d) => new Date(d.datetime),
         },
@@ -121,7 +112,6 @@
         const fetchOne = async (ep) => {
           try {
             const t0 = Date.now();
-            // Cache: 'no-store' forces a fresh network request
             const res = await fetch(ep.url, {
               mode: "cors",
               cache: "no-store",
@@ -163,7 +153,6 @@
       }
 
       syncTime();
-      // Re-sync every 5 minutes
       setInterval(syncTime, 300000);
     </script>
   </body>

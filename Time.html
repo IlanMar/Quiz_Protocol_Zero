@@ -79,6 +79,7 @@
       });
 
       let timeSkew = 0;
+      let hideTimeout = null;
 
       function tick() {
         const now = new Date(Date.now() + timeSkew);
@@ -145,10 +146,18 @@
           LATENCY_EL.textContent = `PRECISION: ±${latencyMs}ms`;
           LATENCY_EL.style.color = latencyMs < 100 ? "#0a0" : "#aa0";
           LATENCY_EL.style.opacity = 1;
+          clearTimeout(hideTimeout);
+          hideTimeout = setTimeout(() => {
+            LATENCY_EL.style.opacity = 0;
+          }, 10000);
         } else {
           LATENCY_EL.textContent = "SYNC FAILED (USING LOCAL)";
           LATENCY_EL.style.color = "#a00";
           LATENCY_EL.style.opacity = 1;
+          clearTimeout(hideTimeout);
+          hideTimeout = setTimeout(() => {
+            LATENCY_EL.style.opacity = 0;
+          }, 10000);
         }
       }
 

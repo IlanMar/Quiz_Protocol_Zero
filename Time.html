@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Tel Aviv Clock - Optimized</title>
+    <title>Time</title>
     <style>
       body {
         display: flex;
@@ -14,36 +14,49 @@
         background-color: #1a1a1a;
         font-family: "Courier New", monospace;
         color: #0f0;
-        overflow: hidden; /* Prevents scrollbars */
+        overflow: hidden;
       }
       #clock {
-        font-size: 6rem; /* Large and clear */
+        font-size: 6rem;
         text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-        font-variant-numeric: tabular-nums; /* Prevents jitter when numbers change */
+        font-variant-numeric: tabular-nums;
         cursor: default;
+      }
+      #zone-display {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        color: #888;
+        font-weight: bold;
       }
       #status {
         margin-top: 10px;
         font-size: 0.8rem;
         color: #555;
-        opacity: 0; /* Hidden by default, fades in on sync */
+        opacity: 0;
         transition: opacity 1s ease;
       }
     </style>
   </head>
   <body>
+    <div id="zone-display">Detecting Zone...</div>
     <div id="clock">00:00:00</div>
     <div id="status">Syncing precision...</div>
 
     <script>
       // --- Configuration ---
-      const TARGET_ZONE = "Asia/Jerusalem";
+      // AUTOMATICALLY DETECT USER'S DEVICE TIMEZONE (IANA format, e.g., "America/New_York")
+      const USER_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       const CLOCK_EL = document.getElementById("clock");
       const STATUS_EL = document.getElementById("status");
+      const ZONE_EL = document.getElementById("zone-display");
 
-      // 1. Pre-calculate formatter (Major performance boost over toLocaleTimeString)
+      // Update UI to show which zone was detected
+      ZONE_EL.textContent = USER_ZONE;
+
+      // 1. Formatter using the detected zone
       const timeFormatter = new Intl.DateTimeFormat("en-GB", {
-        timeZone: TARGET_ZONE,
+        timeZone: USER_ZONE,
         hour12: false,
         hour: "2-digit",
         minute: "2-digit",
@@ -60,12 +73,11 @@
         CLOCK_EL.textContent = timeFormatter.format(now);
 
         // Schedule next tick specifically at the start of the next second
-        // This is much more efficient than a blind setInterval(1000)
         const msUntilNextSecond = 1000 - now.getMilliseconds();
         setTimeout(tick, msUntilNextSecond);
       }
 
-      // Start immediately with local time (0ms latency perception)
+      // Start immediately
       tick();
 
       // --- Network Sync Logic ---
@@ -73,7 +85,6 @@
         const controller = new AbortController();
         const signal = controller.signal;
 
-        // Minified Fetch Wrapper
         const get = (url, parseFn) =>
           fetch(url, { signal, mode: "cors" })
             .then((res) => (res.ok ? res.json() : Promise.reject()))
@@ -81,37 +92,33 @@
 
         const nowTs = Date.now();
 
-        // Race Sources
         try {
+          // We pass the detected USER_ZONE to the APIs to get the precise atomic time for that specific location
           const serverDate = await Promise.any([
             get(
-              `https://timeapi.io/api/Time/current/zone?timeZone=${TARGET_ZONE}`,
+              `https://timeapi.io/api/Time/current/zone?timeZone=${USER_ZONE}`,
               (d) => new Date(d.dateTime),
             ),
             get(
-              `https://worldtimeapi.org/api/timezone/${TARGET_ZONE}`,
+              `https://worldtimeapi.org/api/timezone/${USER_ZONE}`,
               (d) => new Date(d.datetime),
             ),
-            // Added a 3rd robust source just in case
-            get(
-              `https://api.in-adi.com/time?timezone=${TARGET_ZONE}`,
-              (d) => new Date(d.datetime),
-            ),
+            // Backup: If specific zone fails, try IP-based geolocation
+            get(`https://worldtimeapi.org/api/ip`, (d) => new Date(d.datetime)),
           ]);
 
-          // Calculate latency compensation (approximate) and skew
           const latency = (Date.now() - nowTs) / 2;
           const preciseTime = serverDate.getTime() + latency;
 
           // Update global skew
           timeSkew = preciseTime - Date.now();
 
-          // Update UI status
           STATUS_EL.textContent = `Synced: Precision ±${Math.round(latency)}ms`;
           STATUS_EL.style.opacity = 1;
-          controller.abort(); // Cancel losing requests to save bandwidth
+          controller.abort();
         } catch (e) {
-          STATUS_EL.textContent = "Sync failed. Using local time.";
+          // If APIs fail (e.g. offline), we just rely on the system clock (skew remains 0)
+          STATUS_EL.textContent = "Sync failed. Using device system time.";
           STATUS_EL.style.opacity = 1;
         }
       };

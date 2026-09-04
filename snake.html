@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Змейка 2026</title>
+    <title>snake</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
 
@@ -220,14 +220,12 @@
   <body>
     <div class="scanlines"></div>
 
-    <h1>С Новым 2026 годом</h1>
-    <div id="score-board">Счет: 0</div>
+    <h1>snake</h1>
 
     <div id="game-wrapper">
       <div id="game-container">
         <canvas id="gameCanvas" width="300" height="300"></canvas>
       </div>
-      <div id="milestone-text-overlay"></div>
     </div>
 
     <div class="controls">
@@ -237,28 +235,9 @@
       <button class="btn btn-right" id="right">▶</button>
     </div>
 
-    <div id="milestone-screen" role="dialog" aria-modal="true">
-      <h2 id="milestone-title">С наступающим!</h2>
-      <p id="milestone-text"></p>
-      <div id="milestone-hint">Нажми «Продолжить», чтобы продолжить игру.</div>
-      <button class="btn" id="milestone-continue" type="button">
-        Продолжить
-      </button>
-    </div>
-
     <script>
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
-      const scoreElement = document.getElementById("score-board");
-
-      const milestoneScreen = document.getElementById("milestone-screen");
-      const milestoneTextEl = document.getElementById("milestone-text");
-      const milestoneContinueBtn =
-        document.getElementById("milestone-continue");
-
-      const milestoneTextOverlay = document.getElementById(
-        "milestone-text-overlay"
-      );
 
       // Audio Context for retro sounds
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -305,67 +284,6 @@
       let gameInterval;
       let isGameRunning = false;
 
-      const milestoneMessages = [
-        "Янус: а ты помнишь свою жизнь до эммиграции?",
-        "Корпоративная магия: пока все обсуждают KPI, ты реально растёшь — в длину.",
-        "Это не ‘баг’, это ‘фича’: змейка просто репетирует релизный стресс.",
-        "HR уже смотрит на тебя с уважением: ты единственный, кто не просит ‘ещё одну попытку’.",
-        "Если тебя спросят ‘как дела?’, отвечай как ИИ: ‘в процессе обучения… на твоих ошибках’.",
-        "Ты набрал 10 очков — самое время вспомнить иврит: ‘сабаба’ означает ‘всё под контролем’ (почти).",
-        "Тыквенная алия начинается с малого: сначала переезжает змейка, потом — твой сон.",
-        "Эмиграция в Израиль — это как поворот змейки: главное не разворачиваться на 180° прямо в себя.",
-        "В офисе сказали ‘без токсичности’ — поэтому змейка ест только подарки и не спорит в чатике.",
-        "Новый уровень корпоративного дзена: ты молча делаешь результат, пока остальные ищут ‘кто сломал прод’.",
-        "ИИ Янус: ‘Я автоматизирую всё’. Ты: ‘Ок, автоматизируй очередь в Мисрад аПним’. Янус завис.",
-        "Новый репатриант-режим: ты уже знаешь три слова — ‘сабаба’, ‘эх’ и ‘где моя теудат зеут?’",
-        "Жалоба №1: ‘Почему всё через приложение?’ Ответ №1: ‘Потому что так сказал ИИ’. Жалоба №2: ‘Приложение не работает’.",
-        "Ульпан как дебаг: сначала не понимаешь ничего, потом вдруг понимаешь… что это была шутка преподавателя.",
-        "Купат холим: квест ‘записаться’ сложнее, чем победить босса. Но ты уже тренируешься на змейке.",
-        "Битуах Леуми: интерфейс как у Nokia, но без кнопки ‘Назад’.",
-        "В банке спросили ‘ма тахлес?’ — и ты понял: это не про продукт, это про жизнь.",
-        "Янус: ты не жалеешь о том, что переехал в Израиль?",
-        "ИИ предложил ‘перевести всё на облако’. Ты такой: ‘Сначала переведи меня на нормальную связь в автобусе’.",
-        "Репатриантская боль: ‘почему доставка с 8 до 20?’ Потому что это не доставка — это лотерея.",
-        "Тель-Авив: ‘маленькая квартира’. Москва: ‘маленькая квартира’. Разница: тут ещё и вид на стройку.",
-        "Шекели считаются как очки: быстро, нервно и всегда кажется, что где-то спрятался лишний нолик.",
-        "Твой личный ИИ-ассистент сегодня: ‘Рекомендую воду’. Израильский апдейт: ‘очень рекомендую воду’.",
-        "Секрет адаптации: не спорь с навигатором. Он тоже новый репатриант и тоже путается.",
-        "Когда слышишь ‘яхад’, не пугайся: это не новая Jira-доска, это просто ‘вместе’.",
-        "Типичный баг алии: ‘все говорят быстро’. Фикс: говори ‘махер махер’ — и всё ускорится (кроме бюрократии).",
-        "Если Янус попросит ‘дать доступ’, отвечай как в Израиле: ‘Только после подтверждения по SMS… который не приходит’.",
-      ];
-
-      let milestoneDeck = [];
-      let nextScoreMilestone = 10;
-      let shownMilestoneCount = 0;
-      let milestoneHideTimeoutId = null;
-
-      function shuffleInPlace(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-      }
-
-      function getNextMilestoneMessage() {
-        if (milestoneDeck.length === 0) {
-          milestoneDeck = shuffleInPlace([...milestoneMessages]);
-        }
-        return milestoneDeck.pop();
-      }
-
-      function showMilestoneMessage(message) {
-        milestoneTextOverlay.textContent = message;
-        milestoneTextOverlay.style.display = "block";
-        if (milestoneHideTimeoutId) {
-          clearTimeout(milestoneHideTimeoutId);
-        }
-        milestoneHideTimeoutId = setTimeout(() => {
-          milestoneTextOverlay.style.display = "none";
-          milestoneHideTimeoutId = null;
-        }, 7000);
-      }
       const colorSnake = "#000000";
       const colorFood = "#000000";
       const colorBg = "#8ca88b";
@@ -378,11 +296,6 @@
         velocityY = 0;
         snake = [{ x: 10, y: 10 }];
         placeFood();
-        scoreElement.innerText = "Счет: " + score;
-        nextScoreMilestone = 10;
-        shownMilestoneCount = 0;
-        milestoneDeck = [];
-        milestoneTextOverlay.style.display = "none";
         if (gameInterval) clearInterval(gameInterval);
         gameInterval = setInterval(updateGame, 1000 / speed);
       }
@@ -421,18 +334,8 @@
         // Eat food
         if (head.x === food.x && head.y === food.y) {
           score++;
-          scoreElement.innerText = "Счет: " + score;
           placeFood();
           sounds.eat();
-
-          if (
-            shownMilestoneCount < milestoneMessages.length &&
-            score >= nextScoreMilestone
-          ) {
-            showMilestoneMessage(getNextMilestoneMessage());
-            nextScoreMilestone += 10;
-            shownMilestoneCount++;
-          }
 
           // Increase speed slightly every 5 points
           if (score % 5 === 0) {
@@ -492,7 +395,6 @@
         clearInterval(gameInterval);
         isGameRunning = false;
         sounds.gameOver();
-        milestoneTextOverlay.style.display = "none";
 
         // Draw Game Over text on canvas
         ctx.fillStyle = "rgba(140, 168, 139, 0.8)";
@@ -504,12 +406,6 @@
         ctx.font = "30px VT323";
         ctx.textAlign = "center";
         ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
-        ctx.font = "20px VT323";
-        ctx.fillText(
-          "Нажми для рестарта",
-          canvas.width / 2,
-          canvas.height / 2 + 20
-        );
 
         // Allow restart on click/tap
         canvas.onclick = () => {
@@ -628,15 +524,6 @@
       addTouch("up", "up");
       addTouch("right", "right");
       addTouch("down", "down");
-
-      milestoneContinueBtn.addEventListener("click", () => {
-        // Make sure audio is allowed after a user gesture
-        if (audioCtx && audioCtx.state === "suspended") {
-          audioCtx.resume();
-        }
-        // No need to hide since not used for milestones
-      });
-      // Remove milestone screen click listener since not used
 
       // Start immediately
       startGame();
